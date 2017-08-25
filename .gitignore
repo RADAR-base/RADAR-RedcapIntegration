@@ -1,0 +1,11 @@
+# Idea fodler
+.idea/
+
+## File-based project format:
+*.iws
+
+# IntelliJ
+/out/
+
+# IntelliJ
+build

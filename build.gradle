@@ -1,0 +1,140 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'pmd'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'war'
+}
+
+group 'org.radarcns'
+version '1.0-SNAPSHOT'
+
+war {
+    baseName = 'redcap'
+    version = project.version
+    extension = 'war'
+}
+
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
+
+configurations {
+    codacy
+    provided
+    compile.extendsFrom provided
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext.apacheCommonVersion = '2.5'
+ext.jerseyVersion = '2.22.1'
+ext.jerseymediaVersion = '2.24'
+ext.junitVersion = '4.12'
+ext.logbackVersion = '1.1.7'
+ext.okhttp3Version = '3.8.1'
+ext.tomcatVersion = '8.0.44'
+
+dependencies {
+    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcatVersion
+
+    compile group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
+
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
+
+    compile group: 'commons-io', name: 'commons-io', version: apacheCommonVersion
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
+
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+}
+
+//---------------------------------------------------------------------------//
+// Style checking                                                            //
+//---------------------------------------------------------------------------//
+checkstyle {
+    // codacy version
+    toolVersion '6.16'
+    ignoreFailures false
+
+    // ignore tests
+    sourceSets = [sourceSets.main, sourceSets.test]
+}
+
+pmd {
+    // pmd version
+    toolVersion = '5.5.2'
+    ignoreFailures = false
+
+    sourceSets = [sourceSets.main, sourceSets.test]
+
+    consoleOutput = true
+
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+pmdTest {
+    ruleSetFiles = files("config/pmd/test_ruleset.xml")
+}
+
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
+tasks.matching {it instanceof Test}.all {
+    def stdout = new LinkedList<String>()
+    beforeTest { TestDescriptor td ->
+        stdout.clear()
+    }
+
+    onOutput { TestDescriptor td, TestOutputEvent toe ->
+        stdout.addAll(toe.getMessage().split('(?m)$'))
+        while (stdout.size() > 100) {
+            stdout.remove()
+        }
+    }
+
+    afterTest { TestDescriptor td, TestResult tr ->
+        if (tr.resultType == TestResult.ResultType.FAILURE) {
+            println()
+            print("${td.className}.${td.name} FAILED")
+            if (stdout.empty) {
+                println(" without any output")
+            } else {
+                println(" with last 100 lines of output:")
+                println('=' * 100)
+                stdout.each { print(it) }
+                println('=' * 100)
+            }
+        }
+    }
+
+    testLogging {
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat "full"
+    }
+}
+
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events "skipped", "failed"
+    }
+}
+
+//---------------------------------------------------------------------------//
+// Build system metadata                                                     //
+//---------------------------------------------------------------------------//
+idea {
+    module {
+        downloadSources = true
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
+}
