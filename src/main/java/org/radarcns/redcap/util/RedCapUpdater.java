@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -44,20 +43,13 @@ public abstract class RedCapUpdater {
     private static final String DATA_LABEL = "data";
     private static final String TOKEN_LABEL = "token";
 
-    private static final OkHttpClient client;
-
     protected RedCapTrigger trigger;
 
-    static {
-        client = new OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build();
-    }
+    private final OkHttpClient client;
 
-    protected RedCapUpdater(RedCapTrigger trigger) {
+    protected RedCapUpdater(RedCapTrigger trigger, OkHttpClient client) {
         this.trigger = trigger;
+        this.client = client;
     }
 
     /**
@@ -103,6 +95,7 @@ public abstract class RedCapUpdater {
      *      provided by {@link #setParameter(FormBody.Builder)}. Note that in case the
      *      {@link FormBody.Builder} computed by {@link #setParameter(FormBody.Builder)} contains a
      *      {@code data}, this will be automatically override by this function.
+     *
      * @return {@code true} in case of success, {@code false} otherwise
      * @throws IOException in case the request cannot be completed
      */
@@ -118,7 +111,7 @@ public abstract class RedCapUpdater {
             LOGGER.error("[{}] {}", response.code(), response.body().string());
         }
 
-        response.body().close();
+        response.close();
 
         return success;
     }

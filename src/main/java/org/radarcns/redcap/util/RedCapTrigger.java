@@ -246,8 +246,8 @@ public class RedCapTrigger {
     }
 
     /**
-     * Checks if the event related to the trigger is the enrolment event.
-     * @return {@code true} if the event that has triggered the update is the enrolment one,
+     * Checks if the event related to the trigger is the integration event.
+     * @return {@code true} if the event that has triggered the update is the integration one,
      *      {@code false} otherwise.
      */
     public boolean isEnrolment() {

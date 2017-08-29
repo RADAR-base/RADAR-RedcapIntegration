@@ -16,10 +16,18 @@ package org.radarcns.redcap.util;
  * limitations under the License.
  */
 
+import org.radarcns.redcap.integration.IntegrationData;
+
 /**
  * Interface that generalises REDCap input parameters.
- * @see org.radarcns.redcap.enrolment.EnrolmentInput
+ * @see IntegrationData
  */
 public interface RedCapInput {
+
+    /**
+     * Returns the REDCap Record Id involved in the update.
+     * @return {@link Integer} REDCap Record Id
+     */
+    Integer getRecord();
 
 }

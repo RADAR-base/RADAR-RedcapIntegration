@@ -16,12 +16,9 @@ package org.radarcns.redcap;
  * limitations under the License.
  */
 
-//docker run --name tomcat -it --rm -d -p 8888:8080 tomcat:8.0.44-jre8
-//http://52.210.59.174:8888/redcap/trigger
-
 //TODO improve README
-//TODO check what happen if end point returns 500
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -29,7 +26,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.radarcns.redcap.enrolment.RadarEnrolment;
+import org.radarcns.redcap.integration.Integrator;
+import org.radarcns.redcap.listener.HttpClientListener;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapUpdater;
 import org.radarcns.redcap.webapp.PathLabels;
@@ -52,10 +50,14 @@ public class EntryPoint {
 
     @Context
     private HttpServletRequest request;
+    @Context
+    private ServletContext context;
 
     /**
-     * HTTP POST request handler. This function trigger a subject generation in the Management
-     *      Portal in case the event that has generated the
+     * HTTP POST request handler. This function trigger a subject creation in the Management
+     *      Portal in case the event related to the form involved in the update is the enrolment.
+     *      In case this function fails, REDCap will work without any problem. The REDCap's log does
+     *      not report anything about the return of this function. Only the updates are logged in.
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -64,7 +66,8 @@ public class EntryPoint {
             RedCapTrigger trigger = new RedCapTrigger(request);
 
             if (trigger.isEnrolment()) {
-                RedCapUpdater enrolment = new RadarEnrolment(trigger);
+                RedCapUpdater enrolment = new Integrator(trigger,
+                        HttpClientListener.getClient(context));
 
                 if (enrolment.update()) {
                     return ResponseHandler.getResponse(request);

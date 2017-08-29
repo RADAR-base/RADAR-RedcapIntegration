@@ -2,7 +2,7 @@ package org.radarcns.redcap.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import org.radarcns.redcap.enrolment.RadarEnrolment;
+import org.radarcns.redcap.integration.Integrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class IdManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RadarEnrolment.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Integrator.class);
 
     private String radarId;
     private String humanReadableId;

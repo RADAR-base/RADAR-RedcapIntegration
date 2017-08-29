@@ -37,7 +37,7 @@ public final class RedCapManager {
     }
 
     /**
-     * Returns the unique event name of the REDCap event related to the enrolment process.
+     * Returns the unique event name of the REDCap event related to the integration process.
      * @return {@link String} representing REDCap unique event identifier
      */
     public static String getEnrolmentEvent() {

@@ -1,4 +1,4 @@
-package org.radarcns.redcap.enrolment;
+package org.radarcns.redcap.integration;
 
 /*
  * Copyright 2017 King's College London
@@ -19,20 +19,21 @@ package org.radarcns.redcap.enrolment;
 import java.util.LinkedList;
 import java.util.List;
 import okhttp3.FormBody.Builder;
+import okhttp3.OkHttpClient;
 import org.radarcns.redcap.util.IdManager;
 import org.radarcns.redcap.util.RedCapInput;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
 import org.radarcns.redcap.util.RedCapUpdater;
 
-/** Handler for updating RadarEnrolment Redcap form parameters. The input parameters are
- *      described by {@link EnrolmentInput}.
+/** Handler for updating Integrator Redcap form parameters. The input parameters are
+ *      described by {@link IntegrationData}.
  * @see RedCapUpdater
  */
-public class RadarEnrolment extends RedCapUpdater {
+public class Integrator extends RedCapUpdater {
 
-    public RadarEnrolment(RedCapTrigger trigger) {
-        super(trigger);
+    public Integrator(RedCapTrigger trigger, OkHttpClient client) {
+        super(trigger, client);
     }
 
     @Override
@@ -41,13 +42,13 @@ public class RadarEnrolment extends RedCapUpdater {
 
         List<RedCapInput> list = new LinkedList<>();
 
-        list.add(new EnrolmentInput(trigger.getRecord(), trigger.getRedcapEventName(),
-                EnrolmentInput.SUBJECT_ID_LABEL, ids.getRadarId()));
+        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
+                IntegrationData.SUBJECT_ID_LABEL, ids.getRadarId()));
 
-        list.add(new EnrolmentInput(trigger.getRecord(), trigger.getRedcapEventName(),
-                EnrolmentInput.HUMAN_READABLE_ID_LABEL, ids.getHumanReadableId()));
+        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
+                IntegrationData.HUMAN_READABLE_ID_LABEL, ids.getHumanReadableId()));
 
-        list.add(new EnrolmentInput(trigger.getRecord(), trigger.getRedcapEventName(),
+        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
                 trigger.getInstrumentStatusField(),
                 Integer.toString(InstrumentStatus.COMPLETE.getStatus())));
 
