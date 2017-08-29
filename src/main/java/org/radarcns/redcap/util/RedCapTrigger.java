@@ -251,8 +251,7 @@ public class RedCapTrigger {
      *      {@code false} otherwise.
      */
     public boolean isEnrolment() {
-        //TODO
-        return true;
+        return redcapEventName.equalsIgnoreCase(RedCapManager.getEnrolmentEvent());
     }
 
     @Override

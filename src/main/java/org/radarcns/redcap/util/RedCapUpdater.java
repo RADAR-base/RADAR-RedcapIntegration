@@ -88,7 +88,7 @@ public abstract class RedCapUpdater {
 
     private Request getRequest() throws IOException {
         RequestBody body = setParameter(new FormBody.Builder())
-                .add(TOKEN_LABEL, RedCapUser.getToken())
+                .add(TOKEN_LABEL, RedCapManager.getToken())
                 .add(DATA_LABEL, getValidInput())
                 .build();
 

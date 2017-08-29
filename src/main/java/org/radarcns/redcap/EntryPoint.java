@@ -19,6 +19,9 @@ package org.radarcns.redcap;
 //docker run --name tomcat -it --rm -d -p 8888:8080 tomcat:8.0.44-jre8
 //http://52.210.59.174:8888/redcap/trigger
 
+//TODO improve README
+//TODO check what happen if end point returns 500
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -69,6 +72,9 @@ public class EntryPoint {
                     return ResponseHandler.getErrorResponse(request);
                 }
             } else {
+                LOGGER.debug("[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
+                        trigger.getProjectId(), trigger.getRedcapUrl(), trigger.getInstrument(),
+                        trigger.getRedcapEventName());
                 return ResponseHandler.getResponse(request);
             }
         } catch (Exception exc) {

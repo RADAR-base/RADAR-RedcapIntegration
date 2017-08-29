@@ -1,6 +1,9 @@
 # Idea fodler
 .idea/
 
+# Gradle fodler
+.gradle/
+
 ## File-based project format:
 *.iws
 

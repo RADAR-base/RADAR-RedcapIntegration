@@ -19,9 +19,14 @@ package org.radarcns.redcap.util;
 /**
  * Information about the REDCap user used to query the REDCap API.
  */
-public final class RedCapUser {
+public final class RedCapManager {
 
     private static String token = "728A6BED02E68ACB1C9E057812747A22";
+    private static String enrolmentEvent = "baseline_assessmen_arm_1";
+
+    private RedCapManager() {
+        //Static class
+    }
 
     /**
      * Returns API Token used to identify the REDCap user against the REDCap instance.
@@ -29,6 +34,14 @@ public final class RedCapUser {
      */
     public static String getToken() {
         return token;
+    }
+
+    /**
+     * Returns the unique event name of the REDCap event related to the enrolment process.
+     * @return {@link String} representing REDCap unique event identifier
+     */
+    public static String getEnrolmentEvent() {
+        return enrolmentEvent;
     }
 
 }

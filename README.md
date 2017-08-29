@@ -44,7 +44,7 @@ RADAR-CNS Platform.
 
 ## Configuration
 To set a valid token for accessing REDCap API, in the current implementation it is needed to update
-the class `org.radarcns.redcap.util.RedCapUser` 
+the class `org.radarcns.redcap.util.RedCapManager` 
 
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.
