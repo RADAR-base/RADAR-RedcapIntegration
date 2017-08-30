@@ -12,6 +12,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.radarcns.redcap.config.RedCapInfo;
+import org.radarcns.redcap.config.RedCapManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,13 +45,15 @@ public abstract class RedCapUpdater {
     private static final String DATA_LABEL = "data";
     private static final String TOKEN_LABEL = "token";
 
-    protected RedCapTrigger trigger;
+    private final RedCapTrigger trigger;
+    protected final RedCapInfo redCapInfo;
 
     private final OkHttpClient client;
 
     protected RedCapUpdater(RedCapTrigger trigger, OkHttpClient client) {
         this.trigger = trigger;
         this.client = client;
+        this.redCapInfo = RedCapManager.getInfo(trigger);
     }
 
     /**
@@ -59,8 +63,8 @@ public abstract class RedCapUpdater {
      * @throws MalformedURLException in case the URL is malformed
      */
     public URL getApiUrl() throws MalformedURLException {
-        return new URL(trigger.getRedcapUrl().getProtocol(), trigger.getRedcapUrl().getHost(),
-                trigger.getRedcapUrl().getPort(), API_ROOT);
+        return new URL(redCapInfo.getUrl().getProtocol(), redCapInfo.getUrl().getHost(),
+                redCapInfo.getUrl().getPort(), API_ROOT);
     }
 
     private String getValidInput() {
@@ -80,7 +84,7 @@ public abstract class RedCapUpdater {
 
     private Request getRequest() throws IOException {
         RequestBody body = setParameter(new FormBody.Builder())
-                .add(TOKEN_LABEL, RedCapManager.getToken())
+                .add(TOKEN_LABEL, redCapInfo.getToken())
                 .add(DATA_LABEL, getValidInput())
                 .build();
 
@@ -99,7 +103,7 @@ public abstract class RedCapUpdater {
      * @return {@code true} in case of success, {@code false} otherwise
      * @throws IOException in case the request cannot be completed
      */
-    public boolean update() throws IOException {
+    public boolean updateForm() throws IOException {
         Response response = client.newCall(getRequest()).execute();
         boolean success = response.isSuccessful();
 
@@ -117,14 +121,23 @@ public abstract class RedCapUpdater {
     }
 
     /**
-     * Generates the input list that is then send to REDCap by {@link #update()}.
+     * Returns the REDCap record identifier involved in this update.
+     * @return {@link Integer} representing REDCap record identifier
+     */
+    protected Integer getRecordId() {
+        return trigger.getRecord();
+    }
+
+    /**
+     * Generates the input list that is then send to REDCap by {@link #updateForm()}.
      * @return a {@link List} of {@link RedCapInput}
      */
     protected abstract List<RedCapInput> getInput();
 
     /**
-     * Generates the {@link FormBody.Builder} necessary for requesting REDCap API. {@link #update()}
-     *      will add the REDCap user {@code token} and {@code data} parameters.
+     * Generates the {@link FormBody.Builder} necessary for requesting REDCap API.
+     *      {@link #updateForm()} will add the REDCap user {@code token} and {@code data}
+     *      parameters.
      * @param builder {@link FormBody.Builder} that has to be populated
      * @return {@link FormBody.Builder} for updating a REDCap form
      */

@@ -1,4 +1,4 @@
-package org.radarcns.redcap.util;
+package org.radarcns.redcap.config;
 
 /*
  * Copyright 2017 King's College London
@@ -16,32 +16,27 @@ package org.radarcns.redcap.util;
  * limitations under the License.
  */
 
+import org.radarcns.redcap.util.RedCapTrigger;
+
 /**
  * Information about the REDCap user used to query the REDCap API.
  */
 public final class RedCapManager {
 
-    private static String token = "728A6BED02E68ACB1C9E057812747A22";
-    private static String enrolmentEvent = "baseline_assessmen_arm_1";
-
     private RedCapManager() {
         //Static class
     }
 
-    /**
-     * Returns API Token used to identify the REDCap user against the REDCap instance.
-     * @return {@link String} representing REDCap API Token
-     */
-    public static String getToken() {
-        return token;
+    public static boolean isSupportedInstance(RedCapTrigger trigger) {
+        return Properties.isSupportedInstance(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
-    /**
-     * Returns the unique event name of the REDCap event related to the integration process.
-     * @return {@link String} representing REDCap unique event identifier
-     */
-    public static String getEnrolmentEvent() {
-        return enrolmentEvent;
+    public static RedCapInfo getInfo(RedCapTrigger trigger) {
+        return Properties.getRedCapInfo(trigger.getRedcapUrl(), trigger.getProjectId());
+    }
+
+    public static String getStatusField(RedCapInfo info) {
+        return RedCapTrigger.getInstrumentStatusField(info.getIntegrationForm());
     }
 
 }

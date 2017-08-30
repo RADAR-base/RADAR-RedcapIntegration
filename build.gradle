@@ -27,14 +27,17 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
-ext.apacheCommonVersion = '2.5'
+ext.apacheCommonsIoVersion = '2.5'
+ext.apacheCommonsLangVersion = '3.6'
 ext.jerseyVersion = '2.22.1'
 ext.jerseymediaVersion = '2.24'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.1.7'
 ext.okhttp3Version = '3.8.1'
+ext.radarCommonsVersion = '0.4.1'
 ext.tomcatVersion = '8.0.44'
 
 dependencies {
@@ -45,7 +48,11 @@ dependencies {
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
-    compile group: 'commons-io', name: 'commons-io', version: apacheCommonVersion
+    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+
+    compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
+
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
     testCompile group: 'junit', name: 'junit', version: junitVersion

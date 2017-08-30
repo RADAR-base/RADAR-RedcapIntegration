@@ -1,7 +1,7 @@
 package org.radarcns.redcap.listener;
 
 /*
- * Copyright 2017 King's College London and The Hyve
+ * Copyright 2017 King's College London
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,11 @@ public class HttpClientListener implements ServletContextListener {
         }
     }
 
+    /**
+     * Extracts the {@link OkHttpClient} from the {@link ServletContext}.
+     * @param context {@link ServletContext} used to share variables across requests
+     * @return a general instance of {@link OkHttpClient}
+     */
     public static OkHttpClient getClient(ServletContext context) {
         OkHttpClient client = (OkHttpClient) context.getAttribute(HTTP_CLIENT);
 

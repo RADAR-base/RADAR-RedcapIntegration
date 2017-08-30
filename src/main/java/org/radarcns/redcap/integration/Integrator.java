@@ -20,7 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import okhttp3.FormBody.Builder;
 import okhttp3.OkHttpClient;
-import org.radarcns.redcap.util.IdManager;
+import org.radarcns.redcap.config.RedCapManager;
+import org.radarcns.redcap.util.ManagementPortalClient;
 import org.radarcns.redcap.util.RedCapInput;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
@@ -38,18 +39,19 @@ public class Integrator extends RedCapUpdater {
 
     @Override
     protected List<RedCapInput> getInput() {
-        IdManager ids = new IdManager(trigger);
+        ManagementPortalClient mpClient = new ManagementPortalClient(redCapInfo.getUrl(),
+                redCapInfo.getProjectId(), getRecordId());
 
         List<RedCapInput> list = new LinkedList<>();
 
-        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
-                IntegrationData.SUBJECT_ID_LABEL, ids.getRadarId()));
+        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+                IntegrationData.SUBJECT_ID_LABEL, mpClient.getRadarSubjectId()));
 
-        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
-                IntegrationData.HUMAN_READABLE_ID_LABEL, ids.getHumanReadableId()));
+        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+                IntegrationData.HUMAN_READABLE_ID_LABEL, mpClient.getHumanReadableId()));
 
-        list.add(new IntegrationData(trigger.getRecord(), trigger.getRedcapEventName(),
-                trigger.getInstrumentStatusField(),
+        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+                RedCapManager.getStatusField(redCapInfo),
                 Integer.toString(InstrumentStatus.COMPLETE.getStatus())));
 
         return list;

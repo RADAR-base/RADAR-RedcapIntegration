@@ -23,7 +23,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
+import org.radarcns.redcap.config.RedCapManager;
 
 /**
  * <p>Represents data send by REDCap upon triggering.</p>
@@ -107,8 +109,8 @@ public class RedCapTrigger {
     private String redcapEventName;
     private String redcapDataAccessGroup;
     private InstrumentStatus status;
-    private URL redcapUrl;
     private URL projectUrl;
+    private URL redcapUrl;
 
     /**
      * Constructor.
@@ -241,17 +243,14 @@ public class RedCapTrigger {
         return projectUrl;
     }
 
-    public String getInstrumentStatusField() {
-        return this.instrument.concat(INSTRUMENT_STATUS.getName());
-    }
-
     /**
      * Checks if the event related to the trigger is the integration event.
      * @return {@code true} if the event that has triggered the update is the integration one,
      *      {@code false} otherwise.
      */
     public boolean isEnrolment() {
-        return redcapEventName.equalsIgnoreCase(RedCapManager.getEnrolmentEvent());
+        return redcapEventName.equalsIgnoreCase(
+                RedCapManager.getInfo(this).getEnrolmentEvent());
     }
 
     @Override
@@ -267,5 +266,15 @@ public class RedCapTrigger {
                 + ", redcapUrl='" + redcapUrl + '\''
                 + ", projectUrl='" + projectUrl + '\''
                 + '}';
+    }
+
+    /**
+     * Gets the status field related to the instrument given in input.
+     * @param instrument {@link String} representing instrument field
+     * @return {@link String} representing status field related to the given instrument
+     */
+    public static String getInstrumentStatusField(String instrument) {
+        Objects.requireNonNull(instrument);
+        return instrument.concat(INSTRUMENT_STATUS.getName());
     }
 }

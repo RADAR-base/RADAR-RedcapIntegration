@@ -74,6 +74,7 @@ public class IntegrationData implements RedCapInput {
         this.value = value;
     }
 
+    @Override
     public Integer getRecord() {
         return record;
     }
