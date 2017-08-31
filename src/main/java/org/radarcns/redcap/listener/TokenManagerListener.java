@@ -48,7 +48,7 @@ public class TokenManagerListener implements ServletContextListener {
     static {
         try {
             client = new OAuth2Client()
-                        .managementPortalUrl(Properties.getTokenEndPoint().toString())
+                        .tokenEndpoint(Properties.getTokenEndPoint())
                         .clientId(Properties.getOauthClientId())
                         .clientSecret(Properties.getOauthClientSecret())
                         .addScope("read")
