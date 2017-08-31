@@ -16,6 +16,7 @@ package org.radarcns.redcap.listener;
  * limitations under the License.
  */
 
+import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessToken;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.Properties;
@@ -65,7 +66,7 @@ public class TokenManagerListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         try {
             getToken(sce.getServletContext());
-        } catch (IllegalStateException exc) {
+        } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
         }
     }
@@ -91,20 +92,14 @@ public class TokenManagerListener implements ServletContextListener {
      * @return a valid {@code Access Token} to contact Management Portal
      * @throws IllegalStateException If the refresh was completed but did not yield a valid token
      */
-    public static String getToken(ServletContext context) throws IllegalStateException {
+    public static String getToken(ServletContext context) throws TokenException {
         if (token.isExpired()) {
             refresh(context);
         }
-
-        // this checks that token is not null and error is null
-        if (!token.isValid()) {
-            throw new IllegalStateException(token.getError() + ": " + token.getErrorDescription());
-        }
-
         return token.getAccessToken();
     }
 
-    private static synchronized void refresh(ServletContext context) {
+    private static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
         if (!token.isExpired()) {
