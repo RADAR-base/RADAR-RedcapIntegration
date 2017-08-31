@@ -72,7 +72,13 @@ public class TokenManagerListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        // clear connection pool
+        client.getHttpClient().connectionPool().evictAll();
+        // clear current token (set to invalid, expired token)
+        token = new OAuth2AccessToken();
+        // clear the token from the context
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
+
         LOGGER.info("{} has been invalidated.", ACCESS_TOKEN);
     }
 
