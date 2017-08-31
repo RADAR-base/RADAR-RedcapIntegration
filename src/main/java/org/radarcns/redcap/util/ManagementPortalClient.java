@@ -30,6 +30,8 @@ public class ManagementPortalClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalClient.class);
 
+    private static final String SEPARATOR = "-";
+
     private String radarSubjectId;
     private String humanReadableId;
 
@@ -65,8 +67,9 @@ public class ManagementPortalClient {
             String radarWorkPackage = "MDD";
             String location = "LONDON";
 
-            humanReadableId = radarWorkPackage.concat(projectId.toString()).concat(
-                    location).concat(recordId.toString());
+            humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
+                    projectId.toString()).concat(SEPARATOR).concat(location).concat(
+                    SEPARATOR).concat(recordId.toString());
 
             //TODO: PUT subject to the Management Portal. It returns the subject object.
             //What does the PUT return in case the user is already present?

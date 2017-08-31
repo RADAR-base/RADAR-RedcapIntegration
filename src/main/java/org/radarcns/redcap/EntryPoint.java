@@ -67,8 +67,9 @@ public class EntryPoint {
             RedCapTrigger trigger = new RedCapTrigger(request);
 
             if (!RedCapManager.isSupportedInstance(trigger)) {
-                throw new IllegalArgumentException("Requests coming from " + trigger.getRedcapUrl()
-                        + " for project Id " + trigger.getProjectId() + " cannot be managed.");
+                LOGGER.error("Requests coming from " + trigger.getRedcapUrl() + " for project Id "
+                        + trigger.getProjectId() + " cannot be managed.");
+                return ResponseHandler.getErrorResponse(request);
             }
 
             if (trigger.isEnrolment()) {

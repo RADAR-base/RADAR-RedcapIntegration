@@ -57,7 +57,8 @@ public class Configuration {
      *      project data
      * @param subjectEndpoint {@link String} representing Management Portal web root to manage
      *      subject
-     * @param redCapInstances {@link Set} of {@link RedCapInfo} providing information about REDCap instances
+     * @param redCapInstances {@link Set} of {@link RedCapInfo} providing information about REDCap
+     *      instances
      */
     @JsonCreator
     public Configuration(
