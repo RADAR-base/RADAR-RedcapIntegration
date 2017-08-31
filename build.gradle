@@ -26,6 +26,7 @@ configurations {
 }
 
 repositories {
+    maven { url "${rootProject.projectDir}/libs" }
     mavenCentral()
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
@@ -38,6 +39,7 @@ ext.junitVersion = '4.12'
 ext.logbackVersion = '1.1.7'
 ext.okhttp3Version = '3.8.1'
 ext.radarCommonsVersion = '0.4.1'
+ext.radarOauthClientVersion = '1.0-SNAPSHOT'
 ext.tomcatVersion = '8.0.44'
 
 dependencies {
@@ -49,6 +51,7 @@ dependencies {
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
     compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
     compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
