@@ -1,5 +1,6 @@
 package org.radarcns.redcap.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URL;
 import java.util.Set;
@@ -26,28 +27,28 @@ import java.util.Set;
  */
 public class Configuration {
 
-    @JsonProperty("oauth_client_id")
+    private final String version;
+
+    private final String released;
+
     private final String oauthClientId;
 
-    @JsonProperty("oauth_client_secret")
     private final String oauthClientSecret;
 
-    @JsonProperty("management_portal_url")
     private final URL managementPortalUrl;
 
-    @JsonProperty("token_endpoint")
     private final String tokenEndpoint;
 
-    @JsonProperty("project_endpoint")
     private final String projectEndpoint;
 
-    @JsonProperty("subject_endpoint")
     private final String subjectEndpoint;
 
-    private final Set<RedCapInfo> servers;
+    private final Set<RedCapInfo> redCapInstances;
 
     /**
      * Constructor.
+     * @param version {@link String} reporting the web app current version
+     * @param released {@link String} reporting the web app released date
      * @param oauthClientId {@link String} representing OAuth2 client identifier
      * @param oauthClientSecret {@link String} representing OAuth2 client identifier
      * @param managementPortalUrl {@link URL} pointing a Management Portal instane
@@ -56,18 +57,36 @@ public class Configuration {
      *      project data
      * @param subjectEndpoint {@link String} representing Management Portal web root to manage
      *      subject
-     * @param servers {@link Set} of {@link RedCapInfo} providing information about REDCap instances
+     * @param redCapInstances {@link Set} of {@link RedCapInfo} providing information about REDCap instances
      */
-    public Configuration(String oauthClientId, String oauthClientSecret,
-            URL managementPortalUrl, String tokenEndpoint, String projectEndpoint,
-            String subjectEndpoint, Set<RedCapInfo> servers) {
+    @JsonCreator
+    public Configuration(
+            @JsonProperty("version") String version,
+            @JsonProperty("released") String released,
+            @JsonProperty("oauth_client_id") String oauthClientId,
+            @JsonProperty("oauth_client_secret") String oauthClientSecret,
+            @JsonProperty("management_portal_url") URL managementPortalUrl,
+            @JsonProperty("token_endpoint") String tokenEndpoint,
+            @JsonProperty("project_endpoint") String projectEndpoint,
+            @JsonProperty("subject_endpoint") String subjectEndpoint,
+            @JsonProperty("redcap_instances") Set<RedCapInfo> redCapInstances) {
+        this.version = version;
+        this.released = released;
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
         this.managementPortalUrl = managementPortalUrl;
         this.tokenEndpoint = tokenEndpoint;
         this.projectEndpoint = projectEndpoint;
         this.subjectEndpoint = subjectEndpoint;
-        this.servers = servers;
+        this.redCapInstances = redCapInstances;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getReleased() {
+        return released;
     }
 
     public String getOauthClientId() {
@@ -94,7 +113,22 @@ public class Configuration {
         return subjectEndpoint;
     }
 
-    public Set<RedCapInfo> getServers() {
-        return servers;
+    public Set<RedCapInfo> getRedCapInstances() {
+        return redCapInstances;
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration {" + "\n"
+            + "version='" + version + "'\n"
+            + "released='" + released + "'\n"
+            + "oauthClientId = '" + oauthClientId + "'\n"
+            + "oauthClientSecret = '" + oauthClientSecret + "'\n"
+            + "managementPortalUrl = " + managementPortalUrl + "\n"
+            + "tokenEndpoint = '" + tokenEndpoint + "'\n"
+            + "projectEndpoint = '" + projectEndpoint + "'\n"
+            + "subjectEndpoint = '" + subjectEndpoint + "'\n"
+            + "redCapInstances=" + redCapInstances  + "\n"
+            + '}';
     }
 }

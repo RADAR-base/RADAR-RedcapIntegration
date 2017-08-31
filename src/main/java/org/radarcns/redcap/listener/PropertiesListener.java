@@ -35,7 +35,7 @@ public class PropertiesListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            Properties.validate();
+            LOGGER.info(Properties.validate());
         } catch (Exception exc) {
             LOGGER.error("Properties cannot be load. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);

@@ -1,9 +1,12 @@
 package org.radarcns.redcap.config;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Objects;
 import okhttp3.Credentials;
 import org.radarcns.config.YamlConfigLoader;
 import org.slf4j.Logger;
@@ -39,7 +42,7 @@ public final class Properties {
     private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
 
     /** API Config file name. **/
-    public static final String NAME_CONFIG_FILE = "redcap_instances.yml";
+    public static final String NAME_CONFIG_FILE = "radar.yml";
 
     /** Path where the config file is located. **/
     //private static String validPath;
@@ -80,12 +83,20 @@ public final class Properties {
             }
         }
 
-        String path = Properties.class.getClassLoader().getResource(NAME_CONFIG_FILE).getFile();
-        //validPath = new File(path).getParent() + "/";
+        try {
+            String path = Properties.class.getClassLoader().getResource(NAME_CONFIG_FILE).getFile();
+            //validPath = new File(path).getParent() + "/";
 
-        LOGGER.info("Loading Config file located at : {}", path);
+            LOGGER.info("Loading Config file located at : {}", path);
 
-        return new YamlConfigLoader().load(new File(path), Configuration.class);
+            return new YamlConfigLoader().load(new File(path), Configuration.class);
+        } catch (NullPointerException exc) {
+            String[] folders = Arrays.copyOfRange(paths,
+                    Objects.isNull(System.getenv(CONFIG_FOLDER)) ? 1 : 0, paths.length);
+            LOGGER.error("Config file {} cannot be found at {} or in the WAR resources"
+                    + "folder.", NAME_CONFIG_FILE, folders, CONFIG_FOLDER);
+            throw new FileNotFoundException(NAME_CONFIG_FILE + " cannot be found.");
+        }
     }
 
     private static Configuration loadApiConfig(String path) throws IOException {
@@ -111,17 +122,17 @@ public final class Properties {
         return path == null ? false : new File(path).exists();
     }
 
-    public static void validate() {
-        //Nothing to do
+    public static String validate() {
+        return CONFIG.toString();
     }
 
     protected static boolean isSupportedInstance(URL url, Integer projectId) {
-        return CONFIG.getServers().contains(new RedCapInfo(url, projectId));
+        return CONFIG.getRedCapInstances().contains(new RedCapInfo(url, projectId));
     }
 
     protected static RedCapInfo getRedCapInfo(URL url, Integer projectId) {
         RedCapInfo identifier = new RedCapInfo(url, projectId);
-        for (RedCapInfo info : CONFIG.getServers()) {
+        for (RedCapInfo info : CONFIG.getRedCapInstances()) {
             if (info.equals(identifier)) {
                 return info;
             }

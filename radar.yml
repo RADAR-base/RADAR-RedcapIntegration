@@ -1,4 +1,4 @@
-version: 1.0
+version: 0.1-alpha
 released: 2017-08-29
 
 # ManagementPortal configuration
@@ -10,7 +10,7 @@ project_endpoint: #URL managing project function
 subject_endpoint: #URL managing subject functions
 
 # List of REDCap supported instance
-instances:
+redcap_instances:
   - url: #URL pointing REDCap instance
     project_id: #REDCap project identifier
     enrolment_event: #Unique identifier for the enrolment event

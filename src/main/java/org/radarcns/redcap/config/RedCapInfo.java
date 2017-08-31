@@ -22,21 +22,25 @@ import java.net.URL;
 public class RedCapInfo {
 
     private URL url;
-    @JsonProperty("project_id")
-    private Integer projectId;
-    @JsonProperty("enrolment_event")
-    private String enrolmentEvent;
-    @JsonProperty("integration_form")
-    private String integrationForm;
-    private String token;
+    private final Integer projectId;
+    private final String enrolmentEvent;
+    private final String integrationForm;
+    private final String token;
 
     protected RedCapInfo(URL url, Integer projectId) {
         this.url = url;
         this.projectId = projectId;
+        this.enrolmentEvent = null;
+        this.integrationForm = null;
+        this.token = null;
     }
 
-    protected RedCapInfo(URL url, Integer projectId, String enrolmentEvent,
-            String integrationForm, String token) {
+    protected RedCapInfo(
+            @JsonProperty("url") URL url,
+            @JsonProperty("project_id") Integer projectId,
+            @JsonProperty("enrolment_event") String enrolmentEvent,
+            @JsonProperty("integration_form") String integrationForm,
+            @JsonProperty("token")String token) {
         this.url = url;
         this.projectId = projectId;
         this.enrolmentEvent = enrolmentEvent;
@@ -109,5 +113,15 @@ public class RedCapInfo {
             .append(url)
             .append(projectId)
             .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "RedCapInfo {" + "\n"
+            + "url = " + url + "\n"
+            + "projectId = " + projectId + "\n"
+            + "enrolmentEvent = '" + enrolmentEvent + "'\n"
+            + "integrationForm = '" + integrationForm + "'\n"
+            + "token = '" + token + "'" + '}' + "\n";
     }
 }

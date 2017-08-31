@@ -83,7 +83,7 @@ public class TokenManagerListener implements ServletContextListener {
         try {
             getToken(sce.getServletContext());
         } catch (IOException exc) {
-            LOGGER.info("{} cannot be generated.", ACCESS_TOKEN);
+            LOGGER.warn("{} cannot be generated.", ACCESS_TOKEN);
         }
     }
 
