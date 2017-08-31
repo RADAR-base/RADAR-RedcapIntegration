@@ -54,6 +54,7 @@ public class ManagementPortalClient {
      *      has been generated
      * @param recordId {@link Integer} representing REDCap record identifier involved in the
      *      creation
+     * @throws IllegalStateException in case the object cannot be created
      */
     public ManagementPortalClient(URL projectUrl, Integer projectId, Integer recordId) {
         Objects.requireNonNull(projectId);
@@ -61,7 +62,7 @@ public class ManagementPortalClient {
         Objects.requireNonNull(recordId);
 
         try {
-            //TODO: GET from Management Portal Project details using RECap URL and REDCap projectId
+            //TODO: GET from Management Portal Project details using REDCap URL and REDCap projectId
 
             //TODO: extract information from the just GET project object
             String radarWorkPackage = "MDD";

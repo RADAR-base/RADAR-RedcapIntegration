@@ -103,6 +103,7 @@ public class TokenManagerListener implements ServletContextListener {
      *      stored
      * @return a valid {@code Access Token} to contact Management Portal
      * @throws IOException in case the refresh cannot be completed
+     * @throws IllegalStateException in case the token cannot be generated
      */
     public static String getToken(ServletContext context) throws IOException {
         if (needRefresh()) {
@@ -122,7 +123,7 @@ public class TokenManagerListener implements ServletContextListener {
         return System.currentTimeMillis() - lastRefresh >= tokenDuration;
     }
 
-    private static void refresh(ServletContext context) throws IOException {
+    private static synchronized void refresh(ServletContext context) throws IOException {
         RefreshToken refreshToken = RefreshToken.getObject(client.newCall(request).execute());
         tokenDuration = refreshToken.getExpiresIn();
         lastRefresh = refreshToken.getIssueDate();

@@ -66,6 +66,7 @@ public class HttpClientListener implements ServletContextListener {
      * Extracts the {@link OkHttpClient} from the {@link ServletContext}.
      * @param context {@link ServletContext} used to share variables across requests
      * @return a general instance of {@link OkHttpClient}
+     * @throws IllegalStateException in case the client is not available
      */
     public static OkHttpClient getClient(ServletContext context) {
         OkHttpClient client = (OkHttpClient) context.getAttribute(HTTP_CLIENT);
