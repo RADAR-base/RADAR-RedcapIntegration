@@ -28,9 +28,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.net.MalformedURLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
@@ -90,7 +92,7 @@ public class TokenManagerListener implements ServletContextListener {
      * @param context {@link ServletContext} where the last used {@code Access Token} has been
      *      stored
      * @return a valid {@code Access Token} to contact Management Portal
-     * @throws IllegalStateException If the refresh was completed but did not yield a valid token
+     * @throws TokenException In case the token was expired, and a new token could not be retrieved.
      */
     public static String getToken(ServletContext context) throws TokenException {
         if (token.isExpired()) {
@@ -99,6 +101,12 @@ public class TokenManagerListener implements ServletContextListener {
         return token.getAccessToken();
     }
 
+    /**
+     * Refresh the access token stored in the {@link ServletContext}
+     * @param context {@link ServletContext} where the last used {@code Access Token} has been
+     *      stored
+     * @throws TokenException If the token could not be retrieved.
+     */
     private static synchronized void refresh(ServletContext context) throws TokenException {
         // Multiple threads can be waiting to enter this method when the token is expired, we need
         // only the first one to request a new token, subsequent threads can safely exit immediately
