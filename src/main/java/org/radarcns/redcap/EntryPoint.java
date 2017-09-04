@@ -73,6 +73,7 @@ public class EntryPoint {
             }
 
             if (trigger.isEnrolment()) {
+                //TODO Remove context and pass what's needed better for testing
                 RedCapUpdater enrolment = new Integrator(trigger, context);
 
                 if (enrolment.updateForm()) {
