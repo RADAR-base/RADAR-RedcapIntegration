@@ -16,6 +16,8 @@ package org.radarcns.redcap.config;
  * limitations under the License.
  */
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.radarcns.redcap.util.RedCapTrigger;
 
 /**
@@ -27,16 +29,43 @@ public final class RedCapManager {
         //Static class
     }
 
+    //TODO
     public static boolean isSupportedInstance(RedCapTrigger trigger) {
         return Properties.isSupportedInstance(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
+    //TODO
     public static RedCapInfo getInfo(RedCapTrigger trigger) {
         return Properties.getRedCapInfo(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
+    //TODO
     public static String getStatusField(RedCapInfo info) {
         return RedCapTrigger.getInstrumentStatusField(info.getIntegrationForm());
+    }
+
+    //TODO
+    public static ManagementPortalInfo getRelatedMpInfo(URL redCapUrl, Integer projectId) {
+        return Properties.getMpInfo(redCapUrl, projectId);
+    }
+
+    //TODO
+    public static URL getRecordUrl(URL redCapUrl, Integer projectId, Integer recordId)
+            throws MalformedURLException {
+        RedCapInfo redCapInfo = Properties.getRedCapInfo(redCapUrl, projectId);
+
+        String redCap = Properties.getRedCapInfo(redCapUrl, projectId).getUrl().toString();
+
+        if (redCap.charAt(redCap.length() - 1) != '/') {
+            redCap = redCap.concat("/");
+        }
+
+        redCap = redCap.concat("DataEntry/index.php?pid").concat(projectId.toString());
+        redCap = redCap.concat("&id=").concat(recordId.toString());
+        redCap = redCap.concat("&event_id=").concat(redCapInfo.getEnrolmentEvent());
+        redCap = redCap.concat("&page=").concat(redCapInfo.getIntegrationForm());
+
+        return new URL(redCap);
     }
 
 }

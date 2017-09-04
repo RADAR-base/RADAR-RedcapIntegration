@@ -73,8 +73,7 @@ public class EntryPoint {
             }
 
             if (trigger.isEnrolment()) {
-                RedCapUpdater enrolment = new Integrator(trigger,
-                        HttpClientListener.getClient(context));
+                RedCapUpdater enrolment = new Integrator(trigger, context);
 
                 if (enrolment.updateForm()) {
                     return ResponseHandler.getResponse(request);

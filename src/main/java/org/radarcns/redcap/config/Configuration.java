@@ -43,7 +43,7 @@ public class Configuration {
 
     private final String subjectEndpoint;
 
-    private final Set<RedCapInfo> redCapInstances;
+    private final Set<ProjectInfo> projects;
 
     /**
      * Constructor.
@@ -57,11 +57,11 @@ public class Configuration {
      *      project data
      * @param subjectEndpoint {@link String} representing Management Portal web root to manage
      *      subject
-     * @param redCapInstances {@link Set} of {@link RedCapInfo} providing information about REDCap
-     *      instances
+     * @param projects {@link Set} of {@link ProjectInfo} providing information about REDCap and
+     *      Management Portal instances
      */
     @JsonCreator
-    public Configuration(
+    protected Configuration(
             @JsonProperty("version") String version,
             @JsonProperty("released") String released,
             @JsonProperty("oauth_client_id") String oauthClientId,
@@ -70,7 +70,7 @@ public class Configuration {
             @JsonProperty("token_endpoint") String tokenEndpoint,
             @JsonProperty("project_endpoint") String projectEndpoint,
             @JsonProperty("subject_endpoint") String subjectEndpoint,
-            @JsonProperty("redcap_instances") Set<RedCapInfo> redCapInstances) {
+            @JsonProperty("projects") Set<ProjectInfo> projects) {
         this.version = version;
         this.released = released;
         this.oauthClientId = oauthClientId;
@@ -79,7 +79,7 @@ public class Configuration {
         this.tokenEndpoint = tokenEndpoint;
         this.projectEndpoint = projectEndpoint;
         this.subjectEndpoint = subjectEndpoint;
-        this.redCapInstances = redCapInstances;
+        this.projects = projects;
     }
 
     public String getVersion() {
@@ -114,8 +114,8 @@ public class Configuration {
         return subjectEndpoint;
     }
 
-    public Set<RedCapInfo> getRedCapInstances() {
-        return redCapInstances;
+    public Set<ProjectInfo> getProjects() {
+        return projects;
     }
 
     @Override
@@ -129,7 +129,7 @@ public class Configuration {
             + "tokenEndpoint = '" + tokenEndpoint + "'\n"
             + "projectEndpoint = '" + projectEndpoint + "'\n"
             + "subjectEndpoint = '" + subjectEndpoint + "'\n"
-            + "redCapInstances=" + redCapInstances  + "\n"
+            + "projects=" + projects  + "\n"
             + '}';
     }
 }

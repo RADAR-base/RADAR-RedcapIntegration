@@ -19,9 +19,10 @@ package org.radarcns.redcap.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URL;
 
+//TODO
 public class RedCapInfo {
 
-    private URL url;
+    private final URL url;
     private final Integer projectId;
     private final String enrolmentEvent;
     private final String integrationForm;

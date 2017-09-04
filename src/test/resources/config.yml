@@ -9,10 +9,14 @@ token_endpoint: /token
 project_endpoint: /project
 subject_endpoint: /subject
 
-# List of REDCap supported instance
-redcap_instances:
-  - url: https://localhost/
-    project_id: 0
-    enrolment_event: enrolment
-    integration_form: radar_enrolment
-    token: 1234567890
+# List of supported projects
+projects:
+  - redcap_info:
+      url: https://localhost/
+      project_id: 0
+      enrolment_event: enrolment
+      integration_form: radar_enrolment
+      token: 1234567890
+    mp_info:
+      url: https://localhost/
+      project_id: 0

@@ -27,6 +27,8 @@ import java.util.Objects;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+//TODO
 public final class Properties {
 
     /** Logger. **/
@@ -127,19 +129,31 @@ public final class Properties {
     }
 
     protected static boolean isSupportedInstance(URL url, Integer projectId) {
-        return CONFIG.getRedCapInstances().contains(new RedCapInfo(url, projectId));
+        return CONFIG.getProjects().contains(new RedCapInfo(url, projectId));
     }
 
     protected static RedCapInfo getRedCapInfo(URL url, Integer projectId) {
         RedCapInfo identifier = new RedCapInfo(url, projectId);
-        for (RedCapInfo info : CONFIG.getRedCapInstances()) {
-            if (info.equals(identifier)) {
-                return info;
+        for (ProjectInfo info : CONFIG.getProjects()) {
+            if (info.getRedCapInfo().equals(identifier)) {
+                return info.getRedCapInfo();
             }
         }
 
         throw new IllegalArgumentException("No project " + projectId + " for instance "
                 + url.toString());
+    }
+
+    protected static ManagementPortalInfo getMpInfo(URL url, Integer projectId) {
+        RedCapInfo identifier = new RedCapInfo(url, projectId);
+        for (ProjectInfo info : CONFIG.getProjects()) {
+            if (info.getRedCapInfo().equals(identifier)) {
+                return info.getMpInfo();
+            }
+        }
+
+        throw new IllegalArgumentException("No project " + projectId + " for instance "
+            + url.toString());
     }
 
     /**
@@ -178,10 +192,13 @@ public final class Properties {
 
     /**
      * Generates the token end point {@link URL} needed to reade projects on Management Portal.
+     * @param mpInfo {@link ManagementPortalInfo} used to extract the Management Portal project
+     *      identifier
      * @return {@link URL} useful to read project information
      * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
-    public static URL getProjectEndPoint() throws MalformedURLException {
-        return new URL(CONFIG.getManagementPortalUrl(), CONFIG.getProjectEndpoint());
+    public static URL getProjectEndPoint(ManagementPortalInfo mpInfo) throws MalformedURLException {
+        return new URL(CONFIG.getManagementPortalUrl(),
+                CONFIG.getProjectEndpoint().concat(mpInfo.getProjectId().toString()));
     }
 }

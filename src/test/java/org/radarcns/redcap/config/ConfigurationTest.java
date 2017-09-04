@@ -44,7 +44,7 @@ public class ConfigurationTest {
         assertEquals(Collections.singleton(new RedCapInfo(
                 new URL("https://localhost/"),
                 0, "enrolment", "radar_enrolment",
-                "1234567890")), config.getRedCapInstances());
+                "1234567890")), config.getProjects());
     }
 
 }

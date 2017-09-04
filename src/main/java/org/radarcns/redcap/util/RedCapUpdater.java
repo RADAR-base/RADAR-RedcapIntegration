@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
+import javax.servlet.ServletContext;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -14,6 +15,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
+import org.radarcns.redcap.listener.HttpClientListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +52,13 @@ public abstract class RedCapUpdater {
 
     private final OkHttpClient client;
 
-    protected RedCapUpdater(RedCapTrigger trigger, OkHttpClient client) {
+    protected ServletContext context;
+
+    protected RedCapUpdater(RedCapTrigger trigger, ServletContext context) {
         this.trigger = trigger;
-        this.client = client;
+        this.context = context;
+
+        this.client = HttpClientListener.getClient(context);
         this.redCapInfo = RedCapManager.getInfo(trigger);
     }
 
