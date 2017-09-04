@@ -1,5 +1,9 @@
 package org.radarcns.redcap.config;
 
+import org.radarcns.config.YamlConfigLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,10 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
-import okhttp3.Credentials;
-import org.radarcns.config.YamlConfigLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2017 King's College London
@@ -143,13 +143,19 @@ public final class Properties {
     }
 
     /**
-     * Relying on {@link Credentials#basic(String, String)}, it generates and returns the
-     *      credentials required to refresh OAuth2 token. The client identifier and client secret
-     *      are provided by {@link Configuration}.
-     * @return {@link String} representing OAuth2 credentials to refresh the token
+     * Get the OAuth2 client id to access ManagementPortal
+     * @return the client id
      */
-    public static String getOauthCredential() {
-        return Credentials.basic(CONFIG.getOauthClientId(), CONFIG.getOauthClientSecret());
+    public static String getOauthClientId() {
+        return CONFIG.getOauthClientId();
+    }
+
+    /**
+     * Get the OAuth2 client secret to access ManagementPortal
+     * @return the client secret
+     */
+    public static String getOauthClientSecret() {
+        return CONFIG.getOauthClientSecret();
     }
 
     /**
