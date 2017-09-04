@@ -28,11 +28,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.net.MalformedURLException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
@@ -123,6 +121,6 @@ public class TokenManagerListener implements ServletContextListener {
     }
 
     private static String getDate(long time) {
-        return new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS").format(new Date(time));
+        return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS").format(new Date(time));
     }
 }
