@@ -19,13 +19,35 @@ package org.radarcns.redcap.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URL;
 
-//TODO
+/**
+ * Configuration file entry to define REDCap settings.
+ */
 public class RedCapInfo {
 
+    /** {@link URL} pointing a REDCap instance. */
     private final URL url;
+
+    /**
+     * {@link Integer} representing the REDCap project identifier. In REDCap the project
+     *      is usually called {@code pid}. */
     private final Integer projectId;
+
+    /**
+     * {@link String} stating the unique REDCap event name related to the enrolment event. For
+     *      each event in REDCap there are to different identifiers: the {@code event_id} that is
+     *      an {@link Integer} and the {@code event_name} that is a {@link String}.
+     *      This variable must be equals to the {@code event_name}.
+     */
     private final String enrolmentEvent;
+
+    /**
+     * {@link String} reporting the REDCap form / instrument name used to share identifiers.
+     */
     private final String integrationForm;
+
+    /**
+     * Token {@link String} required to use REDCap APIs.
+     */
     private final String token;
 
     protected RedCapInfo(URL url, Integer projectId) {

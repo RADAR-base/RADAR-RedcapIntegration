@@ -2,6 +2,8 @@ package org.radarcns.redcap.managementportal;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
@@ -91,10 +93,18 @@ public class MpClient {
                     radarProjectId).concat(SEPARATOR).concat(location).concat(
                     SEPARATOR).concat(recordId.toString());
 
-            createSubject(redcapUrl, project, recordId, humanReadableId, context);
+            Subject subject = getSubject(redcapUrl, projectId, recordId, context);
 
-            LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}", radarSubjectId,
-                    humanReadableId);
+            if (Objects.isNull(subject)) {
+                createSubject(redcapUrl, project, recordId, humanReadableId, context);
+            } else {
+                LOGGER.info("Subject for Record Id: {} at {} is already available.", recordId,
+                        redcapUrl);
+                //TODO check that Human Readable Identifier is correct. If not update Subject.
+            }
+
+            LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}",
+                    radarSubjectId, humanReadableId);
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
             throw new IllegalStateException("Subject creation cannot be completed.", exc);
@@ -183,10 +193,50 @@ public class MpClient {
         }
     }
 
+    private static Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
+            ServletContext context) throws IOException, URISyntaxException {
+        ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
+
+        Request request = getBuilder(getSubjectUrl(Properties.getSubjectEndPoint(),
+                mpInfo.getProjectId(), recordId), context).get().build();
+
+        Response response = HttpClientListener.getClient(context).newCall(request).execute();
+
+        if (response.isSuccessful()) {
+            LOGGER.info("Successful");
+            return Subject.getObject(response);
+        }
+
+        LOGGER.info("No subject");
+
+        return null;
+    }
+
     private static Request.Builder getBuilder(URL url, ServletContext context) {
         return new Request.Builder()
                 .url(url)
                 .addHeader("Authorization", "Bearer ".concat(
                         TokenManagerListener.getToken(context)));
+    }
+
+    private static URL getSubjectUrl(URL url, Integer projectId, Integer recordId)
+            throws URISyntaxException, MalformedURLException {
+        URI oldUri = url.toURI();
+
+        String parameters = "projectId=".concat(projectId.toString()).concat("&externalId=").concat(
+                recordId.toString());
+        String newQuery = oldUri.getQuery();
+        if (newQuery == null) {
+            newQuery = parameters;
+        } else {
+            newQuery += parameters;
+        }
+
+        URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery,
+                oldUri.getFragment());
+
+        LOGGER.info(newUri.toString());
+
+        return newUri.toURL();
     }
 }

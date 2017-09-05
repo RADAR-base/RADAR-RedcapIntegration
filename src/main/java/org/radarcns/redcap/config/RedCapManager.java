@@ -30,25 +30,32 @@ public final class RedCapManager {
     }
 
     /**
-     * TODO.
-     * @param trigger TODO
-     * @return TODO
+     * Given a {@link RedCapTrigger}, the function checks whether there is a valid configuration
+     *      for the couple REDCap URL instance and REDCap project identifier specified in the
+     *      trigger. If the configuration is available, it returns {@code true}. it returns
+     *      {@code false} otherwise.
+     * @param trigger {@link RedCapTrigger} that has hit the service
+     * @return {@code true} if a valid configuration is available to handle this trigger,
+     *      {@code false} otherwise
      */
     public static boolean isSupportedInstance(RedCapTrigger trigger) {
         return Properties.isSupportedInstance(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
     /**
-     * TODO.
-     * @param trigger TODO
-     * @return TODO
+     * Given a {@link RedCapTrigger}, the function returns the related {@link RedCapInfo}
+     *      configuration, if available.
+     * @param trigger {@link RedCapTrigger} that has hit the service
+     * @return {@link RedCapTrigger} if available
+     * @throws IllegalArgumentException in case the there is no valid configuration related the
+     *      given {@link RedCapInfo}
      */
     public static RedCapInfo getInfo(RedCapTrigger trigger) {
         return Properties.getRedCapInfo(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
     /**
-     * TODO.
+     * Given a {@link RedCapInfo}, the function returns the
      * @param info TODO
      * @return TODO
      */

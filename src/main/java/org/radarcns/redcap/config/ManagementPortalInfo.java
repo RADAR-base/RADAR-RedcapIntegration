@@ -18,9 +18,15 @@ package org.radarcns.redcap.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-//TODO
+/**
+ * Configuration file entry to define Management Portal settings.
+ */
 public class ManagementPortalInfo {
 
+    /**
+     * Management Portal project identifier. As long as the Management Portal is centralised, this
+     *      value is unique.
+     */
     private final Integer projectId;
 
     protected ManagementPortalInfo(

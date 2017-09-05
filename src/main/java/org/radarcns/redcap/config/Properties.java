@@ -27,25 +27,27 @@ import org.slf4j.LoggerFactory;
  * limitations under the License.
  */
 
-//TODO
+/**
+ * Singleton class to manage configuration files.
+ */
 public final class Properties {
 
-    /** Logger. **/
+    /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
-    /** Path to the configuration file for AWS deploy. **/
+    /** Path to the configuration file for AWS deploy. */
     private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
 
-    /** Path to the configuration file for Docker image. **/
+    /** Path to the configuration file for Docker image. */
     private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
 
-    /** Placeholder alternative path for the config folder. **/
+    /** Placeholder alternative path for the config folder. */
     private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
 
-    /** API Config file name. **/
+    /** API Config file name. */
     public static final String NAME_CONFIG_FILE = "radar.yml";
 
-    /** Path where the config file is located. **/
+    /** Path where the config file is located. */
     //private static String validPath;
 
     private static final Configuration CONFIG;
@@ -123,6 +125,11 @@ public final class Properties {
         return path == null ? false : new File(path).exists();
     }
 
+    /**
+     * Loads all configurations and converts them to {@link String}. If the conversion
+     *      fails, it means that the config files are wrong.
+     * @return a {@link String} representing the loaded configurations
+     */
     public static String validate() {
         return CONFIG.toString();
     }
