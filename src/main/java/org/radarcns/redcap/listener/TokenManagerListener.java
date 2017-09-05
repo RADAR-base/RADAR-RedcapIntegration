@@ -109,6 +109,7 @@ public class TokenManagerListener implements ServletContextListener {
         if (!token.isExpired()) {
             return;
         }
+
         token = client.getAccessToken();
 
         context.setAttribute(ACCESS_TOKEN, token.getAccessToken());

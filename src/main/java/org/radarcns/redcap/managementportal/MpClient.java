@@ -38,14 +38,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Client to interact with the RADAR Management Portal.
  */
-public class ManagementPortalClient {
+public class MpClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManagementPortalClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MpClient.class);
 
     private static final String SEPARATOR = "-";
 
     private String radarSubjectId;
     private String humanReadableId;
+
+    private String radarProjectId;
 
     /**
      * <p>Constructor. Starting from the given input it<ul>
@@ -72,7 +74,7 @@ public class ManagementPortalClient {
      * @see org.radarcns.redcap.listener.HttpClientListener
      * @see org.radarcns.redcap.listener.TokenManagerListener
      */
-    public ManagementPortalClient(URL redcapUrl, Integer projectId,
+    public MpClient(URL redcapUrl, Integer projectId,
             Integer recordId, ServletContext context) {
         Objects.requireNonNull(redcapUrl);
         Objects.requireNonNull(projectId);
@@ -80,18 +82,18 @@ public class ManagementPortalClient {
         Objects.requireNonNull(context);
 
         try {
-            Project project = getProject(redcapUrl, recordId, context);
+            Project project = getProject(redcapUrl, projectId, context);
 
             String radarWorkPackage = project.getWorkPackage().toUpperCase();
             String location = project.getLocation().toUpperCase();
 
             humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
-                    projectId.toString()).concat(SEPARATOR).concat(location).concat(
+                    radarProjectId).concat(SEPARATOR).concat(location).concat(
                     SEPARATOR).concat(recordId.toString());
 
             createSubject(redcapUrl, project, recordId, humanReadableId, context);
 
-            LOGGER.info("Created RADAR user: {}. Human readable identifier is: {}", radarSubjectId,
+            LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}", radarSubjectId,
                     humanReadableId);
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -107,7 +109,7 @@ public class ManagementPortalClient {
         return humanReadableId;
     }
 
-    private static Project getProject(URL redcapUrl, Integer projectId,
+    private Project getProject(URL redcapUrl, Integer projectId,
             ServletContext context) throws IOException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
@@ -118,6 +120,12 @@ public class ManagementPortalClient {
         if (response.isSuccessful()) {
             Project project = Project.getObject(response);
             validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
+
+            radarProjectId = project.getId().toString();
+
+            LOGGER.debug("Retrieve project {}", project.toString());
+
+            return project;
         }
 
         throw new IllegalStateException("Error while retrieving project info from "
@@ -148,10 +156,9 @@ public class ManagementPortalClient {
             //TODO check how to generate UUID
             radarSubjectId = UUID.randomUUID().toString();
 
-            //TODO remove email
             Subject subject = new Subject(radarSubjectId, recordId,
                     RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
-                    "admin@localhost", project, humanReadableId);
+                    project, humanReadableId);
 
             Request request = getBuilder(Properties.getSubjectEndPoint(), context)
                         .put(RequestBody.create(MediaType.parse(
@@ -164,8 +171,9 @@ public class ManagementPortalClient {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
                     + response.code() + " Message: " + response.message());
+            } else {
+                LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
             }
-
         } catch (MalformedURLException exc) {
             throw new IllegalStateException("Subject cannot be created".concat(
                     " ").concat(exc.getMessage()));

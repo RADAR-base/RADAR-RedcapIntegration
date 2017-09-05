@@ -60,6 +60,8 @@ import org.radarcns.redcap.config.RedCapManager;
  */
 public class RedCapTrigger {
 
+    //private static final Logger LOGGER = LoggerFactory.getLogger(RedCapTrigger.class);
+
     public enum InstrumentStatus {
         INCOMPLETE(0),
         UNVERIFIED(1),
@@ -154,6 +156,11 @@ public class RedCapTrigger {
                 case PROJECT_URL:
                     projectUrl = new URL(java.net.URLDecoder.decode(
                             val.substring(markerIndex + 1).trim(), StandardCharsets.UTF_8.name()));
+
+                    //Override REDCap URL
+                    String temp = projectUrl.toString();
+                    redcapUrl = new URL(temp.substring(0, temp.indexOf("index.php?")));
+
                     break;
                 case PROJECT_ID:
                     projectId = Integer.parseInt(val.substring(markerIndex + 1).trim());
@@ -250,7 +257,7 @@ public class RedCapTrigger {
      */
     public boolean isEnrolment() {
         return redcapEventName.equalsIgnoreCase(
-                RedCapManager.getInfo(this).getEnrolmentEvent());
+            RedCapManager.getInfo(this).getEnrolmentEvent());
     }
 
     @Override

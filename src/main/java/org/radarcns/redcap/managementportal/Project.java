@@ -143,4 +143,14 @@ public class Project {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.readValue(response.body().bytes(), Project.class);
     }
+
+    @Override
+    public String toString() {
+        return "Project{" + '\n'
+            + "id=" + id + '\n'
+            + "projectName='" + projectName + "'\n"
+            + "organization='" + organization + "'\n"
+            + "location='" + location + "'\n"
+            + "attributes=" + attributes + '}';
+    }
 }

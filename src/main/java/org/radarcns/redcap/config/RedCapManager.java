@@ -82,7 +82,7 @@ public final class RedCapManager {
             redCap = redCap.concat("/");
         }
 
-        redCap = redCap.concat("DataEntry/index.php?pid").concat(projectId.toString());
+        redCap = redCap.concat("DataEntry/index.php?pid=").concat(projectId.toString());
         redCap = redCap.concat("&id=").concat(recordId.toString());
 
         RedCapInfo redCapInfo = Properties.getRedCapInfo(redCapUrl, projectId);

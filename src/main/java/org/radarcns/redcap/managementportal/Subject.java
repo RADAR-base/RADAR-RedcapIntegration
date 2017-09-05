@@ -38,6 +38,8 @@ public class Subject {
     private final String subjectId;
     private final Integer externalId;
     private final URL externalLink;
+    //TODO remove email
+    @JsonProperty("email")
     private final String email;
     private final Project project;
     private final List<Tag> attributes;
@@ -47,7 +49,6 @@ public class Subject {
      * @param subjectId TODO
      * @param externalId TODO
      * @param externalLink TODO
-     * @param email TODO
      * @param project TODO
      * @param attributes TODO
      */
@@ -55,13 +56,12 @@ public class Subject {
             @JsonProperty("login") String subjectId,
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
-            @JsonProperty("email") String email,
             @JsonProperty("project") Project project,
             @JsonProperty("attributes") List<Tag> attributes) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
-        this.email = email;
+        this.email = "admin@localhost";
         this.project = project;
         this.attributes = attributes;
     }
@@ -71,16 +71,15 @@ public class Subject {
      * @param subjectId TODO
      * @param externalId TODO
      * @param externalLink TODO
-     * @param email TODO
      * @param project TODO
      * @param humanReadableId TODO
      */
-    public Subject(String subjectId, Integer externalId, URL externalLink, String email,
-            Project project, String humanReadableId) {
+    public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
+            String humanReadableId) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
-        this.email = email;
+        this.email = "admin@localhost";
         this.project = project;
         this.attributes = Collections.singletonList(new Tag(HUMAN_READABLE_IDENTIFIER_KEY,
                 humanReadableId));

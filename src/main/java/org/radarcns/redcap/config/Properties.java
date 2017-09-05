@@ -128,7 +128,15 @@ public final class Properties {
     }
 
     protected static boolean isSupportedInstance(URL url, Integer projectId) {
-        return CONFIG.getProjects().contains(new RedCapInfo(url, projectId));
+        RedCapInfo identifier = new RedCapInfo(url, projectId);
+
+        for (ProjectInfo info : CONFIG.getProjects()) {
+            if (info.getRedCapInfo().equals(identifier)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected static RedCapInfo getRedCapInfo(URL url, Integer projectId) {

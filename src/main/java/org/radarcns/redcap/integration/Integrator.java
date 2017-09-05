@@ -21,7 +21,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import okhttp3.FormBody.Builder;
 import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.managementportal.ManagementPortalClient;
+import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.util.RedCapInput;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
@@ -33,13 +33,15 @@ import org.radarcns.redcap.util.RedCapUpdater;
  */
 public class Integrator extends RedCapUpdater {
 
+    //private static final Logger LOGGER = LoggerFactory.getLogger(Integrator.class);
+
     public Integrator(RedCapTrigger trigger, ServletContext context) {
         super(trigger, context);
     }
 
     @Override
     protected List<RedCapInput> getInput() {
-        ManagementPortalClient mpClient = new ManagementPortalClient(redCapInfo.getUrl(),
+        MpClient mpClient = new MpClient(redCapInfo.getUrl(),
                 redCapInfo.getProjectId(), getRecordId(), context);
 
         List<RedCapInput> list = new LinkedList<>();

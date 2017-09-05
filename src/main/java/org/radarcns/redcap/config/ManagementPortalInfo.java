@@ -63,7 +63,6 @@ public class ManagementPortalInfo {
 
     @Override
     public String toString() {
-        return "ManagementPortalInfo {" + "\n"
-            + "projectId = " + projectId + '}' + "\n";
+        return "ManagementPortalInfo {projectId = " + projectId + "}\n";
     }
 }

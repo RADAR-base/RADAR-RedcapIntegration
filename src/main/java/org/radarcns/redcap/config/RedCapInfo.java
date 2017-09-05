@@ -123,6 +123,6 @@ public class RedCapInfo {
             + "projectId = " + projectId + "\n"
             + "enrolmentEvent = '" + enrolmentEvent + "'\n"
             + "integrationForm = '" + integrationForm + "'\n"
-            + "token = '" + token + "'" + '}' + "\n";
+            + "token = '" + token + "'" + '}';
     }
 }

@@ -47,7 +47,7 @@ public class RedCapTriggerTest {
         assertNull(trigger.getRedcapDataAccessGroup());
         assertEquals(InstrumentStatus.INCOMPLETE.getStatus(), trigger.getStatus().getStatus(),
                 0.0);
-        assertEquals(new URL("https://redcap.com/"), trigger.getRedcapUrl());
+        assertEquals(new URL("https://redcap.com/redcap_v6.10.1/"), trigger.getRedcapUrl());
         assertEquals(new URL("https://redcap.com/redcap_v6.10.1/index.php?pid=33"),
                 trigger.getProjectUrl());
     }

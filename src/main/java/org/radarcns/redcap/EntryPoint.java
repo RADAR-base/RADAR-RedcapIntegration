@@ -72,7 +72,7 @@ public class EntryPoint {
             }
 
             if (trigger.isEnrolment()) {
-                //TODO Remove context and pass what's needed better for testing
+                //TODO remove context
                 RedCapUpdater enrolment = new Integrator(trigger, context);
 
                 if (enrolment.updateForm()) {
@@ -81,7 +81,7 @@ public class EntryPoint {
                     return ResponseHandler.getErrorResponse(request);
                 }
             } else {
-                LOGGER.debug("[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
+                LOGGER.info("[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
                         trigger.getProjectId(), trigger.getRedcapUrl(), trigger.getInstrument(),
                         trigger.getRedcapEventName());
                 return ResponseHandler.getResponse(request);
