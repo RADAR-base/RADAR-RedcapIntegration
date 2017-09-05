@@ -3,8 +3,6 @@ package org.radarcns.redcap.managementportal;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Objects;
 import java.util.UUID;
 import javax.servlet.ServletContext;
@@ -135,7 +133,8 @@ public class ManagementPortalClient {
                 + " for Project " + project.getId() + " at " + mp.toString();
 
         try {
-            if (!project.getRedCapId().equals(projectId) || project.getRedCapUrl().equals(redcapUrl)) {
+            if (!project.getRedCapId().equals(projectId)
+                    || project.getRedCapUrl().equals(redcapUrl)) {
                 throw new IllegalArgumentException(message);
             }
         } catch (MalformedURLException exc) {
@@ -151,13 +150,14 @@ public class ManagementPortalClient {
 
             //TODO remove email
             Subject subject = new Subject(radarSubjectId, recordId,
-                RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
-                "admin@localhost", project, humanReadableId);
+                    RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
+                    "admin@localhost", project, humanReadableId);
 
             Request request = getBuilder(Properties.getSubjectEndPoint(), context)
-                .put(RequestBody.create(MediaType.parse(
-                        javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
-                .build();
+                        .put(RequestBody.create(MediaType.parse(
+                                javax.ws.rs.core.MediaType.APPLICATION_JSON),
+                                subject.getJsonString()))
+                        .build();
 
             Response response = HttpClientListener.getClient(context).newCall(request).execute();
 

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import okhttp3.Response;
 
 //TODO
@@ -41,6 +42,15 @@ public class Subject {
     private final Project project;
     private final List<Tag> attributes;
 
+    /**
+     * TODO.
+     * @param subjectId TODO
+     * @param externalId TODO
+     * @param externalLink TODO
+     * @param email TODO
+     * @param project TODO
+     * @param attributes TODO
+     */
     public Subject(
             @JsonProperty("login") String subjectId,
             @JsonProperty("externalId") Integer externalId,
@@ -56,6 +66,15 @@ public class Subject {
         this.attributes = attributes;
     }
 
+    /**
+     * TODO.
+     * @param subjectId TODO
+     * @param externalId TODO
+     * @param externalLink TODO
+     * @param email TODO
+     * @param project TODO
+     * @param humanReadableId TODO
+     */
     public Subject(String subjectId, Integer externalId, URL externalLink, String email,
             Project project, String humanReadableId) {
         this.subjectId = subjectId;
@@ -87,6 +106,25 @@ public class Subject {
         return project;
     }
 
+    /**
+     * TODO.
+     * @param key TODO
+     * @return TODO
+     */
+    @JsonIgnore
+    public String getAttribute(String key) {
+        Optional<Tag> tag = attributes.stream()
+                .filter(item -> item.getKey().equals(key)).findFirst();
+
+        return tag.isPresent() ? tag.get().getValue() : null;
+    }
+
+    /**
+     * TODO.
+     * @param response TODO
+     * @return TODO
+     * @throws IOException TODO
+     */
     @JsonIgnore
     public static Subject getObject(Response response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -94,11 +132,21 @@ public class Subject {
         return mapper.readValue(response.body().bytes(), Subject.class);
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     * @throws IOException TODO
+     */
     @JsonIgnore
     public JsonNode getJson() throws IOException {
         return new ObjectMapper().readTree(getJsonString());
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     * @throws IOException TODO
+     */
     @JsonIgnore
     public String getJsonString() throws IOException {
         return new ObjectMapper().writeValueAsString(this);

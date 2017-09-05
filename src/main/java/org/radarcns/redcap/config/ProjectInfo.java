@@ -17,6 +17,8 @@ package org.radarcns.redcap.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 //TODO
 public class ProjectInfo {
@@ -46,5 +48,31 @@ public class ProjectInfo {
         return "ProjectInfo {" + "\n"
             + "redcapInfo = " + redCapInfo.toString() + "\n"
             + "mpInfo = " + mpInfo.toString() + '}' + "\n";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof ProjectInfo)) {
+            return false;
+        }
+
+        ProjectInfo that = (ProjectInfo) obj;
+
+        return new EqualsBuilder()
+            .append(redCapInfo, that.redCapInfo)
+            .append(mpInfo, that.mpInfo)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(redCapInfo)
+            .append(mpInfo)
+            .toHashCode();
     }
 }

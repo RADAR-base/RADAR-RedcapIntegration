@@ -18,5 +18,4 @@ projects:
       integration_form: radar_enrolment
       token: 1234567890
     mp_info:
-      url: https://localhost/
       project_id: 0

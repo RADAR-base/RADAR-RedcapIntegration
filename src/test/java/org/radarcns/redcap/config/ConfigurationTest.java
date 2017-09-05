@@ -41,10 +41,13 @@ public class ConfigurationTest {
         assertEquals("/project", config.getProjectEndpoint());
         assertEquals("/subject", config.getSubjectEndpoint());
 
-        assertEquals(Collections.singleton(new RedCapInfo(
-                new URL("https://localhost/"),
+        RedCapInfo redCapInfo = new RedCapInfo(new URL("https://localhost/"),
                 0, "enrolment", "radar_enrolment",
-                "1234567890")), config.getProjects());
+                "1234567890");
+        ManagementPortalInfo mpInfo = new ManagementPortalInfo(0);
+
+        assertEquals(Collections.singleton(new ProjectInfo(redCapInfo, mpInfo)),
+                config.getProjects());
     }
 
 }

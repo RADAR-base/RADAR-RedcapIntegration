@@ -29,31 +29,53 @@ public final class RedCapManager {
         //Static class
     }
 
-    //TODO
+    /**
+     * TODO.
+     * @param trigger TODO
+     * @return TODO
+     */
     public static boolean isSupportedInstance(RedCapTrigger trigger) {
         return Properties.isSupportedInstance(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
-    //TODO
+    /**
+     * TODO.
+     * @param trigger TODO
+     * @return TODO
+     */
     public static RedCapInfo getInfo(RedCapTrigger trigger) {
         return Properties.getRedCapInfo(trigger.getRedcapUrl(), trigger.getProjectId());
     }
 
-    //TODO
+    /**
+     * TODO.
+     * @param info TODO
+     * @return TODO
+     */
     public static String getStatusField(RedCapInfo info) {
         return RedCapTrigger.getInstrumentStatusField(info.getIntegrationForm());
     }
 
-    //TODO
+    /**
+     * TODO.
+     * @param redCapUrl TODO
+     * @param projectId TODO
+     * @return TODO
+     */
     public static ManagementPortalInfo getRelatedMpInfo(URL redCapUrl, Integer projectId) {
         return Properties.getMpInfo(redCapUrl, projectId);
     }
 
-    //TODO
+    /**
+     * TODO.
+     * @param redCapUrl TODO
+     * @param projectId TODO
+     * @param recordId TODO
+     * @return TODO
+     * @throws MalformedURLException TODO
+     */
     public static URL getRecordUrl(URL redCapUrl, Integer projectId, Integer recordId)
             throws MalformedURLException {
-        RedCapInfo redCapInfo = Properties.getRedCapInfo(redCapUrl, projectId);
-
         String redCap = Properties.getRedCapInfo(redCapUrl, projectId).getUrl().toString();
 
         if (redCap.charAt(redCap.length() - 1) != '/') {
@@ -62,6 +84,9 @@ public final class RedCapManager {
 
         redCap = redCap.concat("DataEntry/index.php?pid").concat(projectId.toString());
         redCap = redCap.concat("&id=").concat(recordId.toString());
+
+        RedCapInfo redCapInfo = Properties.getRedCapInfo(redCapUrl, projectId);
+
         redCap = redCap.concat("&event_id=").concat(redCapInfo.getEnrolmentEvent());
         redCap = redCap.concat("&page=").concat(redCapInfo.getIntegrationForm());
 

@@ -24,7 +24,7 @@ public class ManagementPortalInfo {
     private final Integer projectId;
 
     protected ManagementPortalInfo(
-        @JsonProperty("project_id") Integer projectId) {
+            @JsonProperty("project_id") Integer projectId) {
         this.projectId = projectId;
     }
 

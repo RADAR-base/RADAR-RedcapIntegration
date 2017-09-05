@@ -46,12 +46,12 @@ public class Project {
     private final String location;
     private final List<Tag> attributes;
 
-    public Project(
-        @JsonProperty("id") Integer id,
-        @JsonProperty("projectName") String projectName,
-        @JsonProperty("organization") String organization,
-        @JsonProperty("location") String location,
-        @JsonProperty("attributes") List<Tag> attributes) {
+    protected Project(
+            @JsonProperty("id") Integer id,
+            @JsonProperty("projectName") String projectName,
+            @JsonProperty("organization") String organization,
+            @JsonProperty("location") String location,
+            @JsonProperty("attributes") List<Tag> attributes) {
         this.id = id;
         this.projectName = projectName;
         this.organization = organization;
@@ -79,36 +79,64 @@ public class Project {
         return attributes;
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     */
     @JsonIgnore
     public String getPhase() {
         return getAttribute(PHASE_KEY);
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     * @throws MalformedURLException TODO
+     */
     @JsonIgnore
     public URL getRedCapUrl() throws MalformedURLException {
         String temp = getAttribute(EXTERNAL_PROJECT_URL_KEY);
         return Objects.isNull(temp) ? null : new URL(temp);
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     */
     @JsonIgnore
     public Integer getRedCapId() {
         String temp = getAttribute(EXTERNAL_PROJECT_ID_KEY);
         return Objects.isNull(temp) ? null : Integer.valueOf(temp);
     }
 
+    /**
+     * TODO.
+     * @return TODO
+     */
     @JsonIgnore
     public String getWorkPackage() {
         return getAttribute(WORK_PACKAGE_KEY);
     }
 
+    /**
+     * TODO.
+     * @param key TODO
+     * @return TODO
+     */
     @JsonIgnore
     public String getAttribute(String key) {
         Optional<Tag> tag = attributes.stream()
-            .filter(item -> item.getKey().equals(key)).findFirst();
+                .filter(item -> item.getKey().equals(key)).findFirst();
 
         return tag.isPresent() ? tag.get().getValue() : null;
     }
 
+    /**
+     * TODO.
+     * @param response TODO
+     * @return TODO
+     * @throws IOException TODO
+     */
     @JsonIgnore
     public static Project getObject(Response response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();

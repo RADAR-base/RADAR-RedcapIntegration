@@ -28,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
-import org.radarcns.redcap.listener.HttpClientListener;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapUpdater;
 import org.radarcns.redcap.webapp.PathLabels;

@@ -23,8 +23,8 @@ public class Tag {
     private final String value;
 
     public Tag(
-        @JsonProperty("key") String key,
-        @JsonProperty("value") String value) {
+            @JsonProperty("key") String key,
+            @JsonProperty("value") String value) {
         this.key = key;
         this.value = value;
     }
@@ -39,9 +39,8 @@ public class Tag {
 
     @Override
     public String toString() {
-        return "Tag{" +
-            "key='" + key + '\'' +
-            ", value='" + value + '\'' +
-            '}';
+        return "Tag{" + "\n"
+            + "key='" + key + "'\n"
+            + ", value='" + value + "'}";
     }
 }

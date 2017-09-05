@@ -16,21 +16,20 @@ package org.radarcns.redcap.listener;
  * limitations under the License.
  */
 
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2AccessToken;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
@@ -54,8 +53,7 @@ public class TokenManagerListener implements ServletContextListener {
                         .clientSecret(Properties.getOauthClientSecret())
                         .addScope("read")
                         .addScope("write");
-        }
-        catch (MalformedURLException exc) {
+        } catch (MalformedURLException exc) {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
         }

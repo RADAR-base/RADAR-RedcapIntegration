@@ -1,24 +1,18 @@
 package org.radarcns.redcap;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Instant;
+/*import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.ServletContext;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.Response;*/
 import org.junit.Test;
-import org.radarcns.exception.TokenException;
-import org.radarcns.oauth.OAuth2AccessToken;
+/*import org.radarcns.oauth.OAuth2AccessToken;
 import org.radarcns.oauth.OAuth2Client;
-import org.radarcns.redcap.config.Properties;
 import org.radarcns.redcap.managementportal.Project;
-import org.radarcns.redcap.managementportal.Subject;
+import org.radarcns.redcap.managementportal.Subject;*/
 
 /*
  * Copyright 2017 King's College London and The Hyve
@@ -35,12 +29,11 @@ import org.radarcns.redcap.managementportal.Subject;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class TestMP {
+public class TestMp {
 
     @Test
     public void testToken() throws IOException {
-
-        OAuth2Client clientToken = new OAuth2Client()
+        /*OAuth2Client clientToken = new OAuth2Client()
             .tokenEndpoint(new URL("http://34.250.170.242:9000/oauth/token"))
             .clientId("radar_redcap_integrator")
             .clientSecret("my-secrect_token")
@@ -87,6 +80,6 @@ public class TestMP {
 
         System.out.println(response.code());
 
-        System.out.println(response.body().string());
+        System.out.println(response.body().string());*/
     }
 }

@@ -1,9 +1,5 @@
 package org.radarcns.redcap.config;
 
-import org.radarcns.config.YamlConfigLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +7,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
+import org.radarcns.config.YamlConfigLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2017 King's College London
@@ -157,7 +156,7 @@ public final class Properties {
     }
 
     /**
-     * Get the OAuth2 client id to access ManagementPortal
+     * Get the OAuth2 client id to access ManagementPortal.
      * @return the client id
      */
     public static String getOauthClientId() {
@@ -165,7 +164,7 @@ public final class Properties {
     }
 
     /**
-     * Get the OAuth2 client secret to access ManagementPortal
+     * Get the OAuth2 client secret to access ManagementPortal.
      * @return the client secret
      */
     public static String getOauthClientSecret() {
