@@ -9,10 +9,13 @@ token_endpoint: #URL managing tokens
 project_endpoint: #URL managing project function
 subject_endpoint: #URL managing subject functions
 
-# List of REDCap supported instance
-redcap_instances:
-  - url: #URL pointing REDCap instance
-    project_id: #REDCap project identifier
-    enrolment_event: #Unique identifier for the enrolment event
-    integration_form: #Name of integration REDCap form
-    token: #REDCap API Token used to identify the REDCap user against the REDCap instance
+# Set of supported projects
+projects:
+  - redcap_info:
+      url: #URL pointing REDCap instance
+      project_id: #REDCap project identifier
+      enrolment_event: #Unique identifier for the enrolment event
+      integration_form: #Name of integration REDCap form
+      token: #REDCap API Token used to identify the REDCap user against the REDCap instance
+  - mp_info:
+      project_id: #Management Portal project identifier
