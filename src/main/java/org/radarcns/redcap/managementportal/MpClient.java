@@ -49,8 +49,6 @@ public class MpClient {
     private String radarSubjectId;
     private String humanReadableId;
 
-    private String radarProjectId;
-
     /**
      * <p>Constructor. Starting from the given input it<ul>
      *     <li>retrieves the Management Portal project associated to the given REDCap instance
@@ -90,7 +88,7 @@ public class MpClient {
             String location = project.getLocation().toUpperCase();
 
             humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
-                    radarProjectId).concat(SEPARATOR).concat(location).concat(
+                    project.getId().toString()).concat(SEPARATOR).concat(location).concat(
                     SEPARATOR).concat(recordId.toString());
 
             Subject subject = getSubject(redcapUrl, projectId, recordId, context);
@@ -103,7 +101,17 @@ public class MpClient {
             } else {
                 LOGGER.info("Subject for Record Id: {} at {} is already available.", recordId,
                         redcapUrl);
-                //TODO check that Human Readable Identifier is correct. If not update Subject.
+
+                if (!humanReadableId.equals(subject.getHumanReadableIdentifier())) {
+                    LOGGER.warn("Human Readable identifier for {} at {} does not reflect the "
+                            + "value stored in the Management Portal. {} is different from {}.",
+                            recordId, redcapUrl.toString(), humanReadableId,
+                            subject.getHumanReadableIdentifier());
+
+                    //TODO
+                    // update Subject in case the Human Readable Identifier does not match the
+                    // expected one
+                }
             }
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
@@ -130,8 +138,6 @@ public class MpClient {
         if (response.isSuccessful()) {
             Project project = Project.getObject(response);
             validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
-
-            radarProjectId = project.getId().toString();
 
             LOGGER.debug("Retrieve project {}", project.toString());
 
@@ -239,8 +245,6 @@ public class MpClient {
 
         URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery,
                 oldUri.getFragment());
-
-        LOGGER.info(newUri.toString());
 
         return newUri.toURL();
     }
