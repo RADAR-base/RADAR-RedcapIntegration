@@ -143,6 +143,7 @@ public class RedCapTrigger {
         }
     }
 
+    /** REDCap provides trigger parameters as a sequence of values separated by &. */
     private void parser(String[] values) throws UnsupportedEncodingException,
             MalformedURLException {
         int markerIndex;

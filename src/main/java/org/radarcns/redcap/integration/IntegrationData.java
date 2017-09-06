@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.radarcns.redcap.util.RedCapInput;
 
 /**
@@ -38,20 +40,28 @@ import org.radarcns.redcap.util.RedCapInput;
  */
 public class IntegrationData implements RedCapInput {
 
+    /** Name of the REDCap form / instrument field where the RADAR Subject identifier has to be
+     *  stored. */
     @JsonIgnore
     public static final String SUBJECT_ID_LABEL = "subject_id";
 
+    /** Name of the REDCap form / instrument field where the Human Readable identifier has to be
+     *  stored. */
     @JsonIgnore
     public static final String HUMAN_READABLE_ID_LABEL = "human_readable_id";
 
+    /** REDCap Record identifier. */
     private final Integer record;
 
+    /** REDCap Event name associated with the RECap form / instrument that will be updated. */
     @JsonProperty("redcap_event_name")
     private final String redcapEventName;
 
+    /** REDCap filed name that will be updated. */
     @JsonProperty("field_name")
     private String fieldName;
 
+    /** Value that will be written for the specified field name. */
     private String value;
 
     /**
@@ -74,20 +84,64 @@ public class IntegrationData implements RedCapInput {
         this.value = value;
     }
 
+    /**
+     * Returns the REDCap Record identifier.
+     * @return {@link Integer} representing REDCap Record Identifier
+     */
     @Override
     public Integer getRecord() {
         return record;
     }
 
+    /**
+     * Returns the REDCap Event name related to the update.
+     * @return {@link String} representing REDCap Event name
+     */
     public String getRedcapEventName() {
         return redcapEventName;
     }
 
+    /**
+     * Returns the field name that will be updated.
+     * @return {@link String} representing field name
+     */
     public String getFieldName() {
         return fieldName;
     }
 
+    /**
+     * Returns the value that will be written in REDCap.
+     * @return {@link String} representing the value that will be written
+     */
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof IntegrationData)) {
+            return false;
+        }
+
+        IntegrationData that = (IntegrationData) obj;
+
+        return new EqualsBuilder()
+            .append(record, that.record)
+            .append(fieldName, that.fieldName)
+            .append(value, that.value)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(record)
+            .append(fieldName)
+            .append(value)
+            .toHashCode();
     }
 }

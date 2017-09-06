@@ -19,7 +19,10 @@ package org.radarcns.redcap.util;
 import org.radarcns.redcap.integration.IntegrationData;
 
 /**
- * Interface that generalises REDCap input parameters.
+ * Interface that generalises REDCap input parameters. It forces the override of
+ *      {@link Object#equals(Object)} and {@link Object#hashCode()} in order to create
+ *      {@link java.util.Set} of {@link RedCapInput} leaving to Java the overhead of checking for
+ *      duplicated inputs.
  * @see IntegrationData
  */
 public interface RedCapInput {
@@ -30,4 +33,7 @@ public interface RedCapInput {
      */
     Integer getRecord();
 
+    boolean equals(Object obj);
+
+    int hashCode();
 }

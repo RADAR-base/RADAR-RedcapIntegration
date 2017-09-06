@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import javax.servlet.ServletContext;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -73,8 +74,11 @@ public abstract class RedCapUpdater {
                 redCapInfo.getUrl().getPort(), API_ROOT);
     }
 
+    /**
+     * Function called by {@link #getRequest()} for specifying input data.
+     */
     private String getValidInput() {
-        List<RedCapInput> input = getInput();
+        Collection<RedCapInput> input = getInput();
 
         if (Objects.isNull(input) || input.isEmpty()) {
             throw new IllegalArgumentException("Invalid input. getInput has returned either a "
@@ -88,6 +92,10 @@ public abstract class RedCapUpdater {
         }
     }
 
+    /**
+     * Leveraging on {@link #setParameter(FormBody.Builder)} and {@link #getValidInput()}, the
+     *      function creates the {@link Request} that is then executed by {@link #updateForm()}.
+     */
     private Request getRequest() throws IOException {
         RequestBody body = setParameter(new FormBody.Builder())
                 .add(TOKEN_LABEL, redCapInfo.getToken())
@@ -111,9 +119,8 @@ public abstract class RedCapUpdater {
      */
     public boolean updateForm() throws IOException {
         Response response = client.newCall(getRequest()).execute();
-        boolean success = response.isSuccessful();
 
-        if (success) {
+        if (response.isSuccessful()) {
             LOGGER.debug("[{}] {}", response.code(), response.body().string());
             LOGGER.info("Successful update for record {} at {}", trigger.getRecord(),
                     trigger.getProjectUrl());
@@ -123,7 +130,7 @@ public abstract class RedCapUpdater {
 
         response.close();
 
-        return success;
+        return response.isSuccessful();
     }
 
     /**
@@ -135,10 +142,11 @@ public abstract class RedCapUpdater {
     }
 
     /**
-     * Generates the input list that is then send to REDCap by {@link #updateForm()}.
-     * @return a {@link List} of {@link RedCapInput}
+     * Generates the input list that is then send to REDCap by {@link #updateForm()}. The result of
+     *      this function is validated by {@link #getValidInput()}.
+     * @return a {@link Set} of {@link RedCapInput}
      */
-    protected abstract List<RedCapInput> getInput();
+    protected abstract Set<RedCapInput> getInput();
 
     /**
      * Generates the {@link FormBody.Builder} necessary for requesting REDCap API.

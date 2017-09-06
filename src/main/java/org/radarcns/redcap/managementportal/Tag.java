@@ -17,6 +17,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Management Portal {@link Project} and {@link Subject} support tags: a key-value attribute.
+ */
 public class Tag {
 
     private final String key;

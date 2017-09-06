@@ -28,15 +28,24 @@ import java.util.Objects;
 import java.util.Optional;
 import okhttp3.Response;
 
-//TODO
+/**
+ * Java class defining a RADAR Management Portal Project.
+ */
 public class Project {
 
+    /** Label representing the key of the tag stating the REDCap project URL. */
     @JsonIgnore
     public static final String EXTERNAL_PROJECT_URL_KEY = "External-project-url";
+
+    /** Label representing the key of the tag stating the REDCap project identifier. */
     @JsonIgnore
     public static final String EXTERNAL_PROJECT_ID_KEY = "External-project-id";
+
+    /** Label representing the key of the tag stating the project RADAR-CNS work-package. */
     @JsonIgnore
     public static final String WORK_PACKAGE_KEY = "Work-package";
+
+    /** Label representing the key of the tag stating the project phase. */
     @JsonIgnore
     public static final String PHASE_KEY = "Phase";
 
@@ -80,8 +89,8 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @return TODO
+     * Returns the value associated with the key {@link #PHASE_KEY}.
+     * @return {@link String} reporting the project phase, {@code null} otherwise
      */
     @JsonIgnore
     public String getPhase() {
@@ -89,9 +98,9 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @return TODO
-     * @throws MalformedURLException TODO
+     * Returns the value associated with the key {@link #EXTERNAL_PROJECT_URL_KEY}.
+     * @return {@link URL} pointing the equivalent REDCap project, {@code null} otherwise
+     * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
     @JsonIgnore
     public URL getRedCapUrl() throws MalformedURLException {
@@ -100,8 +109,9 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @return TODO
+     * Returns the value associated with the key {@link #EXTERNAL_PROJECT_ID_KEY}.
+     * @return {@link Integer} stating the project identifier for the REDCap project equivalent,
+     *      {@code null} otherwise
      */
     @JsonIgnore
     public Integer getRedCapId() {
@@ -110,8 +120,8 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @return TODO
+     * Returns the value associated with the key {@link #WORK_PACKAGE_KEY}.
+     * @return {@link String} reporting the RADAR-CNS work-package, {@code null} otherwise
      */
     @JsonIgnore
     public String getWorkPackage() {
@@ -119,9 +129,9 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @param key TODO
-     * @return TODO
+     * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     * @param key {@link String} tag key
+     * @return {@link String} value associated with the given key
      */
     @JsonIgnore
     public String getAttribute(String key) {
@@ -132,16 +142,18 @@ public class Project {
     }
 
     /**
-     * TODO.
-     * @param response TODO
-     * @return TODO
-     * @throws IOException TODO
+     * Converts the {@link Response#body()} to a {@link Project} entity.
+     * @param response {@link Response} that has to be converted
+     * @return {@link Project} stored in the {@link Response#body()}
+     * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
     public static Project getObject(Response response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.readValue(response.body().bytes(), Project.class);
+        byte[] body = response.body().bytes();
+        response.close();
+        return mapper.readValue(body, Project.class);
     }
 
     @Override

@@ -20,10 +20,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-//TODO
+/**
+ * Configuration file entry to define Project settings. Each item provides an instance of
+ *      {@link RedCapInfo} and an instance of {@link ManagementPortalInfo} defining respectively
+ *      REDCap and Management Portal configurations.
+ */
 public class ProjectInfo {
 
+    /** REDCap project information. */
     private final RedCapInfo redCapInfo;
+
+    /** Management Portal project information. */
     private final ManagementPortalInfo mpInfo;
 
     protected ProjectInfo(
@@ -33,21 +40,12 @@ public class ProjectInfo {
         this.mpInfo = mpInfo;
     }
 
-    //TODO
     public RedCapInfo getRedCapInfo() {
         return redCapInfo;
     }
 
-    //TODO
     public ManagementPortalInfo getMpInfo() {
         return mpInfo;
-    }
-
-    @Override
-    public String toString() {
-        return "ProjectInfo {" + "\n"
-            + "redcapInfo = " + redCapInfo.toString() + "\n"
-            + "mpInfo = " + mpInfo.toString() + '}' + "\n";
     }
 
     @Override
@@ -74,5 +72,12 @@ public class ProjectInfo {
             .append(redCapInfo)
             .append(mpInfo)
             .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ProjectInfo {" + "\n"
+            + "redcapInfo = " + redCapInfo.toString() + "\n"
+            + "mpInfo = " + mpInfo.toString() + '}' + "\n";
     }
 }

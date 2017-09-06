@@ -25,6 +25,11 @@ import org.radarcns.redcap.util.RedCapTrigger;
  */
 public final class RedCapManager {
 
+    private static final String PROJECT_ID = "DataEntry/index.php?pid=";
+    private static final String RECORD_ID = "&id=";
+    private static final String EVENT_ID = "&event_id=";
+    private static final String PAGE_NAME = "&page=";
+
     private RedCapManager() {
         //Static class
     }
@@ -55,31 +60,37 @@ public final class RedCapManager {
     }
 
     /**
-     * Given a {@link RedCapInfo}, the function returns the
-     * @param info TODO
-     * @return TODO
+     * Given a {@link String} representing a REDCap form/instrument name, the function returns the
+     *      name of the status field for the given REDCap form.
+     * @param formName {@link String} containing the name of the form
+     * @return {@link String} representing the status field for a REDCap form
      */
-    public static String getStatusField(RedCapInfo info) {
-        return RedCapTrigger.getInstrumentStatusField(info.getIntegrationForm());
+    public static String getStatusField(String formName) {
+        return RedCapTrigger.getInstrumentStatusField(formName);
     }
 
     /**
-     * TODO.
-     * @param redCapUrl TODO
-     * @param projectId TODO
-     * @return TODO
+     * Starting from REDCap {@link URL} and REDCap project identifier, the function returns the
+     *      {@link ManagementPortalInfo} related to given REDCap project.
+     * @param redCapUrl {@link URL} pointing a REDCap instance
+     * @param projectId {@link Integer} representing a REDCap project identifier (i.e. pid)
+     * @return {@link ManagementPortalInfo} related to a REDCap project
      */
     public static ManagementPortalInfo getRelatedMpInfo(URL redCapUrl, Integer projectId) {
         return Properties.getMpInfo(redCapUrl, projectId);
     }
 
     /**
-     * TODO.
-     * @param redCapUrl TODO
-     * @param projectId TODO
-     * @param recordId TODO
-     * @return TODO
-     * @throws MalformedURLException TODO
+     * Given a REDCap {@link URL} and a REDCap project identifier, the function computes the
+     *      {@link URL} pointing the integration form for the given REDCap record identifier.
+     * @param redCapUrl {@link URL} pointing a REDCap instance. The {@link URL} should contain
+     *      the REDCap version as well
+     * @param projectId {@link Integer} representing a REDCap project identifier (i.e. pid)
+     * @param recordId {@link Integer} stating the REDCap Record identifier for which the
+     *      {@link URL} should be computed
+     * @return {@link URL} pointing the integration form for the given REDCap Record identifier
+     *      within the specified project.
+     * @throws MalformedURLException In case the {@link URL} cannot be generated
      */
     public static URL getRecordUrl(URL redCapUrl, Integer projectId, Integer recordId)
             throws MalformedURLException {
@@ -89,13 +100,13 @@ public final class RedCapManager {
             redCap = redCap.concat("/");
         }
 
-        redCap = redCap.concat("DataEntry/index.php?pid=").concat(projectId.toString());
-        redCap = redCap.concat("&id=").concat(recordId.toString());
+        redCap = redCap.concat(PROJECT_ID).concat(projectId.toString());
+        redCap = redCap.concat(RECORD_ID).concat(recordId.toString());
 
         RedCapInfo redCapInfo = Properties.getRedCapInfo(redCapUrl, projectId);
 
-        redCap = redCap.concat("&event_id=").concat(redCapInfo.getEnrolmentEvent());
-        redCap = redCap.concat("&page=").concat(redCapInfo.getIntegrationForm());
+        redCap = redCap.concat(EVENT_ID).concat(redCapInfo.getEnrolmentEvent());
+        redCap = redCap.concat(PAGE_NAME).concat(redCapInfo.getIntegrationForm());
 
         return new URL(redCap);
     }

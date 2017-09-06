@@ -31,6 +31,12 @@ import org.radarcns.redcap.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO check whether the token library is closing all the body request. Log reports
+//WARNING [OkHttp ConnectionPool] okhttp3.internal.platform.Platform.log A connection to
+// http://34.250.170.242:9000/ was leaked. Did you forget to close a response body? To see where
+// this was allocated, set the OkHttpClient logger level to FINE:
+// Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);
+
 /**
  * Refreshes the OAuth2 token needed to authenticate against the Management Portal and adds it to
  *      the {@link javax.servlet.ServletContext} in this way multiple function can make reuse of it.

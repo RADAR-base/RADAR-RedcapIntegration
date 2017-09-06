@@ -16,10 +16,11 @@ package org.radarcns.redcap.integration;
  * limitations under the License.
  */
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.ServletContext;
 import okhttp3.FormBody.Builder;
+import okhttp3.Request;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.util.RedCapInput;
@@ -35,30 +36,50 @@ public class Integrator extends RedCapUpdater {
 
     //private static final Logger LOGGER = LoggerFactory.getLogger(Integrator.class);
 
+    /**
+     * Constructor.
+     * @param trigger {@link RedCapTrigger} that has hit the service
+     * @param context {@link ServletContext} needed to extract shared variables
+     */
     public Integrator(RedCapTrigger trigger, ServletContext context) {
         super(trigger, context);
     }
 
+    /**
+     * Generates the {@link Set} of inputs that will be written in REDCap for finalising the
+     *      integration between REDCap project and Management Portal project. Using a
+     *      {@link MpClient}, the function retrieves the RADAR Subject Identifier and the Human
+     *      Readable Identifier. In the end, the function forces the REDCap integratio
+     *      form /instrument status to {@link InstrumentStatus#COMPLETE}.
+     * @return {@link Set} of inputs that have to be written in REDCap.
+     */
     @Override
-    protected List<RedCapInput> getInput() {
+    protected Set<RedCapInput> getInput() {
         MpClient mpClient = new MpClient(redCapInfo.getUrl(),
                 redCapInfo.getProjectId(), getRecordId(), context);
 
-        List<RedCapInput> list = new LinkedList<>();
+        Set<RedCapInput> set = new HashSet<>();
 
-        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
                 IntegrationData.SUBJECT_ID_LABEL, mpClient.getRadarSubjectId()));
 
-        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
                 IntegrationData.HUMAN_READABLE_ID_LABEL, mpClient.getHumanReadableId()));
 
-        list.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                RedCapManager.getStatusField(redCapInfo),
+        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
+                RedCapManager.getStatusField(redCapInfo.getIntegrationForm()),
                 Integer.toString(InstrumentStatus.COMPLETE.getStatus())));
 
-        return list;
+        return set;
     }
 
+    /**
+     * Sets the HTML form parameters needed to update the REDCap integration form / instrument.
+     *      It sets just the metadata not the real input, that is set by {@link RedCapUpdater}
+     *      while generating the {@link Request}.
+     * @param builder {@link okhttp3.FormBody.Builder} that has to be populated
+     * @return {@link okhttp3.FormBody.Builder} required to finale the HTTP request.
+     */
     @Override
     protected Builder setParameter(Builder builder) {
         return builder.add("content", "record")

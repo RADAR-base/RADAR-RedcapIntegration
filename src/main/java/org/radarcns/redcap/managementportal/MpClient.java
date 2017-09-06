@@ -97,14 +97,14 @@ public class MpClient {
 
             if (Objects.isNull(subject)) {
                 createSubject(redcapUrl, project, recordId, humanReadableId, context);
+
+                LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}",
+                    radarSubjectId, humanReadableId);
             } else {
                 LOGGER.info("Subject for Record Id: {} at {} is already available.", recordId,
                         redcapUrl);
                 //TODO check that Human Readable Identifier is correct. If not update Subject.
             }
-
-            LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}",
-                    radarSubjectId, humanReadableId);
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
             throw new IllegalStateException("Subject creation cannot be completed.", exc);
@@ -177,6 +177,7 @@ public class MpClient {
                         .build();
 
             Response response = HttpClientListener.getClient(context).newCall(request).execute();
+            response.close();
 
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
@@ -193,7 +194,7 @@ public class MpClient {
         }
     }
 
-    private static Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
+    private Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
             ServletContext context) throws IOException, URISyntaxException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
@@ -203,12 +204,16 @@ public class MpClient {
         Response response = HttpClientListener.getClient(context).newCall(request).execute();
 
         if (response.isSuccessful()) {
-            LOGGER.info("Successful");
-            return Subject.getObject(response);
+            Subject subject = Subject.getObject(response);
+
+            radarSubjectId = subject.getSubjectId();
+
+            return subject;
         }
 
-        LOGGER.info("No subject");
+        response.close();
 
+        LOGGER.info("Subject is not present");
         return null;
     }
 

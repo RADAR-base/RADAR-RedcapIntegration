@@ -45,12 +45,12 @@ public class Subject {
     private final List<Tag> attributes;
 
     /**
-     * TODO.
-     * @param subjectId TODO
-     * @param externalId TODO
-     * @param externalLink TODO
-     * @param project TODO
-     * @param attributes TODO
+     * Constructor.
+     * @param subjectId {@link String} representing Management Portal Subject identifier
+     * @param externalId {@link Integer} representing the REDCap Record identifier
+     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
+     * @param project {@link Project} associated with the subject
+     * @param attributes {@link List} of {@link Tag}
      */
     public Subject(
             @JsonProperty("login") String subjectId,
@@ -61,28 +61,33 @@ public class Subject {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
-        this.email = "admin@localhost";
         this.project = project;
         this.attributes = attributes;
+
+        //TODO remove
+        this.email = "admin@localhost";
     }
 
     /**
-     * TODO.
-     * @param subjectId TODO
-     * @param externalId TODO
-     * @param externalLink TODO
-     * @param project TODO
-     * @param humanReadableId TODO
+     * Constructor.
+     * @param subjectId {@link String} representing Management Portal Subject identifier
+     * @param externalId {@link Integer} representing the REDCap Record identifier
+     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
+     * @param project {@link Project} associated with the subject
+     * @param humanReadableId {@link String} representing the value associated with
+     *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
      */
     public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
             String humanReadableId) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
-        this.email = "admin@localhost";
         this.project = project;
         this.attributes = Collections.singletonList(new Tag(HUMAN_READABLE_IDENTIFIER_KEY,
                 humanReadableId));
+
+        //TODO remove
+        this.email = "admin@localhost";
     }
 
     public String getSubjectId() {
@@ -105,10 +110,23 @@ public class Subject {
         return project;
     }
 
+    public List<Tag> getAttributes() {
+        return attributes;
+    }
+
     /**
-     * TODO.
-     * @param key TODO
-     * @return TODO
+     * Returns the Human Readable Identifier associated with this subject.
+     * @return {@link String} stating the Human Readable Identifier associated with this subject
+     */
+    @JsonIgnore
+    public String getHumanReadableIdentifier() {
+        return getAttribute(HUMAN_READABLE_IDENTIFIER_KEY);
+    }
+
+    /**
+     * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     * @param key {@link String} tag key
+     * @return {@link String} value associated with the given key
      */
     @JsonIgnore
     public String getAttribute(String key) {
@@ -119,22 +137,24 @@ public class Subject {
     }
 
     /**
-     * TODO.
-     * @param response TODO
-     * @return TODO
-     * @throws IOException TODO
+     * Converts the {@link Response#body()} to a {@link Project} entity.
+     * @param response {@link Response} that has to be converted
+     * @return {@link Project} stored in the {@link Response#body()}
+     * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
     public static Subject getObject(Response response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.readValue(response.body().bytes(), Subject.class);
+        byte[] body = response.body().bytes();
+        response.close();
+        return mapper.readValue(body, Subject.class);
     }
 
     /**
-     * TODO.
-     * @return TODO
-     * @throws IOException TODO
+     * Generates the {@link JsonNode} representation of the current instance.
+     * @return {@link JsonNode} serialising this object
+     * @throws IOException in case the serialisation cannot be complete
      */
     @JsonIgnore
     public JsonNode getJson() throws IOException {
@@ -142,9 +162,9 @@ public class Subject {
     }
 
     /**
-     * TODO.
-     * @return TODO
-     * @throws IOException TODO
+     * Generates the JSON {@link String} representation of the current instance.
+     * @return {@link String} serialising this object
+     * @throws IOException in case the serialisation cannot be complete
      */
     @JsonIgnore
     public String getJsonString() throws IOException {

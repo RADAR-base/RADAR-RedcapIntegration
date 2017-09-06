@@ -22,27 +22,56 @@ import java.util.Set;
  */
 
 /**
- * Java class that defines the configuration required by the web app to handle authentication and
- *      authorisation against Management Portal and REDCap instances.
+ * <p>Java class that defines the configuration required by the web app to handle authentication and
+ * authorisation against Management Portal and REDCap instances.</p>
+ * <p>Current implementation support a single Management Portal instance since the current
+ * RADAR-CNS Platform Architecture is designed with a centralised Management Portal. In order
+ * to support multiple Management Portal instances, the following variables<ul>
+ *      <li>{@code oauthClientId}</li>
+ *      <li>{@code oauthClientSecret}</li>
+ *      <li>{@code managementPortalUrl}</li>
+ *      <li>{@code tokenEndpoint}</li>
+ *      <li>{@code projectEndpoint}</li>
+ *      <li>{@code subjectEndpoint}</li>
+ * </ul>
+ * should be moved to {@link ManagementPortalInfo}.</p>
  */
 public class Configuration {
 
+    /** Service version. */
     private final String version;
 
+    /** Release date. */
     private final String released;
 
+    /** OAuth2 client identifier. */
     private final String oauthClientId;
 
+    /** OAuth2 client secret. */
     private final String oauthClientSecret;
 
+    /** URL pointing a Management Portal instance. */
     private final URL managementPortalUrl;
 
+    /** Web root of Management Portal token end point. It is required to refresh Access Token. */
     private final String tokenEndpoint;
 
+    /**
+     * Web root of Management Portal project end point. It is required to get a Management Portal
+     *      Project.
+     */
     private final String projectEndpoint;
 
+    /**
+     * Web root of Management Portal subject end point. It is required to create and get Managemen
+     *      Portal Subjects.
+     */
     private final String subjectEndpoint;
 
+    /**
+     * Set of supported projects. For each project REDCap and Management Portal configurations
+     *      are set.
+     */
     private final Set<ProjectInfo> projects;
 
     /**

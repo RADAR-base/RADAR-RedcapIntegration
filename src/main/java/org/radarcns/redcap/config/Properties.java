@@ -35,6 +35,8 @@ public final class Properties {
     /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
+    private static final String HTTPS = "https";
+
     /** Path to the configuration file for AWS deploy. */
     private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
 
@@ -192,7 +194,7 @@ public final class Properties {
      * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
     public static URL getTokenEndPoint() throws MalformedURLException {
-        return new URL(CONFIG.getManagementPortalUrl(), CONFIG.getTokenEndpoint());
+        return new URL(validateMpUrl(), CONFIG.getTokenEndpoint());
     }
 
     /**
@@ -201,7 +203,7 @@ public final class Properties {
      * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
     public static URL getSubjectEndPoint() throws MalformedURLException {
-        return new URL(CONFIG.getManagementPortalUrl(), CONFIG.getSubjectEndpoint());
+        return new URL(validateMpUrl(), CONFIG.getSubjectEndpoint());
     }
 
     /**
@@ -212,7 +214,41 @@ public final class Properties {
      * @throws MalformedURLException in case the {@link URL} cannot be generated
      */
     public static URL getProjectEndPoint(ManagementPortalInfo mpInfo) throws MalformedURLException {
-        return new URL(CONFIG.getManagementPortalUrl(),
-                CONFIG.getProjectEndpoint().concat(mpInfo.getProjectId().toString()));
+        return new URL(validateMpUrl(), CONFIG.getProjectEndpoint().concat(
+                mpInfo.getProjectId().toString()));
+    }
+
+    /**
+     * Checks if the provided {@link URL} is using a secure connection or not.
+     * @param url {@link URL} to check
+     * @return {@code true} if the protocol is {@code HTTPS}, {@code false} otherwise
+     */
+    private static boolean isSecureConnection(URL url) {
+        return url.getProtocol().equals(HTTPS);
+    }
+
+    /**
+     * Returns a {@link URL} pointing a Management Portal instance and Checks if it is using a
+     *      secure connection.
+     * @return {@link URL} pointing the Management Portal instance specified on the config file
+     */
+    public static URL validateMpUrl() {
+        if (!isSecureConnection(CONFIG.getManagementPortalUrl())) {
+            LOGGER.warn("The provided Management Portal instance is not using an encrypted"
+                    + " connection.");
+        }
+        return CONFIG.getManagementPortalUrl();
+    }
+
+    /**
+     * Checks if the provided {@link URL} is using a secure connection and returns it.
+     * @param url {@link URL} to has to be checked
+     * @return the provided {@link URL}
+     */
+    public static URL validateRedcapUrl(URL url) {
+        if (!isSecureConnection(url)) {
+            LOGGER.warn("The provided REDCap instance is not using an encrypted connection.");
+        }
+        return url;
     }
 }

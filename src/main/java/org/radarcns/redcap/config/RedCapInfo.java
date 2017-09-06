@@ -24,29 +24,29 @@ import java.net.URL;
  */
 public class RedCapInfo {
 
-    /** {@link URL} pointing a REDCap instance. */
+    /** URL pointing a REDCap instance. */
     private final URL url;
 
     /**
-     * {@link Integer} representing the REDCap project identifier. In REDCap the project
+     * Integer representing the REDCap project identifier. In REDCap the project
      *      is usually called {@code pid}. */
     private final Integer projectId;
 
     /**
-     * {@link String} stating the unique REDCap event name related to the enrolment event. For
+     * String stating the unique REDCap event name related to the enrolment event. For
      *      each event in REDCap there are to different identifiers: the {@code event_id} that is
-     *      an {@link Integer} and the {@code event_name} that is a {@link String}.
+     *      an Integer and the {@code event_name} that is a String.
      *      This variable must be equals to the {@code event_name}.
      */
     private final String enrolmentEvent;
 
     /**
-     * {@link String} reporting the REDCap form / instrument name used to share identifiers.
+     * String reporting the REDCap form / instrument name used to share identifiers.
      */
     private final String integrationForm;
 
     /**
-     * Token {@link String} required to use REDCap APIs.
+     * Token String required to use REDCap APIs.
      */
     private final String token;
 
@@ -76,7 +76,7 @@ public class RedCapInfo {
      * @return {@link URL} pointing a REDCap instance
      */
     public URL getUrl() {
-        return url;
+        return Properties.validateRedcapUrl(url);
     }
 
     /**
