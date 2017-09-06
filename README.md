@@ -43,8 +43,43 @@ The `RADAR Enrolment` establish a relation between data stored in REDCap and dat
 RADAR-CNS Platform.
 
 ## Configuration
-To set a valid token for accessing REDCap API, in the current implementation it is needed to update
-the class `org.radarcns.redcap.config.RedCapManager` 
+This service requires a configuration file named `radar.yml` that can be stored at:
+- `/usr/share/tomcat8/conf/`
+- `/usr/local/tomcat/conf/radar/`
+- at the path provided by the environment variable `CONFIG_FOLDER`
+
+The configuration should follow this [template](radar.yml).
+For each supported project, the `projects` variable should contains a item like
+```yaml
+redcap_info:
+  url: #URL pointing REDCap instance
+  project_id: #REDCap project identifier
+  enrolment_event: #Unique identifier for the enrolment event
+  integration_form: #Name of integration REDCap form
+  token: #REDCap API Token used to identify the REDCap user against the REDCap instance
+mp_info:
+  project_id: #Management Portal project identifier
+``` 
+
+The service validates the configuration file during the deploy phase. If the file is invalid, the
+deploy is stopped.
+
+## Log files
+The project has been created to be deployed on [Apache Tomcat](http://tomcat.apache.org).
+Application logs are redirected to `standard output`. In case of invalid deploy check
+`$CATALINA_HOME/logs/catalina.*` and `$CATALINA_HOME/logs/localhost.*`
+
+## Docker deploy example
+ 1. Start a tomcat container 
+ `sudo docker run --name tomcat -it --rm -d -p 8888:8080 tomcat:8.0.44-jre8`
+ 2. Create the `radar` folder under `conf`
+ `sudo docker exec -i -t tomcat mkdir /usr/local/tomcat/conf/radar`
+ 3. Copy a valid config file
+ `sudo docker cp /path/to/radar.yml tomcat:/usr/local/tomcat/conf/radar/radar.yml`
+ 4. Deploy the web app
+ `sudo docker cp redcap-1.0-SNAPSHOT.war tomcat:/usr/local/tomcat/webapps/redcap.war`
+ 5. The web app will now running at `http:localhost:8080/redcap/trigger`
+ 
 
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.

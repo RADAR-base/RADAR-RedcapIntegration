@@ -16,7 +16,6 @@ package org.radarcns.redcap;
  * limitations under the License.
  */
 
-//TODO improve README
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
