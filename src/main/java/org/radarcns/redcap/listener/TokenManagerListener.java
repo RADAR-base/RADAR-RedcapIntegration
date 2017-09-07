@@ -70,6 +70,7 @@ public class TokenManagerListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
+            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
             getToken(sce.getServletContext());
         } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
