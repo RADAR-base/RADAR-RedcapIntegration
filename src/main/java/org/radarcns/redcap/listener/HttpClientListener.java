@@ -16,15 +16,16 @@ package org.radarcns.redcap.listener;
  * limitations under the License.
  */
 
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import okhttp3.OkHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Creates a {@link OkHttpClient} and adds it to the {@link javax.servlet.ServletContext} in this

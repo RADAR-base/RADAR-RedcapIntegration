@@ -117,20 +117,20 @@ public abstract class RedCapUpdater {
      * @return {@code true} in case of success, {@code false} otherwise
      * @throws IOException in case the request cannot be completed
      */
-    public boolean updateForm() throws IOException {
-        Response response = client.newCall(getRequest()).execute();
-
-        if (response.isSuccessful()) {
-            LOGGER.debug("[{}] {}", response.code(), response.body().string());
-            LOGGER.info("Successful update for record {} at {}", trigger.getRecord(),
-                    trigger.getProjectUrl());
-        } else {
-            LOGGER.error("[{}] {}", response.code(), response.body().string());
+    public boolean updateForm() {
+        try (Response response = client.newCall(getRequest()).execute()) {
+            if (response.isSuccessful()) {
+                LOGGER.debug("[{}] {}", response.code(), response.body().string());
+                LOGGER.info("Successful update for record {} at {}", trigger.getRecord(),
+                            trigger.getProjectUrl());
+            } else {
+                LOGGER.error("[{}] {}", response.code(), response.body().string());
+            }
+            return response.isSuccessful();
         }
-
-        response.close();
-
-        return response.isSuccessful();
+        catch (IOException exc) {
+            throw new IllegalStateException("Error updating RedCap form", exc);
+        }
     }
 
     /**

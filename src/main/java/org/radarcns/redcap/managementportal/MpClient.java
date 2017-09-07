@@ -1,13 +1,5 @@
 package org.radarcns.redcap.managementportal;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Objects;
-import java.util.UUID;
-import javax.servlet.ServletContext;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -20,6 +12,15 @@ import org.radarcns.redcap.listener.HttpClientListener;
 import org.radarcns.redcap.listener.TokenManagerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Objects;
+import java.util.UUID;
 
 /*
  * Copyright 2017 King's College London
@@ -127,26 +128,30 @@ public class MpClient {
         return humanReadableId;
     }
 
-    private Project getProject(URL redcapUrl, Integer projectId,
-            ServletContext context) throws IOException {
+    private Project getProject(URL redcapUrl, Integer projectId, ServletContext context)
+                throws MalformedURLException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(Properties.getProjectEndPoint(mpInfo), context).get().build();
 
-        Response response = HttpClientListener.getClient(context).newCall(request).execute();
+        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                Project project = Project.getObject(response);
+                validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
 
-        if (response.isSuccessful()) {
-            Project project = Project.getObject(response);
-            validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
+                LOGGER.debug("Retrieve project {}", project.toString());
 
-            LOGGER.debug("Retrieve project {}", project.toString());
+                return project;
+            }
 
-            return project;
+            throw new IllegalStateException("Error while retrieving project info from "
+                        + Properties.getProjectEndPoint(mpInfo) + ". Response code: " + response.code()
+                        + " Message: " + response.message());
         }
-
-        throw new IllegalStateException("Error while retrieving project info from "
-                + Properties.getProjectEndPoint(mpInfo) + ". Response code: " + response.code()
-                + " Message: " + response.message());
+        catch (IOException ex) {
+            throw new IllegalStateException("IO error while retrieving project info from "
+                    + Properties.getProjectEndPoint(mpInfo) + ".", ex);
+        }
     }
 
     private static void validateProject(URL mp, Project project, URL redcapUrl, Integer projectId) {
@@ -168,59 +173,59 @@ public class MpClient {
 
     private void createSubject(URL redcapUrl, Project project, Integer recordId,
             String humanReadableId, ServletContext context) {
-        try {
-            //TODO check how to generate UUID
-            radarSubjectId = UUID.randomUUID().toString();
+        //TODO check how to generate UUID
+        radarSubjectId = UUID.randomUUID().toString();
 
-            Subject subject = new Subject(radarSubjectId, recordId,
+        Subject subject;
+        Request request;
+        try {
+            subject = new Subject(radarSubjectId, recordId,
                     RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
                     project, humanReadableId);
 
-            Request request = getBuilder(Properties.getSubjectEndPoint(), context)
-                        .put(RequestBody.create(MediaType.parse(
-                                javax.ws.rs.core.MediaType.APPLICATION_JSON),
-                                subject.getJsonString()))
-                        .build();
+            request = getBuilder(Properties.getSubjectEndPoint(), context)
+                    .put(RequestBody.create(MediaType.parse(
+                            javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
+                    .build();
+        } catch (MalformedURLException exc) {
+            throw new IllegalStateException("Subject cannot be created", exc);
+        } catch (IOException exc) {
+            throw new IllegalStateException("Subject cannot be created", exc);
+        }
 
-            Response response = HttpClientListener.getClient(context).newCall(request).execute();
-            response.close();
-
+        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
                     + response.code() + " Message: " + response.message());
             } else {
                 LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
             }
-        } catch (MalformedURLException exc) {
-            throw new IllegalStateException("Subject cannot be created".concat(
-                    " ").concat(exc.getMessage()));
         } catch (IOException exc) {
-            throw new IllegalStateException("Subject cannot be created".concat(
-                    " ").concat(exc.getMessage()));
+            throw new IllegalStateException("Subject cannot be created", exc);
         }
     }
 
     private Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
-            ServletContext context) throws IOException, URISyntaxException {
+            ServletContext context) throws MalformedURLException, URISyntaxException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(getSubjectUrl(Properties.getSubjectEndPoint(),
                 mpInfo.getProjectId(), recordId), context).get().build();
 
-        Response response = HttpClientListener.getClient(context).newCall(request).execute();
+        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                Subject subject = Subject.getObject(response);
 
-        if (response.isSuccessful()) {
-            Subject subject = Subject.getObject(response);
+                radarSubjectId = subject.getSubjectId();
 
-            radarSubjectId = subject.getSubjectId();
-
-            return subject;
+                return subject;
+            }
+            LOGGER.info("Subject is not present");
+            return null;
         }
-
-        response.close();
-
-        LOGGER.info("Subject is not present");
-        return null;
+        catch (IOException exc) {
+            throw new IllegalStateException("Subject could not be retrieved", exc);
+        }
     }
 
     private static Request.Builder getBuilder(URL url, ServletContext context) {
