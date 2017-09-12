@@ -16,20 +16,21 @@ package org.radarcns.redcap.listener;
  * limitations under the License.
  */
 
-import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import org.radarcns.exception.TokenException;
-import org.radarcns.oauth.OAuth2AccessToken;
+import org.radarcns.oauth.OAuth2AccessTokenDetails;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 
 //TODO check whether the token library is closing all the body request. Log reports
 //WARNING [OkHttp ConnectionPool] okhttp3.internal.platform.Platform.log A connection to
@@ -49,7 +50,7 @@ public class TokenManagerListener implements ServletContextListener {
     private static final String ACCESS_TOKEN = "TOKEN";
 
     private static final OAuth2Client client;
-    private static OAuth2AccessToken token;
+    private static OAuth2AccessTokenDetails token;
 
     static {
         try {
@@ -63,12 +64,13 @@ public class TokenManagerListener implements ServletContextListener {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
         }
-        token = new OAuth2AccessToken();
+        token = new OAuth2AccessTokenDetails();
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
+            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
             getToken(sce.getServletContext());
         } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
@@ -80,7 +82,7 @@ public class TokenManagerListener implements ServletContextListener {
         // clear connection pool
         client.getHttpClient().connectionPool().evictAll();
         // clear current token (set to invalid, expired token)
-        token = new OAuth2AccessToken();
+        token = new OAuth2AccessTokenDetails();
         // clear the token from the context
         sce.getServletContext().setAttribute(ACCESS_TOKEN, null);
 

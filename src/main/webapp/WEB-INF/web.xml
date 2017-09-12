@@ -29,6 +29,6 @@
     </servlet-mapping>
 
     <listener><listener-class>org.radarcns.redcap.listener.PropertiesListener</listener-class></listener>
-    <listener><listener-class>org.radarcns.redcap.listener.TokenManagerListener</listener-class></listener>
     <listener><listener-class>org.radarcns.redcap.listener.HttpClientListener</listener-class></listener>
+    <listener><listener-class>org.radarcns.redcap.listener.TokenManagerListener</listener-class></listener>
 </web-app>
