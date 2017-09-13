@@ -25,7 +25,7 @@ For setting a `Data Entry Trigger`
 7. enable `Data Entry Trigger`
 8. click on `Save`
 
-This project exposed a REST endpoint located at `<host>:<port>/redcap/trigger`.
+This project exposed a REST endpoint located at `<host>:<port>/redcap/trigger` or `<host>/redcap/trigger` is mapped to http default 80 port.
 
 It is highly recommended to use an encrypted connection (i.e. SSL/HTTPS) for accessing set
 `Data Entry Trigger`.
@@ -70,16 +70,17 @@ Application logs are redirected to `standard output`. In case of invalid deploy 
 `$CATALINA_HOME/logs/catalina.*` and `$CATALINA_HOME/logs/localhost.*`
 
 ## Docker deploy example
- 1. Start a tomcat container 
- `sudo docker run --name tomcat -it --rm -d -p 8888:8080 tomcat:8.0.44-jre8`
- 2. Create the `radar` folder under `conf`
- `sudo docker exec -i -t tomcat mkdir /usr/local/tomcat/conf/radar`
- 3. Copy a valid config file
- `sudo docker cp /path/to/radar.yml tomcat:/usr/local/tomcat/conf/radar/radar.yml`
- 4. Deploy the web app
- `sudo docker cp redcap-1.0-SNAPSHOT.war tomcat:/usr/local/tomcat/webapps/redcap.war`
- 5. The web app will now running at `http:localhost:8080/redcap/trigger`
+ 1. Go to root directory and use the gradle wrapper to create war file for the web app like this. The WAR file is created in ‘root/build/libs/‘
+ `$ ./gradlew clean war`
+ 2. Then build the docker image naming it redcap using the Dockerfile located in root directory
+ `$ docker build -t redcapintegration .`
+ 3. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
+ `$ docker run --name redcapintegration -it --rm -d -p 80:8080 redcapintegration`
+ 4. Access the  entry point like this
+ `$ curl -X POST “<Host IP or URL>/redcap/trigger”`
+ 5. Or if accessing on the same machine as the container do
+ `$ curl -X POST “http://localhost/redcap/trigger`
+ 6. Please note that the radar.yml config file should be valid or else the deploy will fail.
  
-
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.
