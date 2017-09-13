@@ -72,15 +72,17 @@ Application logs are redirected to `standard output`. In case of invalid deploy 
 ## Docker deploy example
  1. Go to root directory and use the gradle wrapper to create war file for the web app like this. The WAR file is created in ‘root/build/libs/‘
  `$ ./gradlew clean war`
- 2. Then build the docker image naming it redcap using the Dockerfile located in root directory
+ 2. Change the ADD command in Dockerfile to copy the WAR file just created in root/build/libs to tomcat webapps for deployment
+ `ADD ./build/libs/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war`
+ 3. Then build the docker image naming it redcap using the Dockerfile located in root directory
  `$ docker build -t redcapintegration .`
- 3. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
+ 4. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
  `$ docker run --name redcapintegration -it --rm -d -p 80:8080 redcapintegration`
- 4. Access the  entry point like this
+ 5. Access the  entry point like this
  `$ curl -X POST “<Host IP or URL>/redcap/trigger”`
- 5. Or if accessing on the same machine as the container do
- `$ curl -X POST “http://localhost/redcap/trigger`
- 6. Please note that the radar.yml config file should be valid or else the deploy will fail.
+ 6. Or if accessing on the same machine as the container do
+ `$ curl -X POST “http://localhost/redcap/trigger` 
+ 7. Please note that the radar.yml config file should be valid or else the deploy will fail.
  
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.
