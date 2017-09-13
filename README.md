@@ -73,9 +73,9 @@ Application logs are redirected to `standard output`. In case of invalid deploy 
  1. Go to root directory and use the gradle wrapper to create war file for the web app like this. The WAR file is created in ‘root/build/libs/‘
  `$ ./gradlew clean war`
  2. Then build the docker image naming it redcap using the Dockerfile located in root directory
- `$ docker build -t redcap .`
+ `$ docker build -t redcapintegration .`
  3. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
- `$ docker run --name redcap -it --rm -d -p 80:8080 redcap`
+ `$ docker run --name redcapintegration -it --rm -d -p 80:8080 redcapintegration`
  4. Access the  entry point like this
  `$ curl -X POST “<Host IP or URL>/redcap/trigger”`
  5. Or if accessing on the same machine as the container do
