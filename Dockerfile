@@ -14,5 +14,5 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 ADD https://github.com/RADAR-CNS/RADAR-RedcapIntegration/releases/download/v0.1-beta.1/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
 #ADD ./build/libs/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
 
-EXPOSE 8888
+EXPOSE 8080
 CMD ["catalina.sh", "run"]
