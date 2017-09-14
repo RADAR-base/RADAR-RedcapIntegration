@@ -8,7 +8,7 @@ RUN mkdir $CATALINA_HOME/conf/radar
 # COPY ./radar.yml $CATALINA_HOME/conf/radar/radar.yml
 # ADD ./radar.yml $CATALINA_HOME/conf/radar/radar.yml
 
-# RUN rm -rf /usr/local/tomcat/webapps/*
+RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy the WAR file to tomcat webapps for deployment
 ADD https://github.com/RADAR-CNS/RADAR-RedcapIntegration/releases/download/v0.1-beta.1/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
