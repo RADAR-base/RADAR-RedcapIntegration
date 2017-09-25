@@ -43,7 +43,7 @@ public abstract class RedCapUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedCapUpdater.class);
 
-    private static final String API_ROOT = "/api/";
+    private static final String API_ROOT = "/redcap/api/";
 
     private static final String DATA_LABEL = "data";
     private static final String TOKEN_LABEL = "token";
