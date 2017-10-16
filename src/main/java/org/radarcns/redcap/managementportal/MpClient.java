@@ -114,6 +114,9 @@ public class MpClient {
                     // expected one
                 }
             }
+        } catch (NullPointerException exc) {
+            LOGGER.error("Work Package cannot be null", exc);
+            throw new IllegalStateException("Work package in MP cannot be null.", exc);
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
             throw new IllegalStateException("Subject creation cannot be completed.", exc);

@@ -42,7 +42,7 @@ public class Subject {
     @JsonProperty("email")
     private final String email;
     private final Project project;
-    private final List<Tag> attributes;
+    private final Attribute attributes;
 
     /**
      * Constructor.
@@ -57,7 +57,7 @@ public class Subject {
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
             @JsonProperty("project") Project project,
-            @JsonProperty("attributes") List<Tag> attributes) {
+            @JsonProperty("attributes") Attribute attributes) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
@@ -83,8 +83,7 @@ public class Subject {
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
-        this.attributes = Collections.singletonList(new Tag(HUMAN_READABLE_IDENTIFIER_KEY,
-                humanReadableId));
+        this.attributes = new Attribute(humanReadableId);
 
         //TODO remove
         this.email = "admin@localhost";
@@ -110,7 +109,7 @@ public class Subject {
         return project;
     }
 
-    public List<Tag> getAttributes() {
+    public Attribute getAttributes() {
         return attributes;
     }
 
@@ -124,16 +123,18 @@ public class Subject {
     }
 
     /**
-     * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     * Gets the subject attribute (e.g. tag) associated with the given {@link String} key.
      * @param key {@link String} tag key
      * @return {@link String} value associated with the given key
      */
     @JsonIgnore
     public String getAttribute(String key) {
-        Optional<Tag> tag = attributes.stream()
-                .filter(item -> item.getKey().equals(key)).findFirst();
 
-        return tag.isPresent() ? tag.get().getValue() : null;
+        if (attributes.getHumanRedableIdentifier() != null) {
+            return attributes.toString();
+        } else {
+            return null;
+        }
     }
 
     /**
