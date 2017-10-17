@@ -23,9 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import okhttp3.Response;
 
 //TODO
@@ -42,7 +41,7 @@ public class Subject {
     @JsonProperty("email")
     private final String email;
     private final Project project;
-    private final Attribute attributes;
+    private final Map<String,String> attributes;
 
     /**
      * Constructor.
@@ -57,7 +56,7 @@ public class Subject {
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
             @JsonProperty("project") Project project,
-            @JsonProperty("attributes") Attribute attributes) {
+            @JsonProperty("attributes") Map<String,String> attributes) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
@@ -83,7 +82,10 @@ public class Subject {
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
-        this.attributes = new Attribute(humanReadableId);
+
+        Map<String,String> att = new HashMap<>();
+        att.put(HUMAN_READABLE_IDENTIFIER_KEY,humanReadableId);
+        this.attributes = att;
 
         //TODO remove
         this.email = "admin@localhost";
@@ -109,7 +111,7 @@ public class Subject {
         return project;
     }
 
-    public Attribute getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
@@ -129,12 +131,7 @@ public class Subject {
      */
     @JsonIgnore
     public String getAttribute(String key) {
-
-        if (attributes.getHumanRedableIdentifier() != null) {
-            return attributes.toString();
-        } else {
-            return null;
-        }
+        return attributes.get(key);
     }
 
     /**
