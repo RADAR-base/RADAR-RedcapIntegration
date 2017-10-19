@@ -23,9 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import okhttp3.Response;
 
 //TODO
@@ -42,7 +41,7 @@ public class Subject {
     @JsonProperty("email")
     private final String email;
     private final Project project;
-    private final List<Tag> attributes;
+    private final Map<String,String> attributes;
 
     /**
      * Constructor.
@@ -57,7 +56,7 @@ public class Subject {
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
             @JsonProperty("project") Project project,
-            @JsonProperty("attributes") List<Tag> attributes) {
+            @JsonProperty("attributes") Map<String,String> attributes) {
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
@@ -83,8 +82,10 @@ public class Subject {
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
-        this.attributes = Collections.singletonList(new Tag(HUMAN_READABLE_IDENTIFIER_KEY,
-                humanReadableId));
+
+        Map<String,String> att = new HashMap<>();
+        att.put(HUMAN_READABLE_IDENTIFIER_KEY,humanReadableId);
+        this.attributes = att;
 
         //TODO remove
         this.email = "admin@localhost";
@@ -110,7 +111,7 @@ public class Subject {
         return project;
     }
 
-    public List<Tag> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
@@ -124,16 +125,13 @@ public class Subject {
     }
 
     /**
-     * Gets the project attribute (e.g. tag) associated with the given {@link String} key.
+     * Gets the subject attribute (e.g. tag) associated with the given {@link String} key.
      * @param key {@link String} tag key
      * @return {@link String} value associated with the given key
      */
     @JsonIgnore
     public String getAttribute(String key) {
-        Optional<Tag> tag = attributes.stream()
-                .filter(item -> item.getKey().equals(key)).findFirst();
-
-        return tag.isPresent() ? tag.get().getValue() : null;
+        return attributes.get(key);
     }
 
     /**
