@@ -11,7 +11,7 @@ RUN mkdir $CATALINA_HOME/conf/radar
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy the WAR file to tomcat webapps for deployment
-ADD https://github.com/RADAR-CNS/RADAR-RedcapIntegration/releases/download/v0.1-beta.1/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
+ADD https://github.com/RADAR-CNS/RADAR-RedcapIntegration/releases/download/v0.1-beta.2/redcap-2.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
 #ADD ./build/libs/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
 
 EXPOSE 8080
