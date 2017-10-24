@@ -30,7 +30,7 @@ public class ManagementPortalInfo {
     private final String projectName;
 
     protected ManagementPortalInfo(
-            @JsonProperty("project_id") String projectName) {
+            @JsonProperty("project_name") String projectName) {
         this.projectName = projectName;
     }
 
