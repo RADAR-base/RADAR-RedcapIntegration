@@ -18,4 +18,4 @@ projects:
       integration_form: radar_enrolment
       token: 1234567890
     mp_info:
-      project_id: 0
+      project_name: project-0

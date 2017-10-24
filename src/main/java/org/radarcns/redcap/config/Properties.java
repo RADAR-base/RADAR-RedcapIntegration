@@ -215,7 +215,7 @@ public final class Properties {
      */
     public static URL getProjectEndPoint(ManagementPortalInfo mpInfo) throws MalformedURLException {
         return new URL(validateMpUrl(), CONFIG.getProjectEndpoint().concat(
-                mpInfo.getProjectId().toString()));
+                mpInfo.getProjectName()));
     }
 
     /**

@@ -27,19 +27,19 @@ public class ManagementPortalInfo {
      * Management Portal project identifier. As long as the Management Portal is centralised, this
      *      value is unique.
      */
-    private final Integer projectId;
+    private final String projectName;
 
     protected ManagementPortalInfo(
-            @JsonProperty("project_id") Integer projectId) {
-        this.projectId = projectId;
+            @JsonProperty("project_id") String projectName) {
+        this.projectName = projectName;
     }
 
     /**
      * Returns the unique project identifier of the Management Portal project.
      * @return {@link Integer} representing Management Portal unique event identifier
      */
-    public Integer getProjectId() {
-        return projectId;
+    public String getProjectName() {
+        return projectName;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ManagementPortalInfo {
         ManagementPortalInfo that = (ManagementPortalInfo) obj;
 
         return new org.apache.commons.lang3.builder.EqualsBuilder()
-            .append(projectId, that.projectId)
+            .append(projectName, that.projectName)
             .isEquals();
     }
 
@@ -63,12 +63,12 @@ public class ManagementPortalInfo {
     public int hashCode() {
         return new org.apache.commons.lang3.builder.HashCodeBuilder(
                 17, 37)
-            .append(projectId)
+            .append(projectName)
             .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ManagementPortalInfo {projectId = " + projectId + "}\n";
+        return "ManagementPortalInfo {projectName = " + projectName + "}\n";
     }
 }
