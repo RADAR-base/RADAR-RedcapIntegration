@@ -213,7 +213,7 @@ public class MpClient {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(getSubjectUrl(Properties.getSubjectEndPoint(),
-                mpInfo.getProjectId(), recordId), context).get().build();
+                mpInfo.getProjectName(), recordId), context).get().build();
 
         try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
             if (response.isSuccessful()) {
@@ -238,11 +238,11 @@ public class MpClient {
                         TokenManagerListener.getToken(context)));
     }
 
-    private static URL getSubjectUrl(URL url, Integer projectId, Integer recordId)
+    private static URL getSubjectUrl(URL url, String projectName, Integer recordId)
             throws URISyntaxException, MalformedURLException {
         URI oldUri = url.toURI();
 
-        String parameters = "projectId=".concat(projectId.toString()).concat("&externalId=").concat(
+        String parameters = "projectName=".concat(projectName).concat("&externalId=").concat(
                 recordId.toString());
         String newQuery = oldUri.getQuery();
         if (newQuery == null) {

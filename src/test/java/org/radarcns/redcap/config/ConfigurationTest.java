@@ -44,7 +44,7 @@ public class ConfigurationTest {
         RedCapInfo redCapInfo = new RedCapInfo(new URL("https://localhost/"),
                 0, "enrolment", "radar_enrolment",
                 "1234567890");
-        ManagementPortalInfo mpInfo = new ManagementPortalInfo(0);
+        ManagementPortalInfo mpInfo = new ManagementPortalInfo("project-0");
 
         assertEquals(Collections.singleton(new ProjectInfo(redCapInfo, mpInfo)),
                 config.getProjects());
