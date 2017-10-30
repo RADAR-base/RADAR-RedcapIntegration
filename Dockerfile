@@ -1,5 +1,6 @@
 
 FROM tomcat:8.5.20-jre8
+ENV JAVA_OPTS=-Djava.security.egd=file:/dev/urandom
 
 # Create a radar configuration directory
 RUN mkdir $CATALINA_HOME/conf/radar
