@@ -136,6 +136,12 @@ test {
     }
 }
 
+task downloadApplicationDependencies {
+    description "Pre-downloads application dependencies"
+    configurations.compileClasspath.files
+    configurations.runtimeClasspath.files
+}
+
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
 //---------------------------------------------------------------------------//
