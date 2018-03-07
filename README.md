@@ -58,7 +58,7 @@ redcap_info:
   integration_form: #Name of integration REDCap form
   token: #REDCap API Token used to identify the REDCap user against the REDCap instance
 mp_info:
-  project_id: #Management Portal project identifier
+  project_name: #Management Portal project identifier
 ``` 
 
 The service validates the configuration file during the deploy phase. If the file is invalid, the
