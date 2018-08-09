@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.radarcns.exception.TokenException;
 import org.radarcns.redcap.config.ManagementPortalInfo;
 import org.radarcns.redcap.config.Properties;
 import org.radarcns.redcap.config.RedCapManager;
@@ -199,7 +200,7 @@ public class MpClient {
         try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
-                    + response.code() + " Message: " + response.message());
+                    + response.code() + " Message: " + response.message() + " Info: " + response.body());
             } else {
                 LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
             }
@@ -232,10 +233,15 @@ public class MpClient {
     }
 
     private static Request.Builder getBuilder(URL url, ServletContext context) {
-        return new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer ".concat(
-                        TokenManagerListener.getToken(context)));
+        try {
+            return new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer ".concat(
+                            TokenManagerListener.getToken(context)));
+        } catch (TokenException e) {
+            LOGGER.warn("Token cannot be generated: {}", e.fillInStackTrace());
+        }
+        return null;
     }
 
     private static URL getSubjectUrl(URL url, String projectName, Integer recordId)

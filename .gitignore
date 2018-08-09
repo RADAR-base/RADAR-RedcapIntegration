@@ -1,5 +1,6 @@
 # Idea fodler
 .idea/
+*.iml
 
 # Gradle fodler
 .gradle/

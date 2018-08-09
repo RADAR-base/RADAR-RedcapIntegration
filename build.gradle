@@ -39,7 +39,7 @@ ext.junitVersion = '4.12'
 ext.logbackVersion = '1.1.7'
 ext.okhttp3Version = '3.8.1'
 ext.radarCommonsVersion = '0.4.1'
-ext.radarOauthClientVersion = '0.1-SNAPSHOT'
+ext.radarOauthClientVersion = '0.4.0'
 ext.tomcatVersion = '8.0.44'
 
 dependencies {

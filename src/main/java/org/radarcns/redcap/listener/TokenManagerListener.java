@@ -49,15 +49,36 @@ public class TokenManagerListener implements ServletContextListener {
 
     private static final String ACCESS_TOKEN = "TOKEN";
 
-    private static final OAuth2Client client;
+    private static OAuth2Client client;
     private static OAuth2AccessTokenDetails token;
 
-    static {
+/*    static {
         try {
-            client = new OAuth2Client()
-                        .tokenEndpoint(Properties.getTokenEndPoint())
-                        .clientId(Properties.getOauthClientId())
-                        .clientSecret(Properties.getOauthClientSecret());
+            client = new OAuth2Client.Builder()
+                        .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
+                        .endpoint(Properties.getTokenEndPoint())
+                        .httpClient()
+        } catch (MalformedURLException exc) {
+            LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
+            throw new ExceptionInInitializerError(exc);
+        }
+        token = new OAuth2AccessTokenDetails();
+    }*/
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+/*        try {
+            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
+            getToken(sce.getServletContext());
+        } catch (TokenException exc) {
+            LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
+        }*/
+
+        try {
+            client = new OAuth2Client.Builder()
+                    .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
+                    .endpoint(Properties.getTokenEndPoint())
+                    .httpClient(HttpClientListener.getClient(sce.getServletContext())).build();
         } catch (MalformedURLException exc) {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
@@ -66,19 +87,9 @@ public class TokenManagerListener implements ServletContextListener {
     }
 
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        try {
-            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
-            getToken(sce.getServletContext());
-        } catch (TokenException exc) {
-            LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
-        }
-    }
-
-    @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // clear connection pool
-        client.getHttpClient().connectionPool().evictAll();
+        HttpClientListener.getClient(sce.getServletContext()).connectionPool().evictAll();
         // clear current token (set to invalid, expired token)
         token = new OAuth2AccessTokenDetails();
         // clear the token from the context
@@ -116,7 +127,7 @@ public class TokenManagerListener implements ServletContextListener {
             return;
         }
 
-        token = client.getAccessToken();
+        token = client.refreshToken();
 
         context.setAttribute(ACCESS_TOKEN, token.getAccessToken());
 

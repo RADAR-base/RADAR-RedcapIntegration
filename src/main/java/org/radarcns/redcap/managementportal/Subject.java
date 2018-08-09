@@ -49,7 +49,7 @@ public class Subject {
      * @param externalId {@link Integer} representing the REDCap Record identifier
      * @param externalLink {@link URL} pointing the REDCap integration form / instrument
      * @param project {@link Project} associated with the subject
-     * @param attributes {@link List} of {@link Tag}
+     * @param attributes {@link Map} of key,value pairs
      */
     public Subject(
             @JsonProperty("login") String subjectId,
@@ -121,17 +121,7 @@ public class Subject {
      */
     @JsonIgnore
     public String getHumanReadableIdentifier() {
-        return getAttribute(HUMAN_READABLE_IDENTIFIER_KEY);
-    }
-
-    /**
-     * Gets the subject attribute (e.g. tag) associated with the given {@link String} key.
-     * @param key {@link String} tag key
-     * @return {@link String} value associated with the given key
-     */
-    @JsonIgnore
-    public String getAttribute(String key) {
-        return attributes.get(key);
+        return attributes.get(HUMAN_READABLE_IDENTIFIER_KEY);
     }
 
     /**
