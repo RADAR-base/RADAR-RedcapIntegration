@@ -27,9 +27,22 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
 
 ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
@@ -38,9 +51,10 @@ ext.jerseymediaVersion = '2.24'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.1.7'
 ext.okhttp3Version = '3.8.1'
-ext.radarCommonsVersion = '0.4.1'
+ext.radarCommonsVersion = '0.9.0'
 ext.radarOauthClientVersion = '0.4.0'
 ext.tomcatVersion = '8.0.44'
+ext.mockitoVersion = '1.9.5'
 
 dependencies {
     providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcatVersion
@@ -50,7 +64,7 @@ dependencies {
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    compile group: 'org.radarcns', name: 'radar-commons-server', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
     compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
@@ -59,6 +73,7 @@ dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile group: 'org.mockito', name: 'mockito-all', version: mockitoVersion
 }
 
 //---------------------------------------------------------------------------//
@@ -152,5 +167,52 @@ idea {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '4.9'
+}
+
+
+task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
+    description = "Run integration tests (located in src/integrationTest/...)."
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    // This is not needed, but I like to see which tests have run
+    testLogging {
+        events "skipped", "failed", "passed"
+    }
+}
+
+integrationTest.finalizedBy 'removeLock'
+
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+ext.simpleStackLock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
+
+task installMP(type: Exec) {
+    doFirst{
+        def lockFile = new File(simpleStackLock)
+        if (lockFile.exists()) {
+            throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
+        } else {
+            lockFile.createNewFile()
+        }
+    }
+
+    workingDir 'src/integration-test/'
+    standardInput = System.in
+    commandLine sudoLinux + ['docker-compose', 'up', '-d', '--build']
+
+    doLast {
+        // wait until the hotstorage and managementportal are ready
+        sleep(60_000)
+    }
+}
+
+task removeLock {
+    new File(simpleStackLock).delete()
+}
+
+task copyConf(type: Copy) {
+    from "src/integration-test/"
+    into "/usr/local/tomcat/conf/radar/"
 }

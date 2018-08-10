@@ -49,41 +49,29 @@ public class TokenManagerListener implements ServletContextListener {
 
     private static final String ACCESS_TOKEN = "TOKEN";
 
-    private static OAuth2Client client;
+    private static final OAuth2Client client;
     private static OAuth2AccessTokenDetails token;
 
-/*    static {
+    static {
         try {
             client = new OAuth2Client.Builder()
                         .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
-                        .endpoint(Properties.getTokenEndPoint())
-                        .httpClient()
+                        .endpoint(Properties.getTokenEndPoint()).build();
         } catch (MalformedURLException exc) {
             LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
             throw new ExceptionInInitializerError(exc);
         }
         token = new OAuth2AccessTokenDetails();
-    }*/
+    }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-/*        try {
-            client.setHttpClient(HttpClientListener.getClient(sce.getServletContext()));
+      try {
             getToken(sce.getServletContext());
         } catch (TokenException exc) {
             LOGGER.warn("{} cannot be generated: {}", ACCESS_TOKEN, exc.getMessage());
-        }*/
-
-        try {
-            client = new OAuth2Client.Builder()
-                    .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
-                    .endpoint(Properties.getTokenEndPoint())
-                    .httpClient(HttpClientListener.getClient(sce.getServletContext())).build();
-        } catch (MalformedURLException exc) {
-            LOGGER.error("Properties cannot be loaded. Check the log for more information.", exc);
-            throw new ExceptionInInitializerError(exc);
         }
-        token = new OAuth2AccessTokenDetails();
+
     }
 
     @Override

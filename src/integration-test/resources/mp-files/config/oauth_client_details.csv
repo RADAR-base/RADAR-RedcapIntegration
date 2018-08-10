@@ -1,0 +1,2 @@
+client_id;resource_ids;client_secret;scope;authorized_grant_types;redirect_uri;authorities;access_token_validity;refresh_token_validity;additional_information;autoapprove
+radar_redcap_integrator;res_ManagementPortal;secret;PROJECT.READ,SUBJECT.CREATE,SUBJECT.READ,SUBJECT.UPDATE,PROJECT.UPDATE;client_credentials;;;43200;259200;{};

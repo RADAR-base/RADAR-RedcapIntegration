@@ -67,6 +67,7 @@ public final class Properties {
         //Nothing to do
     }
 
+
     /**
      * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
      *      checked to verify if points a valid config file. If not, the default location for AWS
@@ -207,7 +208,7 @@ public final class Properties {
     }
 
     /**
-     * Generates the token end point {@link URL} needed to reade projects on Management Portal.
+     * Generates the Project end point {@link URL} needed to reade projects on Management Portal.
      * @param mpInfo {@link ManagementPortalInfo} used to extract the Management Portal project
      *      identifier
      * @return {@link URL} useful to read project information
@@ -216,6 +217,16 @@ public final class Properties {
     public static URL getProjectEndPoint(ManagementPortalInfo mpInfo) throws MalformedURLException {
         return new URL(validateMpUrl(), CONFIG.getProjectEndpoint().concat(
                 mpInfo.getProjectName()));
+    }
+
+    /**
+     * Generates the base Project end point {@link URL} needed to read projects on Management Portal.
+     *
+     * @return {@link URL} useful to read project information
+     * @throws MalformedURLException in case the {@link URL} cannot be generated
+     */
+    public static URL getProjectEndPoint() throws MalformedURLException {
+        return new URL(validateMpUrl(), CONFIG.getProjectEndpoint());
     }
 
     /**

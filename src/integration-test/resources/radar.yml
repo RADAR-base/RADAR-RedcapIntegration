@@ -1,0 +1,21 @@
+version: 1.0
+released: 2017-08-29
+
+# ManagementPortal configuration
+oauth_client_id: radar_redcap_integrator
+oauth_client_secret:  secret
+management_portal_url: http://localhost:8090/
+token_endpoint: oauth/token
+project_endpoint: api/projects/
+subject_endpoint: api/subjects/
+
+# List of supported projects
+projects:
+  - redcap_info:
+      url: http://redcap.com/redcap_v6.10.1/
+      project_id: 33
+      enrolment_event: enrolment
+      integration_form: radar_enrolment
+      token: 1234567890
+    mp_info:
+      project_name: radar

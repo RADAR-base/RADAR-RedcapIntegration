@@ -28,14 +28,20 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class ProjectInfo {
 
     /** REDCap project information. */
-    private final RedCapInfo redCapInfo;
+    @JsonProperty("redcap_info")
+    private RedCapInfo redCapInfo;
 
     /** Management Portal project information. */
-    private final ManagementPortalInfo mpInfo;
+    @JsonProperty("mp_info")
+    private ManagementPortalInfo mpInfo;
+
+    public ProjectInfo() {
+        // For desrialization
+    }
 
     protected ProjectInfo(
-            @JsonProperty("redcap_info") RedCapInfo redCapInfo,
-            @JsonProperty("mp_info") ManagementPortalInfo mpInfo) {
+            RedCapInfo redCapInfo,
+            ManagementPortalInfo mpInfo) {
         this.redCapInfo = redCapInfo;
         this.mpInfo = mpInfo;
     }

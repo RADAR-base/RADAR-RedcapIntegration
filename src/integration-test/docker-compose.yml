@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+    #---------------------------------------------------------------------------#
+    # Management Portal                                                         #
+    #---------------------------------------------------------------------------#
+    managementportal-app:
+      image: radarbase/management-portal:0.4.0
+      networks:
+        - default
+      environment:
+        SERVER_PORT : 8090
+        SPRING_PROFILES_ACTIVE: dev,swagger
+        MANAGEMENTPORTAL_FRONTEND_CLIENT_SECRET: my-secret
+        MANAGEMENTPORTAL_OAUTH_CLIENTS_FILE: /mp-includes/config/oauth_client_details.csv
+        MANAGEMENTPORTAL_CATALOGUE_SERVER_ENABLE_AUTO_IMPORT: "false"
+        JAVA_OPTS: -Xmx256m  # maximum heap size for the JVM running ManagementPortal, increase this as necessary
+      volumes:
+        - ./resources/mp-files/:/mp-includes/
+      ports:
+        - "8090:8090"
+      healthcheck:
+        test: ["CMD", "wget", "--spider", "localhost:8090/oauth/token_key"]
+        interval: 1m30s
+        timeout: 5s
+        retries: 3

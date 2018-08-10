@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,6 +51,8 @@ public class MpClient {
 
     private String radarSubjectId;
     private String humanReadableId;
+
+    private OkHttpClient httpClient;
 
     /**
      * <p>Constructor. Starting from the given input it<ul>
@@ -82,6 +85,8 @@ public class MpClient {
         Objects.requireNonNull(projectId);
         Objects.requireNonNull(recordId);
         Objects.requireNonNull(context);
+
+        this.httpClient = HttpClientListener.getClient(context);
 
         try {
             Project project = getProject(redcapUrl, projectId, context);
@@ -124,6 +129,11 @@ public class MpClient {
         }
     }
 
+    // For tests
+    public MpClient(OkHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
     public String getRadarSubjectId() {
         return radarSubjectId;
     }
@@ -132,13 +142,13 @@ public class MpClient {
         return humanReadableId;
     }
 
-    private Project getProject(URL redcapUrl, Integer projectId, ServletContext context)
+    public Project getProject(URL redcapUrl, Integer projectId, ServletContext context)
                 throws MalformedURLException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(Properties.getProjectEndPoint(mpInfo), context).get().build();
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 Project project = Project.getObject(response);
                 validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
@@ -175,7 +185,7 @@ public class MpClient {
         }
     }
 
-    private void createSubject(URL redcapUrl, Project project, Integer recordId,
+    public void createSubject(URL redcapUrl, Project project, Integer recordId,
             String humanReadableId, ServletContext context) {
         //TODO check how to generate UUID
         radarSubjectId = UUID.randomUUID().toString();
@@ -197,10 +207,10 @@ public class MpClient {
             throw new IllegalStateException("Subject cannot be created", exc);
         }
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
-                    + response.code() + " Message: " + response.message() + " Info: " + response.body());
+                    + response.code() + " Message: " + response.message() + " Info: " + response.body().string());
             } else {
                 LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
             }
@@ -209,20 +219,24 @@ public class MpClient {
         }
     }
 
-    private Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
+    public Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
             ServletContext context) throws MalformedURLException, URISyntaxException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(getSubjectUrl(Properties.getSubjectEndPoint(),
                 mpInfo.getProjectName(), recordId), context).get().build();
 
-        try (Response response = HttpClientListener.getClient(context).newCall(request).execute()) {
+        try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                Subject subject = Subject.getObject(response);
+                List<Subject> subjects = Subject.getObjects(response);
 
-                radarSubjectId = subject.getSubjectId();
+                if(subjects.size() > 1) {
+                    throw new IllegalStateException("More than 1 subject exists same externalId exist in the same Project");
+                }
 
-                return subject;
+                radarSubjectId = subjects.get(0).getSubjectId();
+
+                return subjects.get(0);
             }
             LOGGER.info("Subject is not present");
             return null;
@@ -259,6 +273,8 @@ public class MpClient {
 
         URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery,
                 oldUri.getFragment());
+
+        LOGGER.info("URI = " + newUri.toString());
 
         return newUri.toURL();
     }

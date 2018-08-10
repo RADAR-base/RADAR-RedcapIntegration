@@ -25,12 +25,14 @@ import java.net.URL;
 public class RedCapInfo {
 
     /** URL pointing a REDCap instance. */
-    private final URL url;
+    @JsonProperty("url")
+    private URL url;
 
     /**
      * Integer representing the REDCap project identifier. In REDCap the project
      *      is usually called {@code pid}. */
-    private final Integer projectId;
+    @JsonProperty("project_id")
+    private Integer projectId;
 
     /**
      * String stating the unique REDCap event name related to the enrolment event. For
@@ -38,17 +40,24 @@ public class RedCapInfo {
      *      an Integer and the {@code event_name} that is a String.
      *      This variable must be equals to the {@code event_name}.
      */
-    private final String enrolmentEvent;
+    @JsonProperty("enrolment_event")
+    private String enrolmentEvent;
 
     /**
      * String reporting the REDCap form / instrument name used to share identifiers.
      */
-    private final String integrationForm;
+    @JsonProperty("integration_form")
+    private String integrationForm;
 
     /**
      * Token String required to use REDCap APIs.
      */
-    private final String token;
+    @JsonProperty("token")
+    private String token;
+
+    public RedCapInfo() {
+        // for deserialization
+    }
 
     protected RedCapInfo(URL url, Integer projectId) {
         this.url = url;
@@ -58,12 +67,9 @@ public class RedCapInfo {
         this.token = null;
     }
 
-    protected RedCapInfo(
-            @JsonProperty("url") URL url,
-            @JsonProperty("project_id") Integer projectId,
-            @JsonProperty("enrolment_event") String enrolmentEvent,
-            @JsonProperty("integration_form") String integrationForm,
-            @JsonProperty("token")String token) {
+    protected RedCapInfo(URL url, Integer projectId,
+            String enrolmentEvent, String integrationForm,
+            String token) {
         this.url = url;
         this.projectId = projectId;
         this.enrolmentEvent = enrolmentEvent;
