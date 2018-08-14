@@ -6,20 +6,22 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.radarcns.exception.TokenException;
+import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.ManagementPortalInfo;
 import org.radarcns.redcap.config.Properties;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.listener.HttpClientListener;
-import org.radarcns.redcap.listener.TokenManagerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -47,111 +49,43 @@ public class MpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MpClient.class);
 
-    private static final String SEPARATOR = "-";
+    private final OkHttpClient httpClient;
 
-    private String radarSubjectId;
-    private String humanReadableId;
+    private final OAuth2Client oauthClient;
 
-    private OkHttpClient httpClient;
-
-    /**
-     * <p>Constructor. Starting from the given input it<ul>
-     *     <li>retrieves the Management Portal project associated to the given REDCap instance
-     *          and project identifier</li>
-     *     <li>creates the Human Readable Identifier that is going to be associated with the
-     *          created subject</li>
-     *     <li>makes an HTTP PUT request on the Management Portal to create the subject if
-     *          needed</li>
-     *     <li>adds REDCap Record identifier, Human Readable Identifier and REDCap project URL to
-     *          the subject stored in the Management Portal</li>
-     *     <li>updates the REDCap form involved in the integration</li>
-     * </ul></p>
-     * <p>Note that REDCap will trigger upon any updates. For this reason this function may
-     * be executed multiple times even if the two components have been already linked.</p>
-     * @param redcapUrl {@link URL} pointing the REDCap instance that has issued the trigger
-     * @param projectId {@link Integer} representing REDCap project identifier within the trigger
-     *      has been generated
-     * @param recordId {@link Integer} representing REDCap record identifier involved in the
-     *      creation
-     * @param context {@link ServletContext} useful to retrieve shared {@link OkHttpClient} and
-     *      {@code access token}
-     * @throws IllegalStateException in case the object cannot be created
-     * @see org.radarcns.redcap.listener.HttpClientListener
-     * @see org.radarcns.redcap.listener.TokenManagerListener
-     */
-    public MpClient(URL redcapUrl, Integer projectId,
-            Integer recordId, ServletContext context) {
-        Objects.requireNonNull(redcapUrl);
-        Objects.requireNonNull(projectId);
-        Objects.requireNonNull(recordId);
-        Objects.requireNonNull(context);
-
-        this.httpClient = HttpClientListener.getClient(context);
+    @Inject
+    public MpClient(OkHttpClient httpClient) {
+        this.httpClient = httpClient;
 
         try {
-            Project project = getProject(redcapUrl, projectId, context);
-
-            String radarWorkPackage = project.getWorkPackage().toUpperCase();
-            String location = project.getLocation().toUpperCase();
-
-            humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
-                    project.getId().toString()).concat(SEPARATOR).concat(location).concat(
-                    SEPARATOR).concat(recordId.toString());
-
-            Subject subject = getSubject(redcapUrl, projectId, recordId, context);
-
-            if (Objects.isNull(subject)) {
-                createSubject(redcapUrl, project, recordId, humanReadableId, context);
-
-                LOGGER.info("Created RADAR subject: {}. Human readable identifier is: {}",
-                    radarSubjectId, humanReadableId);
-            } else {
-                LOGGER.info("Subject for Record Id: {} at {} is already available.", recordId,
-                        redcapUrl);
-
-                if (!humanReadableId.equals(subject.getHumanReadableIdentifier())) {
-                    LOGGER.warn("Human Readable identifier for {} at {} does not reflect the "
-                            + "value stored in the Management Portal. {} is different from {}.",
-                            recordId, redcapUrl.toString(), humanReadableId,
-                            subject.getHumanReadableIdentifier());
-
-                    //TODO
-                    // update Subject in case the Human Readable Identifier does not match the
-                    // expected one
-                }
-            }
-        } catch (NullPointerException exc) {
-            LOGGER.error("Project or Project attributes (Work Package, etc) cannot be null", exc);
-            throw new IllegalStateException("Project or Project attributes (Work Package, etc) in MP cannot be null.", exc);
-        } catch (Exception exc) {
-            LOGGER.error(exc.getMessage(), exc);
-            throw new IllegalStateException("Subject creation cannot be completed.", exc);
+            oauthClient = new OAuth2Client.Builder()
+                    .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
+                    .endpoint(Properties.getTokenEndPoint())
+                    .httpClient(this.httpClient).build();
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException("Failed to construct MP Token endpoint URL", ex);
         }
     }
 
-    // For tests
-    public MpClient(OkHttpClient httpClient) {
-        this.httpClient = httpClient;
+    private String getToken() throws IOException {
+        try {
+            return oauthClient.getValidToken(Duration.ofSeconds(30)).getAccessToken();
+        } catch (TokenException ex) {
+            throw new IOException(ex);
+        }
     }
 
-    public String getRadarSubjectId() {
-        return radarSubjectId;
-    }
-
-    public String getHumanReadableId() {
-        return humanReadableId;
-    }
-
-    public Project getProject(URL redcapUrl, Integer projectId, ServletContext context)
-                throws MalformedURLException {
+    public Project getProject(URL redcapUrl, Integer projectId)
+                throws IOException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
-        Request request = getBuilder(Properties.getProjectEndPoint(mpInfo), context).get().build();
+        Request request = getBuilder(Properties.getProjectEndPoint(mpInfo)).get().build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 Project project = Project.getObject(response);
-                validateProject(Properties.getProjectEndPoint(mpInfo), project, redcapUrl, projectId);
+                validateProject(Properties.getProjectEndPoint(mpInfo),
+                        project, redcapUrl, projectId);
 
                 LOGGER.debug("Retrieve project {}", project.toString());
 
@@ -159,8 +93,8 @@ public class MpClient {
             }
 
             throw new IllegalStateException("Error while retrieving project info from "
-                        + Properties.getProjectEndPoint(mpInfo) + ". Response code: " + response.code()
-                        + " Message: " + response.message());
+                    + Properties.getProjectEndPoint(mpInfo) + ". Response code: "
+                    + response.code() + " Message: " + response.message());
         }
         catch (IOException ex) {
             throw new IllegalStateException("IO error while retrieving project info from "
@@ -168,7 +102,8 @@ public class MpClient {
         }
     }
 
-    private static void validateProject(URL mp, Project project, URL redcapUrl, Integer projectId) {
+    private static void validateProject(URL mp, Project project,
+                                        URL redcapUrl, Integer projectId) {
         String message = "Project " + project.getId() + " at "
                 + mp.toString() + " seems to be not linked to the REDCap project " + projectId
                 + " at " + redcapUrl + ". Please check values set for "
@@ -185,10 +120,10 @@ public class MpClient {
         }
     }
 
-    public void createSubject(URL redcapUrl, Project project, Integer recordId,
-            String humanReadableId, ServletContext context) {
+    public Subject createSubject(URL redcapUrl, Project project, Integer recordId,
+            String humanReadableId) {
         //TODO check how to generate UUID
-        radarSubjectId = UUID.randomUUID().toString();
+        String radarSubjectId = UUID.randomUUID().toString();
 
         Subject subject;
         Request request;
@@ -197,7 +132,7 @@ public class MpClient {
                     RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
                     project, humanReadableId);
 
-            request = getBuilder(Properties.getSubjectEndPoint(), context)
+            request = getBuilder(Properties.getSubjectEndPoint())
                     .put(RequestBody.create(MediaType.parse(
                             javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
                     .build();
@@ -210,31 +145,32 @@ public class MpClient {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("Subject cannot be created. Response code: "
-                    + response.code() + " Message: " + response.message() + " Info: " + response.body().string());
+                    + response.code() + " Message: " + response.message() + " Info: "
+                        + response.body().string());
             } else {
                 LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
+                return subject;
             }
         } catch (IOException exc) {
             throw new IllegalStateException("Subject cannot be created", exc);
         }
     }
 
-    public Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId,
-            ServletContext context) throws MalformedURLException, URISyntaxException {
+    public Subject getSubject(URL redcapUrl, Integer projectId, Integer recordId)
+            throws IOException, URISyntaxException {
         ManagementPortalInfo mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId);
 
         Request request = getBuilder(getSubjectUrl(Properties.getSubjectEndPoint(),
-                mpInfo.getProjectName(), recordId), context).get().build();
+                mpInfo.getProjectName(), recordId)).get().build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 List<Subject> subjects = Subject.getObjects(response);
 
                 if(subjects.size() > 1) {
-                    throw new IllegalStateException("More than 1 subject exists same externalId exist in the same Project");
+                    throw new IllegalStateException("More than 1 subject exists same "
+                            + "externalId exist in the same Project");
                 }
-
-                radarSubjectId = subjects.get(0).getSubjectId();
 
                 return subjects.get(0);
             }
@@ -246,16 +182,10 @@ public class MpClient {
         }
     }
 
-    private static Request.Builder getBuilder(URL url, ServletContext context) {
-        try {
-            return new Request.Builder()
-                    .url(url)
-                    .addHeader("Authorization", "Bearer ".concat(
-                            TokenManagerListener.getToken(context)));
-        } catch (TokenException e) {
-            LOGGER.warn("Token cannot be generated: {}", e.fillInStackTrace());
-        }
-        return null;
+    private Request.Builder getBuilder(URL url) throws IOException {
+        return new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + getToken());
     }
 
     private static URL getSubjectUrl(URL url, String projectName, Integer recordId)

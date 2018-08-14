@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -51,15 +52,12 @@ public abstract class RedCapUpdater {
     private final RedCapTrigger trigger;
     protected final RedCapInfo redCapInfo;
 
-    private final OkHttpClient client;
+    @Inject
+    private OkHttpClient client;
 
-    protected ServletContext context;
-
-    protected RedCapUpdater(RedCapTrigger trigger, ServletContext context) {
+    protected RedCapUpdater(RedCapTrigger trigger) {
         this.trigger = trigger;
-        this.context = context;
 
-        this.client = HttpClientListener.getClient(context);
         this.redCapInfo = RedCapManager.getInfo(trigger);
     }
 

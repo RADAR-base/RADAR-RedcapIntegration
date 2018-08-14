@@ -1,4 +1,4 @@
-package org.radarcns.redcap;
+package org.radarcns.redcap.webapp.resource;
 
 /*
  * Copyright 2017 King's College London
@@ -29,8 +29,8 @@ import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapUpdater;
-import org.radarcns.redcap.webapp.PathLabels;
-import org.radarcns.redcap.webapp.ResponseHandler;
+import org.radarcns.redcap.webapp.util.PathLabels;
+import org.radarcns.redcap.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class EntryPoint {
 
             if (trigger.isEnrolment()) {
                 //TODO remove context
-                RedCapUpdater enrolment = new Integrator(trigger, context);
+                RedCapUpdater enrolment = new Integrator(trigger);
 
                 if (enrolment.updateForm()) {
                     return ResponseHandler.getResponse(request);

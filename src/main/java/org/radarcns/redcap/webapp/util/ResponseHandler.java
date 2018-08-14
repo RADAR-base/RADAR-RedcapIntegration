@@ -1,4 +1,4 @@
-package org.radarcns.redcap.webapp;
+package org.radarcns.redcap.webapp.util;
 
 /*
  * Copyright 2016 King's College London

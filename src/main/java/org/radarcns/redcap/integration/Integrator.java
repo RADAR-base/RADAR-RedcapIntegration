@@ -16,17 +16,24 @@ package org.radarcns.redcap.integration;
  * limitations under the License.
  */
 
+import java.net.URL;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import javax.servlet.ServletContext;
+import javax.inject.Inject;
+
 import okhttp3.FormBody.Builder;
 import okhttp3.Request;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
+import org.radarcns.redcap.managementportal.Project;
+import org.radarcns.redcap.managementportal.Subject;
 import org.radarcns.redcap.util.RedCapInput;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
 import org.radarcns.redcap.util.RedCapUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Handler for updating Integrator Redcap form parameters. The input parameters are
  *      described by {@link IntegrationData}.
@@ -34,15 +41,19 @@ import org.radarcns.redcap.util.RedCapUpdater;
  */
 public class Integrator extends RedCapUpdater {
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger(Integrator.class);
+    private static final Logger Logger = LoggerFactory.getLogger(Integrator.class);
+
+    private static final String SEPARATOR = "-";
+
+    @Inject
+    private MpClient mpClient;
 
     /**
      * Constructor.
      * @param trigger {@link RedCapTrigger} that has hit the service
-     * @param context {@link ServletContext} needed to extract shared variables
      */
-    public Integrator(RedCapTrigger trigger, ServletContext context) {
-        super(trigger, context);
+    public Integrator(RedCapTrigger trigger) {
+        super(trigger);
     }
 
     /**
@@ -55,16 +66,16 @@ public class Integrator extends RedCapUpdater {
      */
     @Override
     protected Set<RedCapInput> getInput() {
-        MpClient mpClient = new MpClient(redCapInfo.getUrl(),
-                redCapInfo.getProjectId(), getRecordId(), context);
+        Subject subject = performSubjectUpdateOnMp(redCapInfo.getUrl(),
+                redCapInfo.getProjectId(), getRecordId());
 
         Set<RedCapInput> set = new HashSet<>();
 
         set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                IntegrationData.SUBJECT_ID_LABEL, mpClient.getRadarSubjectId()));
+                IntegrationData.SUBJECT_ID_LABEL, subject.getSubjectId()));
 
         set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                IntegrationData.HUMAN_READABLE_ID_LABEL, mpClient.getHumanReadableId()));
+                IntegrationData.HUMAN_READABLE_ID_LABEL, subject.getHumanReadableIdentifier()));
 
         set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
                 RedCapManager.getStatusField(redCapInfo.getIntegrationForm()),
@@ -90,4 +101,50 @@ public class Integrator extends RedCapUpdater {
                 .add("returnFormat", "json");
     }
 
+
+    public Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
+                                     Integer recordId) {
+        try {
+            Project project = mpClient.getProject(redcapUrl, projectId);
+
+            String radarWorkPackage = project.getWorkPackage().toUpperCase();
+            String location = project.getLocation().toUpperCase();
+
+            String humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
+                    project.getId().toString()).concat(SEPARATOR).concat(location).concat(
+                    SEPARATOR).concat(recordId.toString());
+
+            Subject subject = mpClient.getSubject(redcapUrl, projectId, recordId);
+
+            if (Objects.isNull(subject)) {
+                Subject newSubject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId);
+
+                Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",
+                        newSubject.getSubjectId(), humanReadableId);
+                return newSubject;
+            } else {
+                Logger.info("Subject for Record Id: {} at {} is already available.", recordId,
+                        redcapUrl);
+
+                if (!humanReadableId.equals(subject.getHumanReadableIdentifier())) {
+                    Logger.warn("Human Readable identifier for {} at {} does not reflect the "
+                                    + "value stored in the Management Portal. {} is different from {}.",
+                            recordId, redcapUrl.toString(), humanReadableId,
+                            subject.getHumanReadableIdentifier());
+
+                    //TODO
+                    // update Subject in case the Human Readable Identifier does not match the
+                    // expected one
+                }
+
+                return subject;
+            }
+        } catch (NullPointerException exc) {
+            Logger.error("Project or Project attributes (Work Package, etc) cannot be null", exc);
+            throw new IllegalStateException("Project or Project attributes (Work Package, etc) in MP cannot be null.", exc);
+        } catch (Exception exc) {
+            Logger.error(exc.getMessage(), exc);
+            throw new IllegalStateException("Subject creation cannot be completed.", exc);
+        }
+    }
 }
