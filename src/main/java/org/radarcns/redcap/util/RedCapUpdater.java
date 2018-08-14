@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,7 +16,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.listener.HttpClientListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

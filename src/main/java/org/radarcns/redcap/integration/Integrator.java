@@ -45,22 +45,22 @@ public class Integrator extends RedCapUpdater {
 
     private static final String SEPARATOR = "-";
 
-    @Inject
     private MpClient mpClient;
 
     /**
      * Constructor.
      * @param trigger {@link RedCapTrigger} that has hit the service
      */
-    public Integrator(RedCapTrigger trigger) {
+    public Integrator(RedCapTrigger trigger, MpClient mpClient) {
         super(trigger);
+        this.mpClient = mpClient;
     }
 
     /**
      * Generates the {@link Set} of inputs that will be written in REDCap for finalising the
      *      integration between REDCap project and Management Portal project. Using a
      *      {@link MpClient}, the function retrieves the RADAR Subject Identifier and the Human
-     *      Readable Identifier. In the end, the function forces the REDCap integratio
+     *      Readable Identifier. In the end, the function forces the REDCap integration
      *      form /instrument status to {@link InstrumentStatus#COMPLETE}.
      * @return {@link Set} of inputs that have to be written in REDCap.
      */
@@ -102,7 +102,7 @@ public class Integrator extends RedCapUpdater {
     }
 
 
-    public Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
+    private Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
                                      Integer recordId) {
         try {
             Project project = mpClient.getProject(redcapUrl, projectId);

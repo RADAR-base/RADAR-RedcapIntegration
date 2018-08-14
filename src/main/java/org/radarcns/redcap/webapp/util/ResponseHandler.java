@@ -16,11 +16,13 @@ package org.radarcns.redcap.webapp.util;
  * limitations under the License.
  */
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 
 /**
  * Generic response handler.
@@ -31,25 +33,24 @@ public class ResponseHandler {
 
     /**
      * Response generator in case of success.
-     * @param request {@link HttpServletRequest} that has generated the computation
+     * @param uri {@link URI} that has generated the computation
      * @return {@link Response} sent back to the API consumer
      */
-    public static Response getResponse(HttpServletRequest request) {
+    public static Response getResponse(URI uri) {
         Status status = Status.OK;
 
-        LOGGER.info("[{}] {}", status.getStatusCode(), request.getRequestURI());
+        LOGGER.info("[{}] {}", status.getStatusCode(), uri);
 
         return Response.status(status.getStatusCode()).entity("").build();
     }
 
     /**
      * Response generator in case of error.
-     * @param request {@link HttpServletRequest} that has generated the computation
+     * @param uri {@link URI} that has generated the computation
      * @return {@link Response} sent back to the API consumer
      */
-    public static Response getErrorResponse(HttpServletRequest request) {
-        LOGGER.error("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                request.getRequestURI());
+    public static Response getErrorResponse(URI uri) {
+        LOGGER.error("[{}] {}", Status.INTERNAL_SERVER_ERROR.getStatusCode(), uri);
 
         return Response.serverError().build();
     }

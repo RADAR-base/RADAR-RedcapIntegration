@@ -10,12 +10,10 @@ import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.ManagementPortalInfo;
 import org.radarcns.redcap.config.Properties;
 import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.listener.HttpClientListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -23,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 /*
@@ -136,8 +133,6 @@ public class MpClient {
                     .put(RequestBody.create(MediaType.parse(
                             javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
                     .build();
-        } catch (MalformedURLException exc) {
-            throw new IllegalStateException("Subject cannot be created", exc);
         } catch (IOException exc) {
             throw new IllegalStateException("Subject cannot be created", exc);
         }

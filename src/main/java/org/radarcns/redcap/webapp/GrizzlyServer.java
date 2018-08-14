@@ -21,7 +21,7 @@ public class GrizzlyServer {
         ServiceLocator locator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
 
         HttpServer httpServer = GrizzlyHttpServerFactory
-                .createHttpServer(URI.create(BASE_URI), new RadarApplication(), locator);
+                .createHttpServer(URI.create(BASE_URI), new Application(), locator);
 
         try {
             httpServer.start();

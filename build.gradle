@@ -4,18 +4,13 @@ plugins {
     id 'pmd'
     id 'checkstyle'
     id 'jacoco'
-    id 'war'
+    id 'application'
 }
 
 group 'org.radarcns'
 version '1.0-SNAPSHOT'
 
-war {
-    baseName = 'redcap'
-    version = project.version
-    extension = 'war'
-    archiveName = baseName + '.' + extension
-}
+mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -58,7 +53,7 @@ ext.tomcatVersion = '8.0.44'
 ext.grizzlyVersion = '2.3.19'
 
 dependencies {
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcatVersion
+    //providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcatVersion
 
     runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
@@ -112,41 +107,6 @@ pmdTest {
 //---------------------------------------------------------------------------//
 // Testing                                                                   //
 //---------------------------------------------------------------------------//
-tasks.matching {it instanceof Test}.all {
-    def stdout = new LinkedList<String>()
-    beforeTest { TestDescriptor td ->
-        stdout.clear()
-    }
-
-    onOutput { TestDescriptor td, TestOutputEvent toe ->
-        stdout.addAll(toe.getMessage().split('(?m)$'))
-        while (stdout.size() > 100) {
-            stdout.remove()
-        }
-    }
-
-    afterTest { TestDescriptor td, TestResult tr ->
-        if (tr.resultType == TestResult.ResultType.FAILURE) {
-            println()
-            print("${td.className}.${td.name} FAILED")
-            if (stdout.empty) {
-                println(" without any output")
-            } else {
-                println(" with last 100 lines of output:")
-                println('=' * 100)
-                stdout.each { print(it) }
-                println('=' * 100)
-            }
-        }
-    }
-
-    testLogging {
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-        exceptionFormat "full"
-    }
-}
 
 test {
     testLogging {
@@ -170,8 +130,19 @@ idea {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '4.9'
+}
+
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar'
 }
 
 
@@ -213,10 +184,13 @@ task installMP(type: Exec) {
 }
 
 task removeLock(type: Exec) {
-    new File(lock).delete()
 
     workingDir 'src/integration-test/'
     commandLine sudoLinux + ['docker-compose', 'down']
+
+    doLast{
+        new File(lock).delete()
+    }
 }
 
 task copyConf(type: Copy) {

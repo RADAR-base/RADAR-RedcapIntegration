@@ -16,17 +16,19 @@ package org.radarcns.redcap.webapp.resource;
  * limitations under the License.
  */
 
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
+import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.util.RedCapTrigger;
 import org.radarcns.redcap.util.RedCapUpdater;
 import org.radarcns.redcap.webapp.util.PathLabels;
@@ -47,10 +49,8 @@ public class EntryPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntryPoint.class);
 
-    @Context
-    private HttpServletRequest request;
-    @Context
-    private ServletContext context;
+    @Inject
+    private MpClient mpClient;
 
     /**
      * HTTP POST request handler. This function trigger a subject creation in the Management
@@ -59,36 +59,35 @@ public class EntryPoint {
      *      not report anything about the return of this function. Only the updates are logged in.
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response handlerPostRequest() {
+    public Response handlerPostRequest(@Context UriInfo ui, String body) {
         try {
-            RedCapTrigger trigger = new RedCapTrigger(request);
+            RedCapTrigger trigger = new RedCapTrigger(body);
 
             if (!RedCapManager.isSupportedInstance(trigger)) {
                 LOGGER.error("Requests coming from " + trigger.getRedcapUrl() + " for project Id "
                         + trigger.getProjectId() + " cannot be managed.");
-                return ResponseHandler.getErrorResponse(request);
+                return ResponseHandler.getErrorResponse(ui.getRequestUri());
             }
 
             if (trigger.isEnrolment()) {
-                //TODO remove context
-                RedCapUpdater enrolment = new Integrator(trigger);
+                RedCapUpdater enrolment = new Integrator(trigger, mpClient);
 
                 if (enrolment.updateForm()) {
-                    return ResponseHandler.getResponse(request);
+                    return ResponseHandler.getResponse(ui.getRequestUri());
                 } else {
-                    return ResponseHandler.getErrorResponse(request);
+                    return ResponseHandler.getErrorResponse(ui.getRequestUri());
                 }
             } else {
                 LOGGER.info("[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
                         trigger.getProjectId(), trigger.getRedcapUrl(), trigger.getInstrument(),
                         trigger.getRedcapEventName());
-                return ResponseHandler.getResponse(request);
+                return ResponseHandler.getResponse(ui.getRequestUri());
             }
         } catch (Exception exc) {
             LOGGER.error(exc.getMessage(), exc);
-            return ResponseHandler.getErrorResponse(request);
+            return ResponseHandler.getErrorResponse(ui.getRequestUri());
         }
     }
-
 }
