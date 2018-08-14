@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.inject.Inject;
 
 import okhttp3.FormBody.Builder;
 import okhttp3.Request;

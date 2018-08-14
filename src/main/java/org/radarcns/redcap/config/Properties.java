@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class Properties {
 
+    // TODO change paths to not use tomcat paths 
+
     /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
