@@ -1,13 +1,18 @@
 version: '3'
 
+networks:
+    integration:
+      driver: bridge
+
 services:
     #---------------------------------------------------------------------------#
     # Management Portal                                                         #
     #---------------------------------------------------------------------------#
     managementportal-app:
-      image: radarbase/management-portal:0.4.0
+      image: radarbase/management-portal:0.4.1
       networks:
         - default
+        - integration
       environment:
         SERVER_PORT : 8090
         SPRING_PROFILES_ACTIVE: dev,swagger
@@ -24,3 +29,15 @@ services:
         interval: 1m30s
         timeout: 5s
         retries: 3
+
+    redcap-integration:
+      build:
+        ../../
+      image: redcap-integration/test
+      networks:
+        - default
+        - integration
+      ports:
+        - "8080:8080"
+      volumes:
+        - "./resources/radar.yml:/usr/local/tomcat/conf/radar/radar.yml"

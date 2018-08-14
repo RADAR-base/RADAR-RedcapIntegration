@@ -35,7 +35,7 @@ It is highly recommended to use an encrypted connection (i.e. SSL/HTTPS) for acc
 ## How does it works
 Upon receiving a request, the service verifies whether the trigger is related to the REDCap
 enrolment event. If so, it triggers a Subject creation in the
-[RADAR-CNS Management Portal](https://github.com/RADAR-CNS/ManagementPortal). After creating a new
+[RADAR-CNS Management Portal](https://github.com/RADAR-base/ManagementPortal). After creating a new
 subject, the serivce update the RADAR REDCap `RADAR Enrolment` form adding:
 - `RADAR-CNS Subject Identifier`: unique identifier within the a RADAR-CNS Platform instance
 - `Human Readable Identifier`: unique identifier used for visualising data
@@ -87,7 +87,7 @@ Application logs are redirected to `standard output`. In case of invalid deploy 
  
 ## Docker-compose example
 
-If running this along with other components on docker usinf docker-compose, you can add the following to your docker-compose.yml file under the `services` - 
+If running this along with other components on docker using docker-compose, you can add the following to your docker-compose.yml file under the `services` - 
 
 ```yaml
   redcap-integration:

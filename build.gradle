@@ -14,6 +14,7 @@ war {
     baseName = 'redcap'
     version = project.version
     extension = 'war'
+    archiveName = baseName + '.' + extension
 }
 
 targetCompatibility = '1.8'
@@ -85,7 +86,7 @@ checkstyle {
     ignoreFailures false
 
     // ignore tests
-    sourceSets = [sourceSets.main, sourceSets.test]
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
 }
 
 pmd {
@@ -93,7 +94,7 @@ pmd {
     toolVersion = '5.5.2'
     ignoreFailures = false
 
-    sourceSets = [sourceSets.main, sourceSets.test]
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
 
     consoleOutput = true
 
@@ -186,11 +187,11 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
 integrationTest.finalizedBy 'removeLock'
 
 ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
-ext.simpleStackLock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
+ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
 
 task installMP(type: Exec) {
     doFirst{
-        def lockFile = new File(simpleStackLock)
+        def lockFile = new File(lock)
         if (lockFile.exists()) {
             throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
         } else {
@@ -200,7 +201,7 @@ task installMP(type: Exec) {
 
     workingDir 'src/integration-test/'
     standardInput = System.in
-    commandLine sudoLinux + ['docker-compose', 'up', '-d', '--build']
+    commandLine sudoLinux + ['docker-compose', 'up', '-d', '--build', '--force-recreate']
 
     doLast {
         // wait until the hotstorage and managementportal are ready
@@ -208,11 +209,19 @@ task installMP(type: Exec) {
     }
 }
 
-task removeLock {
-    new File(simpleStackLock).delete()
+task removeLock(type: Exec) {
+    new File(lock).delete()
+
+    workingDir 'src/integration-test/'
+    commandLine sudoLinux + ['docker-compose', 'down']
 }
 
 task copyConf(type: Copy) {
-    from "src/integration-test/"
+    from "src/integration-test/resources/radar.yml"
     into "/usr/local/tomcat/conf/radar/"
+
+    filter { String line ->
+        line.replace("management_portal_url: http://managementportal-app:8090/",
+                "management_portal_url: http://localhost:8090/")
+    }
 }
