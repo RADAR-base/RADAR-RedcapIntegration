@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Properties {
 
-    // TODO change paths to not use tomcat paths 
+    // TODO change paths to not use tomcat paths
 
     /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
@@ -40,10 +40,10 @@ public final class Properties {
     private static final String HTTPS = "https";
 
     /** Path to the configuration file for AWS deploy. */
-    private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
+    private static final String PATH_FILE_AWS = "/usr/share/conf/radar/redcap-int/";
 
     /** Path to the configuration file for Docker image. */
-    private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
+    private static final String PATH_FILE_DOCKER = "/usr/local/conf/radar/redcap-int/";
 
     /** Placeholder alternative path for the config folder. */
     private static final String CONFIG_FOLDER = "CONFIG_FOLDER";

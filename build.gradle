@@ -178,7 +178,7 @@ task installMP(type: Exec) {
     commandLine sudoLinux + ['docker-compose', 'up', '-d', '--build', '--force-recreate']
 
     doLast {
-        // wait until the hotstorage and managementportal are ready
+        // wait until the managementportal is ready
         sleep(60_000)
     }
 }
@@ -195,7 +195,7 @@ task removeLock(type: Exec) {
 
 task copyConf(type: Copy) {
     from "src/integration-test/resources/radar.yml"
-    into "/usr/local/tomcat/conf/radar/"
+    into "/usr/local/conf/radar/redcap-int/"
 
     filter { String line ->
         line.replace("management_portal_url: http://managementportal-app:8090/",

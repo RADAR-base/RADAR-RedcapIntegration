@@ -49,6 +49,7 @@ public class Integrator extends RedCapUpdater {
     /**
      * Constructor.
      * @param trigger {@link RedCapTrigger} that has hit the service
+     * @param mpClient {@link MpClient} used for making requests to Management Portal
      */
     public Integrator(RedCapTrigger trigger, MpClient mpClient) {
         super(trigger);
@@ -101,6 +102,17 @@ public class Integrator extends RedCapUpdater {
     }
 
 
+    /**
+     * Performs update of the subject on Management portal from the information
+     * sent from Redcap trigger. If subject does not exist, it creates a new one,
+     * otherwise it just returns the subject.
+     * TODO update the subject in case it exists
+     * @see MpClient
+     * @param redcapUrl the Redcap URL
+     * @param projectId the Redcap Project ID
+     * @param recordId the Redcap Record ID
+     * @return {@link Subject} from the Management Portal
+     */
     private Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
                                      Integer recordId) {
         try {

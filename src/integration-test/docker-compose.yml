@@ -40,4 +40,4 @@ services:
       ports:
         - "8080:8080"
       volumes:
-        - "./resources/radar.yml:/usr/local/tomcat/conf/radar/radar.yml"
+        - "./resources/radar.yml:/usr/local/conf/radar/redcap-int/radar.yml"
