@@ -7,7 +7,9 @@ support online or offline data capture for research studies and operations. The 
 a vast support network of collaborators, is composed of thousands of active institutional
 partners in over one hundred countries who utilize and support REDCap in various ways.
 
-The REDcap integration web app integrates a REDcap Project with a Project on [Management Portal](https://github.com/RADAR-base/ManagementPortal) linking corresponding subjects in both systems. This ensures that personal identifiable data is kept securely in REDcap (out of [RADAR-base](https://github.com/RADAR-base/RADAR-Docker) platform) and linked via Pseudonymised Data (Human Readable Ids and UUIDs). The non-identifiable sensor data is stored in the RADAR-base platform. 
+The REDcap integration web app integrates a REDcap Project with a Project on [Management Portal](https://github.com/RADAR-base/ManagementPortal) linking corresponding subjects in both systems. 
+This ensures that personal identifiable data is kept securely in REDcap (out of [RADAR-base](https://github.com/RADAR-base/RADAR-Docker) platform) and linked via Pseudonymised Data (Human Readable Ids and UUIDs). 
+The non-identifiable sensor data is stored in the RADAR-base platform. 
 
 In REDCap, it is possible to set a `Data Entry Trigger` as an advanced feature. It provides a way
 for REDCap to trigger a call to a remote web address (URL), in which it will send a HTTP POST
@@ -46,8 +48,8 @@ RADAR-CNS Platform.
 
 ## Configuration
 This service requires a configuration file named `radar.yml` that can be stored at:
-- `/usr/share/tomcat8/conf/`
-- `/usr/local/tomcat/conf/radar/`
+- `/usr/share/conf/radar/redcap-int/`
+- `/usr/local/conf/radar/redcap-int/`
 - at the path provided by the environment variable `CONFIG_FOLDER`
 
 The configuration should follow this [template](radar.yml).
@@ -67,27 +69,24 @@ The service validates the configuration file during the deploy phase. If the fil
 deploy is stopped.
 
 ## Log files
-The project has been created to be deployed on [Apache Tomcat](http://tomcat.apache.org).
-Application logs are redirected to `standard output`. In case of invalid deploy check
-`$CATALINA_HOME/logs/catalina.*` and `$CATALINA_HOME/logs/localhost.*`
+The project has been created to be deployed on [Grizzly Server](https://javaee.github.io/grizzly/).
+Application logs are redirected to `standard output`.
 
 ## Docker deploy example
- 1. Go to root directory and use the gradle wrapper to create war file for the web app like this. The WAR file is created in ‘root/build/libs/‘
- `$ ./gradlew clean war`
- 2. Update the radar.yml in root for correct configurtation.
- 3. Then build the docker image naming it redcap using the Dockerfile located in root directory
+ 1. Update the radar.yml in root for correct configuration.
+ 2. Then build the docker image naming it `redcapintegration` using the Dockerfile located in root directory
  `$ docker build -t redcapintegration .`
- 4. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
- `$ docker run --name redcapintegration -v "./radar.yml:/usr/local/tomcat/conf/radar/" -it --rm -d -p 8080:8080 redcapintegration`
- 5. Access the  entry point like this
+ 3. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
+ `$ docker run --name redcapintegration -v "/your/absolute/path/radar.yml:/usr/local/conf/radar/redcap-int/" -it --rm -d -p 8080:8080 redcapintegration`
+ 4. Access the  entry point like this
  `$ curl -X POST “<Host IP or URL>:<Port>/redcap/trigger”`
- 6. Or if accessing on the same machine as the container do
+ 5. Or if accessing on the same machine as the container do
  `$ curl -X POST “http://localhost:8080/redcap/trigger` 
- 7. Please note that the radar.yml config file should be valid or else the deploy will fail.
+ 6. Please note that the radar.yml config file should be valid or else the deploy will fail.
  
 ## Docker-compose example
 
-If running this along with other components on docker using docker-compose, you can add the following to your docker-compose.yml file under the `services` - 
+If running this along with other components on docker using docker-compose, you can add the following to your docker-compose.yml file under the `services` tag - 
 
 ```yaml
   redcap-integration:
@@ -97,13 +96,12 @@ If running this along with other components on docker using docker-compose, you 
       - default
     restart: always
     volumes:
-      - "./radar.yml:/usr/local/tomcat/conf/radar/"
+      - "./radar.yml:/usr/local/conf/radar/redcap-int/"
     healthcheck:
       test: ["CMD", "curl", "-IX", "POST", "http://localhost:8080/redcap/trigger"]
       interval: 1m
       timeout: 5s
       retries: 3
-
 ```
 
 Please check the RADAR-base platform [docker-compose.yml file](https://github.com/RADAR-base/RADAR-Docker/blob/master/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml) for more information.

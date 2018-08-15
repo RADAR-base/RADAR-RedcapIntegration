@@ -143,12 +143,17 @@ public class Integrator extends RedCapUpdater {
                             recordId, redcapUrl.toString(), humanReadableId,
                             subject.getHumanReadableIdentifier());
 
+                    throw new IllegalStateException("The Subject already exists but " +
+                            "the Human Readable identifier does not match the expected one.");
+
                     //TODO
                     // update Subject in case the Human Readable Identifier does not match the
                     // expected one
+                } else {
+                    Logger.info("Found RADAR subject: {}. Human readable identifier is: {}. Using it for integration",
+                            subject.getSubjectId(), humanReadableId);
+                    return subject;
                 }
-
-                return subject;
             }
         } catch (NullPointerException exc) {
             Logger.error("Project or Project attributes (Work Package, etc) cannot be null", exc);

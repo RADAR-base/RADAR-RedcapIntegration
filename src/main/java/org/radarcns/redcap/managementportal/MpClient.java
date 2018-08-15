@@ -163,8 +163,8 @@ public class MpClient {
                 List<Subject> subjects = Subject.getObjects(response);
 
                 if(subjects.size() > 1) {
-                    throw new IllegalStateException("More than 1 subject exists same "
-                            + "externalId exist in the same Project");
+                    throw new IllegalStateException("More than 1 subjects exist with same "
+                            + "externalId in the same Project");
                 }
 
                 return subjects.get(0);

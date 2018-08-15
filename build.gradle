@@ -104,22 +104,6 @@ pmdTest {
     ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
-//---------------------------------------------------------------------------//
-// Testing                                                                   //
-//---------------------------------------------------------------------------//
-
-test {
-    testLogging {
-        // Show that tests are run in the command-line output
-        events "skipped", "failed"
-    }
-}
-
-task downloadApplicationDependencies {
-    description "Pre-downloads application dependencies"
-    configurations.compileClasspath.files
-    configurations.runtimeClasspath.files
-}
 
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
@@ -143,6 +127,23 @@ task wrapper(type: Wrapper) {
 tasks.withType(Tar){
     compression = Compression.GZIP
     extension = 'tar'
+}
+
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
+
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events "skipped", "failed"
+    }
+}
+
+task downloadApplicationDependencies {
+    description "Pre-downloads application dependencies"
+    configurations.compileClasspath.files
+    configurations.runtimeClasspath.files
 }
 
 
