@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import javax.inject.Inject;
 import okhttp3.FormBody;
@@ -76,7 +75,7 @@ public abstract class RedCapUpdater {
     private String getValidInput() {
         Collection<RedCapInput> input = getInput();
 
-        if (Objects.isNull(input) || input.isEmpty()) {
+        if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("Invalid input. getInput has returned either a "
                     + "null or an empty list.");
         }

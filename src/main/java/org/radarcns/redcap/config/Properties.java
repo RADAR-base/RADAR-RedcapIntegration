@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Objects;
 import org.radarcns.config.YamlConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,21 +31,16 @@ import org.slf4j.LoggerFactory;
  */
 public final class Properties {
 
-    // TODO change paths to not use tomcat paths
-
     /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Properties.class);
 
     private static final String HTTPS = "https";
 
-    /** Path to the configuration file for AWS deploy. */
-    private static final String PATH_FILE_AWS = "/usr/share/conf/radar/redcap-int/";
-
-    /** Path to the configuration file for Docker image. */
-    private static final String PATH_FILE_DOCKER = "/usr/local/conf/radar/redcap-int/";
+    /** Path to the configuration file. */
+    private static final String PATH_FILE = "/usr/local/etc/radar-redcap-int/";
 
     /** Placeholder alternative path for the config folder. */
-    private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
+    private static final String CONFIG_FOLDER = "REDCAP_INTEGRATION_CONFIG_FOLDER";
 
     /** API Config file name. */
     public static final String NAME_CONFIG_FILE = "radar.yml";
@@ -79,8 +73,7 @@ public final class Properties {
     private static Configuration loadApiConfig() throws IOException {
         String[] paths = new String[]{
             System.getenv(CONFIG_FOLDER),
-            PATH_FILE_AWS,
-            PATH_FILE_DOCKER
+                PATH_FILE
         };
 
         Configuration config;
@@ -100,8 +93,8 @@ public final class Properties {
             return new YamlConfigLoader().load(new File(path), Configuration.class);
         } catch (NullPointerException exc) {
             String[] folders = Arrays.copyOfRange(paths,
-                    Objects.isNull(System.getenv(CONFIG_FOLDER)) ? 1 : 0, paths.length);
-            LOGGER.error("Config file {} cannot be found at {} or in the WAR resources"
+                    System.getenv(CONFIG_FOLDER) == null ? 1 : 0, paths.length);
+            LOGGER.error("Config file {} cannot be found at {} or in the resources"
                     + "folder.", NAME_CONFIG_FILE, folders, CONFIG_FOLDER);
             throw new FileNotFoundException(NAME_CONFIG_FILE + " cannot be found.");
         }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Objects;
 import okhttp3.Response;
 
 /**
@@ -104,7 +103,7 @@ public class Project {
     @JsonIgnore
     public URL getRedCapUrl() throws MalformedURLException {
         String temp = getAttribute(EXTERNAL_PROJECT_URL_KEY);
-        return Objects.isNull(temp) ? null : new URL(temp);
+        return temp == null ? null : new URL(temp);
     }
 
     /**
@@ -115,7 +114,7 @@ public class Project {
     @JsonIgnore
     public Integer getRedCapId() {
         String temp = getAttribute(EXTERNAL_PROJECT_ID_KEY);
-        return Objects.isNull(temp) ? null : Integer.valueOf(temp);
+        return temp == null ? null : Integer.valueOf(temp);
     }
 
     /**

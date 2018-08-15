@@ -18,7 +18,6 @@ package org.radarcns.redcap.integration;
 
 import java.net.URL;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import okhttp3.FormBody.Builder;
@@ -127,7 +126,7 @@ public class Integrator extends RedCapUpdater {
 
             Subject subject = mpClient.getSubject(redcapUrl, projectId, recordId);
 
-            if (Objects.isNull(subject)) {
+            if (subject == null) {
                 Subject newSubject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId);
 
                 Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",

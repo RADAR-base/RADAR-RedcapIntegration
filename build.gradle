@@ -193,7 +193,7 @@ task removeLock(type: Exec) {
 
 task copyConf(type: Copy) {
     from "src/integration-test/resources/radar.yml"
-    into "/usr/local/conf/radar/redcap-int/"
+    into "/usr/local/etc/radar-redcap-int/"
 
     filter { String line ->
         line.replace("management_portal_url: http://managementportal-app:8090/",

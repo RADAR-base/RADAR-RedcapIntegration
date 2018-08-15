@@ -50,9 +50,8 @@ RADAR-CNS Platform.
 
 ## Configuration
 This service requires a configuration file named `radar.yml` that can be stored at:
-- `/usr/share/conf/radar/redcap-int/`
-- `/usr/local/conf/radar/redcap-int/`
-- at the path provided by the environment variable `CONFIG_FOLDER`
+- `/usr/local/etc/radar-redcap-int/`
+- at the path provided by the environment variable `REDCAP_INTEGRATION_CONFIG_FOLDER`
 
 The configuration should follow this [template](radar.yml).
 For each supported project, the `projects` variable should contains a item like

@@ -28,8 +28,7 @@ public class GrizzlyServer {
 
             System.out.println(String.format("Jersey app started on %s.\nHit any key to stop it...",
                     BASE_URI));
-            //noinspection ResultOfMethodCallIgnored
-            System.in.read();
+            Thread.currentThread().join();
         } catch (Exception e) {
             logger.error("Error starting server", e);
         }
