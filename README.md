@@ -76,7 +76,7 @@ Application logs are redirected to `standard output`.
  1. Update the radar.yml in root for correct configuration.
  2. Then build the docker image naming it `redcapintegration` using the Dockerfile located in root directory
  `$ docker build -t redcapintegration .`
- 3. Then run the app in a container using using the image created above mapping port 80 (HTTP default) to 8080 (container)
+ 3. Then run the app in a container using using the image created above mapping port 8080 (host) to 8080 (container)
  `$ docker run --name redcapintegration -v "/your/absolute/path/radar.yml:/usr/local/conf/radar/redcap-int/" -it --rm -d -p 8080:8080 redcapintegration`
  4. Access the  entry point like this
  `$ curl -X POST “<Host IP or URL>:<Port>/redcap/trigger”`
