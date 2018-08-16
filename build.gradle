@@ -32,7 +32,7 @@ sourceSets {
     integrationTest {
         java {
             compileClasspath += main.output + test.output + test.compileClasspath
-            runtimeClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath + test.runtimeClasspath + main.runtimeClasspath
             srcDir file('src/integration-test/java')
         }
         resources.srcDir file('src/integration-test/resources')
@@ -150,6 +150,10 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
 
+    // Don't run specific test classes as they will be run by the Test Suite
+    exclude '**/*IntegratorTest*'
+    exclude '**/*MpClientTest*'
+    exclude '**/*EntryPointTest*'
     // This is not needed, but I like to see which tests have run
     testLogging {
         events "skipped", "failed", "passed"

@@ -64,7 +64,7 @@ public class Integrator extends RedCapUpdater {
      * @return {@link Set} of inputs that have to be written in REDCap.
      */
     @Override
-    protected Set<RedCapInput> getInput() {
+    public Set<RedCapInput> getInput() {
         Subject subject = performSubjectUpdateOnMp(redCapInfo.getUrl(),
                 redCapInfo.getProjectId(), getRecordId());
 
@@ -149,9 +149,13 @@ public class Integrator extends RedCapUpdater {
                     // update Subject in case the Human Readable Identifier does not match the
                     // expected one
                 } else {
-                    Logger.info("Found RADAR subject: {}. Human readable identifier is: {}. Using it for integration",
+                    // Don't perform integration if subject already exists as this may compromise integrity.
+                    /** TODO Remove the external attributes from old subject if it exists and
+                     * create a new one with these attributes.
+                    **/
+                    Logger.warn("Found RADAR subject: {}. Human readable identifier is: {}.",
                             subject.getSubjectId(), humanReadableId);
-                    return subject;
+                    throw new IllegalStateException("The Subject already exists.");
                 }
             }
         } catch (NullPointerException exc) {
