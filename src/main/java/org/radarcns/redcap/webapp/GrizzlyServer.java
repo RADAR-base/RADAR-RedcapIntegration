@@ -23,10 +23,11 @@ public class GrizzlyServer {
         HttpServer httpServer = GrizzlyHttpServerFactory
                 .createHttpServer(URI.create(BASE_URI), new Application(), locator);
 
+        // TODO Add an exception mapper
         try {
             httpServer.start();
 
-            System.out.println(String.format("Jersey app started on %s.\nHit any key to stop it...",
+            System.out.println(String.format("Jersey app started on %s.\nPress Ctrl+C to stop it...",
                     BASE_URI));
             Thread.currentThread().join();
         } catch (Exception e) {
