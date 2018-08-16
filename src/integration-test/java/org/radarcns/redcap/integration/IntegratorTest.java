@@ -3,8 +3,6 @@ package org.radarcns.redcap.integration;
 import org.junit.Test;
 import org.radarcns.redcap.util.RedCapTrigger;
 
-import java.util.Set;
-
 import static org.radarcns.redcap.util.IntegrationUtils.TRIGGER_BODY;
 import static org.radarcns.redcap.util.IntegrationUtils.mpClient;
 
@@ -19,6 +17,6 @@ public class IntegratorTest {
          * as the {@link org.radarcns.redcap.EntryPointTest} has run already. The order is
          * specifies by {@link org.radarcns.redcap.testsuite.OrderedTestSuite}.
          **/
-        Set<?> input = integrator.getInput();
+        integrator.getInput();
     }
 }
