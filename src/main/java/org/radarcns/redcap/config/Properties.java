@@ -203,7 +203,7 @@ public final class Properties {
     }
 
     /**
-     * Generates the Project end point {@link URL} needed to reade projects on Management Portal.
+     * Generates the Project end point {@link URL} needed to read projects on Management Portal.
      * @param mpInfo {@link ManagementPortalInfo} used to extract the Management Portal project
      *      identifier
      * @return {@link URL} useful to read project information
