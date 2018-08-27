@@ -59,7 +59,6 @@ public class EntryPoint {
      *      not report anything about the return of this function. Only the updates are logged in.
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response handlerPostRequest(@Context UriInfo ui, String body) {
         try {
