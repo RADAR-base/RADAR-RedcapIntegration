@@ -27,10 +27,14 @@ public class ManagementPortalInfo {
      * Management Portal project identifier. As long as the Management Portal is centralised, this
      *      value is unique.
      */
-    private final String projectName;
+    @JsonProperty("project_name")
+    private String projectName;
 
-    protected ManagementPortalInfo(
-            @JsonProperty("project_name") String projectName) {
+    public ManagementPortalInfo() {
+        // for deserialization
+    }
+
+    protected ManagementPortalInfo(String projectName) {
         this.projectName = projectName;
     }
 

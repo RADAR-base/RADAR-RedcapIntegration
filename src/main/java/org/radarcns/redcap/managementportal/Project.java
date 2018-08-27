@@ -23,9 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Map;
 import okhttp3.Response;
 
 /**
@@ -53,14 +51,14 @@ public class Project {
     private final String projectName;
     private final String organization;
     private final String location;
-    private final List<Tag> attributes;
+    private final Map<String, String> attributes;
 
     protected Project(
             @JsonProperty("id") Integer id,
             @JsonProperty("projectName") String projectName,
             @JsonProperty("organization") String organization,
             @JsonProperty("location") String location,
-            @JsonProperty("attributes") List<Tag> attributes) {
+            @JsonProperty("attributes") Map<String, String> attributes) {
         this.id = id;
         this.projectName = projectName;
         this.organization = organization;
@@ -84,7 +82,7 @@ public class Project {
         return location;
     }
 
-    public List<Tag> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
@@ -105,7 +103,7 @@ public class Project {
     @JsonIgnore
     public URL getRedCapUrl() throws MalformedURLException {
         String temp = getAttribute(EXTERNAL_PROJECT_URL_KEY);
-        return Objects.isNull(temp) ? null : new URL(temp);
+        return temp == null ? null : new URL(temp);
     }
 
     /**
@@ -116,7 +114,7 @@ public class Project {
     @JsonIgnore
     public Integer getRedCapId() {
         String temp = getAttribute(EXTERNAL_PROJECT_ID_KEY);
-        return Objects.isNull(temp) ? null : Integer.valueOf(temp);
+        return temp == null ? null : Integer.valueOf(temp);
     }
 
     /**
@@ -135,10 +133,7 @@ public class Project {
      */
     @JsonIgnore
     public String getAttribute(String key) {
-        Optional<Tag> tag = attributes.stream()
-                .filter(item -> item.getKey().equals(key)).findFirst();
-
-        return tag.isPresent() ? tag.get().getValue() : null;
+       return attributes.get(key);
     }
 
     /**

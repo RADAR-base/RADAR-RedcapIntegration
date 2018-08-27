@@ -18,6 +18,7 @@ package org.radarcns.redcap.managementportal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +50,7 @@ public class Subject {
      * @param externalId {@link Integer} representing the REDCap Record identifier
      * @param externalLink {@link URL} pointing the REDCap integration form / instrument
      * @param project {@link Project} associated with the subject
-     * @param attributes {@link List} of {@link Tag}
+     * @param attributes {@link Map} of key,value pairs
      */
     public Subject(
             @JsonProperty("login") String subjectId,
@@ -121,17 +122,22 @@ public class Subject {
      */
     @JsonIgnore
     public String getHumanReadableIdentifier() {
-        return getAttribute(HUMAN_READABLE_IDENTIFIER_KEY);
+        return attributes.get(HUMAN_READABLE_IDENTIFIER_KEY);
     }
 
     /**
-     * Gets the subject attribute (e.g. tag) associated with the given {@link String} key.
-     * @param key {@link String} tag key
-     * @return {@link String} value associated with the given key
+     * Converts the {@link Response#body()} to a {@link List} of {@link Subject} entity.
+     * @param response {@link Response} that has to be converted
+     * @return {@link Subject} stored in the {@link Response#body()}
+     * @throws IOException in case the conversion cannot be computed
      */
     @JsonIgnore
-    public String getAttribute(String key) {
-        return attributes.get(key);
+    public static List<Subject> getObjects(Response response) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        byte[] body = response.body().bytes();
+        response.close();
+        return mapper.readValue(body, new TypeReference<List<Subject>>(){});
     }
 
     /**
