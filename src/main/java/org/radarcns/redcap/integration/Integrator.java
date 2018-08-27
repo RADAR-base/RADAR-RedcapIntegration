@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import okhttp3.FormBody.Builder;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
@@ -50,8 +51,8 @@ public class Integrator extends RedCapUpdater {
      * @param trigger {@link RedCapTrigger} that has hit the service
      * @param mpClient {@link MpClient} used for making requests to Management Portal
      */
-    public Integrator(RedCapTrigger trigger, MpClient mpClient) {
-        super(trigger);
+    public Integrator(RedCapTrigger trigger, MpClient mpClient, OkHttpClient client) {
+        super(trigger, client);
         this.mpClient = mpClient;
     }
 

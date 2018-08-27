@@ -17,7 +17,6 @@ package org.radarcns.redcap.webapp.resource;
  */
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -26,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import okhttp3.OkHttpClient;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
 import org.radarcns.redcap.managementportal.MpClient;
@@ -52,6 +52,9 @@ public class EntryPoint {
     @Inject
     private MpClient mpClient;
 
+    @Inject
+    private OkHttpClient client;
+
     /**
      * HTTP POST request handler. This function trigger a subject creation in the Management
      *      Portal in case the event related to the form involved in the update is the enrolment.
@@ -59,7 +62,6 @@ public class EntryPoint {
      *      not report anything about the return of this function. Only the updates are logged in.
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response handlerPostRequest(@Context UriInfo ui, String body) {
         try {
@@ -72,7 +74,7 @@ public class EntryPoint {
             }
 
             if (trigger.isEnrolment()) {
-                RedCapUpdater enrolment = new Integrator(trigger, mpClient);
+                RedCapUpdater enrolment = new Integrator(trigger, mpClient, client);
 
                 if (enrolment.updateForm()) {
                     return ResponseHandler.getResponse(ui.getRequestUri());
