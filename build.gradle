@@ -4,17 +4,13 @@ plugins {
     id 'pmd'
     id 'checkstyle'
     id 'jacoco'
-    id 'war'
+    id 'application'
 }
 
 group 'org.radarcns'
-version '1.0-SNAPSHOT'
+version '0.1.0'
 
-war {
-    baseName = 'redcap'
-    version = project.version
-    extension = 'war'
-}
+mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -27,30 +23,45 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath + test.runtimeClasspath + main.runtimeClasspath
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
+
 ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
-ext.jerseyVersion = '2.22.1'
-ext.jerseymediaVersion = '2.24'
+ext.jerseyVersion = '2.27'
+ext.jerseymediaVersion = '2.27'
 ext.junitVersion = '4.12'
-ext.logbackVersion = '1.1.7'
+ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
-ext.radarCommonsVersion = '0.4.1'
-ext.radarOauthClientVersion = '0.1-SNAPSHOT'
-ext.tomcatVersion = '8.0.44'
+ext.radarCommonsVersion = '0.9.0'
+ext.radarOauthClientVersion = '0.4.0'
+ext.grizzlyVersion = '2.3.19'
 
 dependencies {
-    providedCompile group: 'org.apache.tomcat', name: 'tomcat-catalina', version: tomcatVersion
-
-    compile group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
+    runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
+    runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
-    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
+    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jerseyVersion
 
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
+
+    compile group: 'org.radarcns', name: 'radar-commons-server', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
     compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
@@ -70,7 +81,7 @@ checkstyle {
     ignoreFailures false
 
     // ignore tests
-    sourceSets = [sourceSets.main, sourceSets.test]
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
 }
 
 pmd {
@@ -78,7 +89,7 @@ pmd {
     toolVersion = '5.5.2'
     ignoreFailures = false
 
-    sourceSets = [sourceSets.main, sourceSets.test]
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
 
     consoleOutput = true
 
@@ -90,51 +101,6 @@ pmdTest {
     ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
-//---------------------------------------------------------------------------//
-// Testing                                                                   //
-//---------------------------------------------------------------------------//
-tasks.matching {it instanceof Test}.all {
-    def stdout = new LinkedList<String>()
-    beforeTest { TestDescriptor td ->
-        stdout.clear()
-    }
-
-    onOutput { TestDescriptor td, TestOutputEvent toe ->
-        stdout.addAll(toe.getMessage().split('(?m)$'))
-        while (stdout.size() > 100) {
-            stdout.remove()
-        }
-    }
-
-    afterTest { TestDescriptor td, TestResult tr ->
-        if (tr.resultType == TestResult.ResultType.FAILURE) {
-            println()
-            print("${td.className}.${td.name} FAILED")
-            if (stdout.empty) {
-                println(" without any output")
-            } else {
-                println(" with last 100 lines of output:")
-                println('=' * 100)
-                stdout.each { print(it) }
-                println('=' * 100)
-            }
-        }
-    }
-
-    testLogging {
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-        exceptionFormat "full"
-    }
-}
-
-test {
-    testLogging {
-        // Show that tests are run in the command-line output
-        events "skipped", "failed"
-    }
-}
 
 //---------------------------------------------------------------------------//
 // Build system metadata                                                     //
@@ -145,6 +111,96 @@ idea {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '4.9'
+}
+
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar'
+}
+
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
+
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events "skipped", "failed"
+    }
+}
+
+task downloadApplicationDependencies {
+    description "Pre-downloads application dependencies"
+    configurations.compileClasspath.files
+    configurations.runtimeClasspath.files
+}
+
+
+task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
+    description = "Run integration tests (located in src/integrationTest/...)."
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    // Don't run specific test classes as they will be run by the Test Suite
+    exclude '**/*IntegratorTest*'
+    exclude '**/*MpClientTest*'
+    exclude '**/*EntryPointTest*'
+    // This is not needed, but I like to see which tests have run
+    testLogging {
+        events "skipped", "failed", "passed"
+    }
+}
+
+integrationTest.finalizedBy 'removeLock'
+
+ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
+ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
+
+task installMP(type: Exec) {
+    doFirst{
+        def lockFile = new File(lock)
+        if (lockFile.exists()) {
+            throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
+        } else {
+            lockFile.createNewFile()
+        }
+    }
+
+    workingDir 'src/integration-test/'
+    standardInput = System.in
+    commandLine sudoLinux + ['docker-compose', 'up', '-d', '--build', '--force-recreate']
+
+    doLast {
+        // wait until the managementportal is ready
+        sleep(60_000)
+    }
+}
+
+task removeLock(type: Exec) {
+
+    workingDir 'src/integration-test/'
+    commandLine sudoLinux + ['docker-compose', 'down']
+
+    doLast{
+        new File(lock).delete()
+    }
+}
+
+task copyConf(type: Copy) {
+    from "src/integration-test/resources/radar.yml"
+    into "/usr/local/etc/radar-redcap-int/"
+
+    filter { String line ->
+        line.replace("management_portal_url: http://managementportal-app:8090/",
+                "management_portal_url: http://localhost:8090/")
+    }
 }

@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
-import javax.servlet.ServletContext;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,7 +14,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.listener.HttpClientListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,15 +48,11 @@ public abstract class RedCapUpdater {
     private final RedCapTrigger trigger;
     protected final RedCapInfo redCapInfo;
 
-    private final OkHttpClient client;
+    private OkHttpClient client;
 
-    protected ServletContext context;
-
-    protected RedCapUpdater(RedCapTrigger trigger, ServletContext context) {
+    protected RedCapUpdater(RedCapTrigger trigger, OkHttpClient client) {
         this.trigger = trigger;
-        this.context = context;
-
-        this.client = HttpClientListener.getClient(context);
+        this.client = client;
         this.redCapInfo = RedCapManager.getInfo(trigger);
     }
 
@@ -80,7 +73,7 @@ public abstract class RedCapUpdater {
     private String getValidInput() {
         Collection<RedCapInput> input = getInput();
 
-        if (Objects.isNull(input) || input.isEmpty()) {
+        if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("Invalid input. getInput has returned either a "
                     + "null or an empty list.");
         }

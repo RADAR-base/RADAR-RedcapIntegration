@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Objects;
 import org.radarcns.config.YamlConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +36,11 @@ public final class Properties {
 
     private static final String HTTPS = "https";
 
-    /** Path to the configuration file for AWS deploy. */
-    private static final String PATH_FILE_AWS = "/usr/share/tomcat8/conf/";
-
-    /** Path to the configuration file for Docker image. */
-    private static final String PATH_FILE_DOCKER = "/usr/local/tomcat/conf/radar/";
+    /** Path to the configuration file. */
+    private static final String PATH_FILE = "/usr/local/etc/radar-redcap-int/";
 
     /** Placeholder alternative path for the config folder. */
-    private static final String CONFIG_FOLDER = "CONFIG_FOLDER";
+    private static final String CONFIG_FOLDER = "REDCAP_INTEGRATION_CONFIG_FOLDER";
 
     /** API Config file name. */
     public static final String NAME_CONFIG_FILE = "radar.yml";
@@ -67,6 +63,7 @@ public final class Properties {
         //Nothing to do
     }
 
+
     /**
      * Loads the API configuration file. First of all, the {@code CONFIG_FOLDER} env variable is
      *      checked to verify if points a valid config file. If not, the default location for AWS
@@ -76,8 +73,7 @@ public final class Properties {
     private static Configuration loadApiConfig() throws IOException {
         String[] paths = new String[]{
             System.getenv(CONFIG_FOLDER),
-            PATH_FILE_AWS,
-            PATH_FILE_DOCKER
+                PATH_FILE
         };
 
         Configuration config;
@@ -97,8 +93,8 @@ public final class Properties {
             return new YamlConfigLoader().load(new File(path), Configuration.class);
         } catch (NullPointerException exc) {
             String[] folders = Arrays.copyOfRange(paths,
-                    Objects.isNull(System.getenv(CONFIG_FOLDER)) ? 1 : 0, paths.length);
-            LOGGER.error("Config file {} cannot be found at {} or in the WAR resources"
+                    System.getenv(CONFIG_FOLDER) == null ? 1 : 0, paths.length);
+            LOGGER.error("Config file {} cannot be found at {} or in the resources"
                     + "folder.", NAME_CONFIG_FILE, folders, CONFIG_FOLDER);
             throw new FileNotFoundException(NAME_CONFIG_FILE + " cannot be found.");
         }
@@ -207,7 +203,7 @@ public final class Properties {
     }
 
     /**
-     * Generates the token end point {@link URL} needed to reade projects on Management Portal.
+     * Generates the Project end point {@link URL} needed to read projects on Management Portal.
      * @param mpInfo {@link ManagementPortalInfo} used to extract the Management Portal project
      *      identifier
      * @return {@link URL} useful to read project information
@@ -216,6 +212,16 @@ public final class Properties {
     public static URL getProjectEndPoint(ManagementPortalInfo mpInfo) throws MalformedURLException {
         return new URL(validateMpUrl(), CONFIG.getProjectEndpoint().concat(
                 mpInfo.getProjectName()));
+    }
+
+    /**
+     * Generates the base Project end point {@link URL} needed to read projects on Management Portal.
+     *
+     * @return {@link URL} useful to read project information
+     * @throws MalformedURLException in case the {@link URL} cannot be generated
+     */
+    public static URL getProjectEndPoint() throws MalformedURLException {
+        return new URL(validateMpUrl(), CONFIG.getProjectEndpoint());
     }
 
     /**

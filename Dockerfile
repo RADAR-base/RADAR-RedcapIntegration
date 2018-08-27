@@ -1,18 +1,47 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-FROM tomcat:8.5.20-jre8
+FROM openjdk:8-alpine as builder
 
-# Create a radar configuration directory
-RUN mkdir $CATALINA_HOME/conf/radar
+RUN mkdir /code
+WORKDIR /code
 
-# Add the configuration file
-# COPY ./radar.yml $CATALINA_HOME/conf/radar/radar.yml
-# ADD ./radar.yml $CATALINA_HOME/conf/radar/radar.yml
+ENV GRADLE_OPTS -Dorg.gradle.daemon=false
 
-RUN rm -rf /usr/local/tomcat/webapps/*
+COPY ./gradle/wrapper /code/gradle/wrapper
+COPY ./gradlew /code/
+RUN ./gradlew --version
 
-# Copy the WAR file to tomcat webapps for deployment
-ADD https://github.com/RADAR-CNS/RADAR-RedcapIntegration/releases/download/v0.1-beta.2/redcap-2.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
-#ADD ./build/libs/redcap-1.0-SNAPSHOT.war $CATALINA_HOME/webapps/redcap.war
+COPY ./build.gradle ./settings.gradle /code/
+
+RUN ./gradlew downloadApplicationDependencies
+
+COPY ./src/ /code/src
+
+RUN ./gradlew distTar \
+    && cd build/distributions \
+    && tar xf *.tar \
+    && rm *.tar redcap-*/lib/redcap-*.jar
+
+FROM openjdk:8-jre-alpine
+
+MAINTAINER @yatharthranjan, @blootsvoets
+
+LABEL description="RADAR-CNS Redcap Integration docker container"
+
+COPY --from=builder /code/build/distributions/redcap-*/bin/* /usr/bin/
+COPY --from=builder /code/build/distributions/redcap-*/lib/* /usr/lib/
+COPY --from=builder /code/build/libs/redcap-*.jar /usr/lib/
 
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
+
+CMD ["redcap"]
