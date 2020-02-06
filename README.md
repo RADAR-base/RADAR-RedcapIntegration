@@ -107,5 +107,14 @@ If running this along with other components on docker using docker-compose, you 
 
 Please check the RADAR-base platform [docker-compose.yml file](https://github.com/RADAR-base/RADAR-Docker/blob/master/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml) for more information.
 
+## Scripts
+Under the scripts folder there is a python script which will download non-identifiable data from a RedCAP project and upload it to a specified FTP server. It is run as a cron job for RADAR-CNS projects to provide RedCAP data to data analysts. FTP authentication details can be provided through a .netrc file or as arguments to the script. It requires the [requests library]('https://pypi.org/project/requests/').
+
+Usage:
+```
+python3 scripts/redcap-extract.py --help
+python3 scripts/redcap-extract.py PROJECT_NAME REDCAP_TOKEN --redcap-url URL --ftp-ip IP 
+```
+
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.
