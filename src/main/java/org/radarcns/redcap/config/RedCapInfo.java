@@ -17,7 +17,12 @@ package org.radarcns.redcap.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.w3c.dom.Attr;
+
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration file entry to define REDCap settings.
@@ -55,6 +60,12 @@ public class RedCapInfo {
     @JsonProperty("token")
     private String token;
 
+    /**
+     * Token String required to use REDCap APIs.
+     */
+    @JsonProperty("attributes")
+    private Set<Attribute> attributes;
+
     public RedCapInfo() {
         // for deserialization
     }
@@ -65,16 +76,18 @@ public class RedCapInfo {
         this.enrolmentEvent = null;
         this.integrationForm = null;
         this.token = null;
+        this.attributes = null;
     }
 
     protected RedCapInfo(URL url, Integer projectId,
             String enrolmentEvent, String integrationForm,
-            String token) {
+            String token, Set<Attribute> attributes) {
         this.url = url;
         this.projectId = projectId;
         this.enrolmentEvent = enrolmentEvent;
         this.integrationForm = integrationForm;
         this.token = token;
+        this.attributes = attributes;
     }
 
     /**
@@ -116,6 +129,8 @@ public class RedCapInfo {
     public String getIntegrationForm() {
         return integrationForm;
     }
+
+    public Set<Attribute> getAttributes() { return attributes; }
 
     @Override
     public boolean equals(Object obj) {
