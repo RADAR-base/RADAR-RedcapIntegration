@@ -24,7 +24,7 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url 'http://packages.confluent.io/maven/' }
+    maven { url 'https://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }

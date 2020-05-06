@@ -9,7 +9,7 @@ services:
     # Management Portal                                                         #
     #---------------------------------------------------------------------------#
     managementportal-app:
-      image: radarbase/management-portal:0.4.1
+      image: radarbase/management-portal:0.5.8
       networks:
         - default
         - integration
