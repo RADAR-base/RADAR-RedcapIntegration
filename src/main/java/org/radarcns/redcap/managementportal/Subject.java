@@ -41,7 +41,7 @@ public class Subject {
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
     @JsonProperty("id")
-    private final Long mpId = null;
+    private final Long mpId;
     
     @JsonProperty("login")
     private final String subjectId;
@@ -54,7 +54,7 @@ public class Subject {
     private final Map<String,String> attributes;
 
     @JsonProperty("status")
-    private final String status = SubjectStatus.ACTIVATED.toString();
+    private final String status;
 
 
     /**
@@ -66,16 +66,19 @@ public class Subject {
      * @param attributes {@link Map} of key,value pairs
      */
     public Subject(
+            @JsonProperty("id") Long mpId,
             @JsonProperty("login") String subjectId,
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
             @JsonProperty("project") Project project,
             @JsonProperty("attributes") Map<String,String> attributes) {
+        this.mpId = mpId;
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
         this.attributes = attributes;
+        this.status = SubjectStatus.ACTIVATED.toString();
 
         //TODO remove
         this.email = "admin@localhost";
@@ -92,10 +95,12 @@ public class Subject {
      */
     public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
             String humanReadableId) {
+        this.mpId = null;
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
+        this.status = SubjectStatus.ACTIVATED.toString();
 
         Map<String,String> att = new HashMap<>();
         att.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
@@ -114,6 +119,10 @@ public class Subject {
     public void setAttributes(Map<String, String> attributes) {
         this.attributes.putAll(attributes);
     }
+
+    public Long getMpId() { return mpId; }
+
+    public String getStatus() { return status; }
 
     public String getSubjectId() {
         return subjectId;

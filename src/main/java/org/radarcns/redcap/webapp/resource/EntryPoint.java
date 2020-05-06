@@ -51,9 +51,6 @@ public class EntryPoint {
     @Inject
     private MpClient mpClient;
 
-    @Inject
-    private OkHttpClient client;
-
     /**
      * HTTP POST request handler. This function trigger a subject creation in the Management
      *      Portal in case the event related to the form involved in the update is the enrolment.

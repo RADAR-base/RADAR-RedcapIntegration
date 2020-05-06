@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.radarcns.redcap.config.Attribute;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;

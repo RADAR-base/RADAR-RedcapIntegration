@@ -67,6 +67,6 @@ public class Attribute {
     @Override
     public String toString() {
         return "ProjectInfo {" + "\n"
-            + "fieldName = " + fieldName.toString() + '}' + "\n";
+            + "fieldName = " + fieldName + '}' + "\n";
     }
 }

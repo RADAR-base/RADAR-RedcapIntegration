@@ -77,13 +77,19 @@ public class RedCapInfo {
     }
 
     protected RedCapInfo(URL url, Integer projectId,
-            String enrolmentEvent, String integrationForm,
-            String token, Set<Attribute> attributes) {
+                         String enrolmentEvent, String integrationForm,
+                         String token) {
         this.url = url;
         this.projectId = projectId;
         this.enrolmentEvent = enrolmentEvent;
         this.integrationForm = integrationForm;
         this.token = token;
+    }
+
+    protected RedCapInfo(URL url, Integer projectId,
+            String enrolmentEvent, String integrationForm,
+            String token, Set<Attribute> attributes) {
+        this(url, projectId, enrolmentEvent, integrationForm, token);
         this.attributes = attributes;
     }
 
