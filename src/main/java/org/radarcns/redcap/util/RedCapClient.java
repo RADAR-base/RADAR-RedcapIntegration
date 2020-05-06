@@ -138,6 +138,7 @@ public class RedCapClient {
         parameters.put("content", "record");
         parameters.put("format", "json");
         parameters.put("type", "flat");
+        parameters.put("rawOrLabel", "label");
 
         Map<String, String> fieldsEncoded = encodeListParams(fields, FIELDS_LABEL);
         Map<String, String> recordIdsEncoded = encodeListParams(records, RECORDS_LABEL);
