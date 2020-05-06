@@ -10,7 +10,6 @@ import java.util.*;
 
 import okhttp3.*;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,6 @@ public class RedCapClient {
     private static final String API_ROOT = "/redcap/api/";
     private static final String TOKEN_LABEL = "token";
     private static final String DATA_LABEL = "data";
-    private static final String FORMS_LABEL = "forms";
     private static final String FIELDS_LABEL = "fields";
     private static final String RECORDS_LABEL = "records";
     private static final int REDCAP_RESULT_INDEX = 0;
@@ -115,10 +113,10 @@ public class RedCapClient {
         }
     }
 
-    public Map<String, String> fetchFormDataForId(List<String> forms, List<String> fields, Integer recordId) {
+    public Map<String, String> fetchFormDataForId(List<String> fields, Integer recordId) {
         ArrayList<String> records = new ArrayList<String>();
         records.add(String.valueOf(recordId));
-        Map<String, String> parameters = getFormFetchParameters(forms, fields, records);
+        Map<String, String> parameters = getFormFetchParameters(fields, records);
         try {
             Request request = createRequest(parameters);
             Response response = httpClient.newCall(request).execute();
@@ -135,16 +133,14 @@ public class RedCapClient {
     }
 
 
-    protected Map<String, String> getFormFetchParameters(List<String> forms, List<String> fields, List<String> records) {
+    protected Map<String, String> getFormFetchParameters(List<String> fields, List<String> records) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("content", "record");
         parameters.put("format", "json");
         parameters.put("type", "flat");
 
-        Map<String, String> formsEncoded = encodeListParams(forms, FORMS_LABEL);
         Map<String, String> fieldsEncoded = encodeListParams(fields, FIELDS_LABEL);
         Map<String, String> recordIdsEncoded = encodeListParams(records, RECORDS_LABEL);
-        parameters.putAll(formsEncoded);
         parameters.putAll(fieldsEncoded);
         parameters.putAll(recordIdsEncoded);
 

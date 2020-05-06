@@ -16,7 +16,6 @@ package org.radarcns.redcap.integration;
  * limitations under the License.
  */
 
-import okhttp3.Response;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.managementportal.Subject;
@@ -63,7 +62,7 @@ public class RedCapIntegator {
     }
 
     public Map<String, String> pullRecordAttributes(List<String> attributes, Integer recordId){
-            Map<String, String> data = redCapClient.fetchFormDataForId(new ArrayList<>(), attributes, recordId);
+            Map<String, String> data = redCapClient.fetchFormDataForId(attributes, recordId);
             return data;
     }
 
