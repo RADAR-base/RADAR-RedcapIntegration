@@ -62,6 +62,8 @@ redcap_info:
   enrolment_event: #Unique identifier for the enrolment event
   integration_form: #Name of integration REDCap form
   token: #REDCap API Token used to identify the REDCap user against the REDCap instance
+  attributes:
+    - field_name: #Field name of the attribute specified in REDCap. Multiple field_names are supported.
 mp_info:
   project_name: #Management Portal project identifier
 ``` 

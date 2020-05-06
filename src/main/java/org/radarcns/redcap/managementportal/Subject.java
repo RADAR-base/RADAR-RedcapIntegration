@@ -28,14 +28,13 @@ import java.util.*;
 
 import okhttp3.Response;
 
-//TODO
 public class Subject {
 
     public enum SubjectStatus {
-        DEACTIVATED,    // activated = false, removed = false
-        ACTIVATED,      // activated = true,  removed = false
-        DISCONTINUED,   // activated = false, removed = true
-        INVALID         // activated = true,  removed = true (invalid state, makes no sense)
+        DEACTIVATED,
+        ACTIVATED,
+        DISCONTINUED,
+        INVALID
     }
 
     @JsonIgnore
