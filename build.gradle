@@ -32,6 +32,10 @@ repositories {
 sourceSets {
     main.kotlin.srcDirs += 'src/main/kotlin'
     main.java.srcDirs += 'src/main/kotlin'
+
+    test.kotlin.srcDirs += 'src/test/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+
     integrationTest {
         java {
             compileClasspath += main.output + test.output + test.compileClasspath
@@ -75,9 +79,12 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.+"
     compile "org.json:json:20170516"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+"
+    testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.+"
 }
 
 //---------------------------------------------------------------------------//

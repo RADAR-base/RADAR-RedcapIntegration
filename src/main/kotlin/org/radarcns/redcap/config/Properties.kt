@@ -1,6 +1,9 @@
 package org.radarcns.redcap.config
 
-import org.radarcns.config.YamlConfigLoader
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
@@ -39,6 +42,11 @@ object Properties {
     /** Path where the config file is located.  */ //private static String validPath;
     private var CONFIG: Configuration? = null
 
+    private val mapper = ObjectMapper(YAMLFactory()).apply {
+        registerModule(KotlinModule())
+        propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+    }
+
     /**
      * Loads the API configuration file. First of all, the `CONFIG_FOLDER` env variable is
      * checked to verify if points a valid config file. If not, the default location for AWS
@@ -48,19 +56,19 @@ object Properties {
     @Throws(IOException::class)
     private fun loadApiConfig(): Configuration {
         val paths = arrayOf(
-            System.getenv(CONFIG_FOLDER),
+            System.getenv(CONFIG_FOLDER) ?: ".",
             PATH_FILE
         )
         var config: Configuration?
-        for (i in paths.indices) {
-            config = loadApiConfig(paths[i])
+        for (path in paths) {
+            config = loadApiConfig(path)
             if (config != null) {
                 return config
             }
         }
         val path = Properties::class.java.classLoader.getResource(NAME_CONFIG_FILE)?.file
         //validPath = new File(path).getParent() + "/";
-        if (path == null) {
+        if (checkFileExist(path)) {
             val folders = paths.copyOfRange(
                 if (System.getenv(CONFIG_FOLDER) == null) 1 else 0,
                 paths.size
@@ -75,7 +83,7 @@ object Properties {
             throw FileNotFoundException("$NAME_CONFIG_FILE cannot be found.")
         }
         LOGGER.info("Loading Config file located at : {}", path)
-        return YamlConfigLoader().load(File(path), Configuration::class.java)
+        return loadConfig(File(path!!))
     }
 
     @Throws(IOException::class)
@@ -86,14 +94,16 @@ object Properties {
                 "Loading Config file located at : {}",
                 path
             )
-            return YamlConfigLoader().load(
-                File(
-                    filePath
-                ), Configuration::class.java
-            )
+            return loadConfig(File(filePath))
         }
         //validPath = null;
         return null
+    }
+
+    fun loadConfig(file: File): Configuration {
+        return file.inputStream().use {
+            mapper.readValue(it, Configuration::class.java)
+        }
     }
 
     /**
@@ -102,7 +112,7 @@ object Properties {
      * @param path that should point a file
      * @return true if `path` points a file, false otherwise
      */
-    private fun checkFileExist(path: String?): Boolean {
+    fun checkFileExist(path: String?): Boolean {
         return if (path == null) false else File(path).exists()
     }
 

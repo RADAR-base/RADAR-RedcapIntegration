@@ -1,4 +1,10 @@
-package org.radarcns.redcap.config;
+package org.radarcns.redcap.config
+
+import org.junit.Assert
+import org.junit.Test
+import java.io.File
+import java.io.IOException
+import java.net.URL
 
 /*
  * Copyright 2017 King's College London
@@ -15,40 +21,32 @@ package org.radarcns.redcap.config;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import org.junit.Test;
-import org.radarcns.config.YamlConfigLoader;
-
-public class ConfigurationTest {
-
+class ConfigurationTest {
     @Test
-    public void loadConfigTest() throws IOException {
-        Configuration config = new YamlConfigLoader().load(new File(
-                        ConfigurationTest.class.getClassLoader().getResource("config.yml").getFile()),
-                Configuration.class);
+    @Throws(IOException::class)
+    fun loadConfigTest() {
+        val filePath = ConfigurationTest::class.java.classLoader
+            .getResource("config.yml")?.file
 
-        assertEquals("1.0", config.getVersion());
-        assertEquals("2017-08-29", config.getReleased());
-        assertEquals("todo", config.getOauthClientId());
-        assertEquals("todo", config.getOauthClientSecret());
-        assertEquals(new URL("https://localhost"), config.getManagementPortalUrl());
-        assertEquals("/token", config.getTokenEndpoint());
-        assertEquals("/project", config.getProjectEndpoint());
-        assertEquals("/subject", config.getSubjectEndpoint());
+        if (!Properties.checkFileExist(filePath)) {
+            throw IllegalStateException("File does not exist")
+        }
 
-        RedCapInfo redCapInfo = new RedCapInfo(new URL("https://localhost/"),
-                0, "enrolment", "radar_enrolment",
-                "1234567890", Collections.emptySet());
-        ManagementPortalInfo mpInfo = new ManagementPortalInfo("project-0");
-
-        assertEquals(Collections.singleton(new ProjectInfo(redCapInfo, mpInfo)),
-                config.getProjects());
+        val configuration = Properties.loadConfig(File(filePath!!))
+        Assert.assertEquals("1.0", configuration.version)
+        Assert.assertEquals("2017-08-29", configuration.released)
+        Assert.assertEquals("todo", configuration.oauthClientId)
+        Assert.assertEquals("todo", configuration.oauthClientSecret)
+        Assert.assertEquals(URL("https://localhost"), configuration.managementPortalUrl)
+        Assert.assertEquals("/token", configuration.tokenEndpoint)
+        Assert.assertEquals("/project", configuration.projectEndpoint)
+        Assert.assertEquals("/subject", configuration.subjectEndpoint)
+        val redCapInfo = RedCapInfo(
+            URL("https://localhost/"),
+            0, "enrolment", "radar_enrolment",
+            "1234567890", emptySet()
+        )
+        val mpInfo = ManagementPortalInfo("project-0")
+        Assert.assertEquals(setOf(ProjectInfo(redCapInfo, mpInfo)), configuration.projects)
     }
-
 }

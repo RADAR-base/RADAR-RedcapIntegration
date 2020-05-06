@@ -1,4 +1,10 @@
-package org.radarcns.redcap.util;
+package org.radarcns.redcap.util
+
+import junit.framework.TestCase
+import org.junit.Test
+import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus
+import java.net.MalformedURLException
+import java.net.URL
 
 /*
  * Copyright 2017 King's College London
@@ -15,41 +21,33 @@ package org.radarcns.redcap.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import org.junit.Test;
-import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
-
-public class RedCapTriggerTest {
-
+class RedCapTriggerTest {
     @Test
-    public void testConstructor() throws MalformedURLException {
-        String input = "redcap_url=https%3A%2F%2Fredcap.com%2F&"
+    @Throws(MalformedURLException::class)
+    fun testConstructor() {
+        val input = ("redcap_url=https%3A%2F%2Fredcap.com%2F&"
                 + "project_url=https://redcap.com/redcap_v6.10.1/index.php?pid=33&"
                 + "project_id=33&"
                 + "username=test&"
                 + "record=1&"
                 + "redcap_event_name=baseline_assessmen_arm_1&"
                 + "instrument=radar_enrolment&"
-                + "radar_enrolment_complete=0";
-
-        RedCapTrigger trigger = new RedCapTrigger(input);
-
-        assertEquals(33, trigger.getProjectId(), 0.0);
-        assertEquals("test", trigger.getUsername());
-        assertEquals("radar_enrolment", trigger.getInstrument());
-        assertEquals(1, trigger.getRecord(), 0.0);
-        assertEquals("baseline_assessmen_arm_1", trigger.getRedcapEventName());
-        assertNull(trigger.getRedcapDataAccessGroup());
-        assertEquals(InstrumentStatus.INCOMPLETE.getStatus(), trigger.getStatus().getStatus(),
-                0.0);
-        assertEquals(new URL("https://redcap.com/redcap_v6.10.1/"), trigger.getRedcapUrl());
-        assertEquals(new URL("https://redcap.com/redcap_v6.10.1/index.php?pid=33"),
-                trigger.getProjectUrl());
+                + "radar_enrolment_complete=0")
+        val trigger = RedCapTrigger(input)
+        TestCase.assertEquals(33.0, trigger.projectId!!.toDouble(), 0.0)
+        TestCase.assertEquals("test", trigger.username)
+        TestCase.assertEquals("radar_enrolment", trigger.instrument)
+        TestCase.assertEquals(1.0, trigger.record!!.toDouble(), 0.0)
+        TestCase.assertEquals("baseline_assessmen_arm_1", trigger.redcapEventName)
+        TestCase.assertNull(trigger.redcapDataAccessGroup)
+        TestCase.assertEquals(
+            InstrumentStatus.INCOMPLETE.status.toDouble(), trigger.status!!.status.toDouble(),
+            0.0
+        )
+        TestCase.assertEquals(URL("https://redcap.com/redcap_v6.10.1/"), trigger.redcapUrl)
+        TestCase.assertEquals(
+            URL("https://redcap.com/redcap_v6.10.1/index.php?pid=33"),
+            trigger.projectUrl
+        )
     }
-
 }

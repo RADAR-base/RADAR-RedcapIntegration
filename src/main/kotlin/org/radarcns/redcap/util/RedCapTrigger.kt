@@ -61,7 +61,7 @@ class RedCapTrigger(value: String) {
         INCOMPLETE(0), UNVERIFIED(1), COMPLETE(2);
     }
 
-    enum class TriggerParameter(val key: String) {
+    enum class TriggerParameter(val value: String) {
         PROJECT_ID("project_id"),
         USERNAME("username"),
         INSTRUMENT("instrument"),
@@ -74,7 +74,7 @@ class RedCapTrigger(value: String) {
 
         companion object {
             fun instrumentStatus(instrument: String?): String {
-                return instrument + INSTRUMENT_STATUS.name
+                return instrument + INSTRUMENT_STATUS.value
             }
         }
     }
@@ -148,7 +148,7 @@ class RedCapTrigger(value: String) {
     private fun convertParameter(value: String, markerIndex: Int): TriggerParameter {
         val name = value.substring(0, markerIndex).trim { it <= ' ' }
         for (param in TriggerParameter.values()) {
-            if (param.key == name) {
+            if (param.value == name) {
                 return param
             }
         }
@@ -203,7 +203,7 @@ class RedCapTrigger(value: String) {
         @JvmStatic
         fun instrumentStatusField(instrument: String): String {
             Objects.requireNonNull(instrument)
-            return instrument + TriggerParameter.INSTRUMENT_STATUS.name
+            return instrument + TriggerParameter.INSTRUMENT_STATUS.value
         }
     }
 

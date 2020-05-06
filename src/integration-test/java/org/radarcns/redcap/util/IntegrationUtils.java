@@ -41,10 +41,14 @@ public class IntegrationUtils {
             + "radar_enrolment_complete=0" ;
 
     static {
-        oauthClient = new OAuth2Client.Builder()
-                .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
-                .endpoint(Properties.getTokenEndPoint())
-                .httpClient(httpClient).build();
+        try {
+            oauthClient = new OAuth2Client.Builder()
+                    .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
+                    .endpoint(Properties.getTokenEndPoint())
+                    .httpClient(httpClient).build();
+        } catch (MalformedURLException ex) {
+            throw new IllegalStateException("Failed to construct MP Token endpoint URL", ex);
+        }
     }
 
     /**

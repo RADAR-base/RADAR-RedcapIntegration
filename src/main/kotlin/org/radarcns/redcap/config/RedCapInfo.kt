@@ -23,7 +23,7 @@ import java.net.URL
  */ /**
  * Configuration file entry to define REDCap settings.
  */
-data class RedCapInfo(
+data class RedCapInfo @JvmOverloads constructor(
     @JsonProperty("url") var url: URL,
     @JsonProperty("project_id") val projectId: Int,
     @JsonProperty("enrolment_event") val enrolmentEvent: String? = null,
