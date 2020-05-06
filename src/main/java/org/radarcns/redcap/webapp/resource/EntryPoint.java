@@ -25,7 +25,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import okhttp3.OkHttpClient;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
 import org.radarcns.redcap.managementportal.MpClient;
