@@ -31,9 +31,19 @@ import okhttp3.Response;
 //TODO
 public class Subject {
 
+    public enum SubjectStatus {
+        DEACTIVATED,    // activated = false, removed = false
+        ACTIVATED,      // activated = true,  removed = false
+        DISCONTINUED,   // activated = false, removed = true
+        INVALID         // activated = true,  removed = true (invalid state, makes no sense)
+    }
+
     @JsonIgnore
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
+    @JsonProperty("id")
+    private final Long mpId = null;
+    
     @JsonProperty("login")
     private final String subjectId;
     private final Integer externalId;
@@ -43,6 +53,10 @@ public class Subject {
     private final String email;
     private final Project project;
     private final Map<String,String> attributes;
+
+    @JsonProperty("status")
+    private final String status = SubjectStatus.ACTIVATED.toString();
+
 
     /**
      * Constructor.
@@ -85,11 +99,21 @@ public class Subject {
         this.project = project;
 
         Map<String,String> att = new HashMap<>();
-        att.put(HUMAN_READABLE_IDENTIFIER_KEY,humanReadableId);
+        att.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
         this.attributes = att;
 
         //TODO remove
         this.email = "admin@localhost";
+    }
+
+    public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
+                   String humanReadableId, Map<String, String> attributes) {
+        this(subjectId, externalId, externalLink, project, humanReadableId);
+        this.setAttributes(attributes);
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes.putAll(attributes);
     }
 
     public String getSubjectId() {

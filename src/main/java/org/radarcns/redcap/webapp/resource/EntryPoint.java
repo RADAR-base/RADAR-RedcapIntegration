@@ -30,7 +30,6 @@ import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.integration.Integrator;
 import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.util.RedCapTrigger;
-import org.radarcns.redcap.util.RedCapUpdater;
 import org.radarcns.redcap.webapp.util.PathLabels;
 import org.radarcns.redcap.webapp.util.ResponseHandler;
 import org.slf4j.Logger;
@@ -74,9 +73,9 @@ public class EntryPoint {
             }
 
             if (trigger.isEnrolment()) {
-                RedCapUpdater enrolment = new Integrator(trigger, mpClient, client);
+                Integrator enrolment = new Integrator(trigger, mpClient);
 
-                if (enrolment.updateForm()) {
+                if (enrolment.handleDataEntryTrigger()) {
                     return ResponseHandler.getResponse(ui.getRequestUri());
                 } else {
                     return ResponseHandler.getErrorResponse(ui.getRequestUri());
