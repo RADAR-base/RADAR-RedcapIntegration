@@ -1,4 +1,6 @@
-package org.radarcns.redcap.util
+package org.radarcns.redcap.config
+
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /*
  * Copyright 2017 King's College London
@@ -15,19 +17,6 @@ package org.radarcns.redcap.util
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ /**
- * Interface that generalises REDCap input parameters. It forces the override of
- * [Object.equals] and [Object.hashCode] in order to create
- * [java.util.Set] of [RedCapInput] leaving to Java the overhead of checking for
- * duplicated inputs.
- * @see [org.radarcns.redcap.integration.IntegrationData]
+ * Configuration file entry to define Management Portal settings.
  */
-interface RedCapInput {
-    /**
-     * Returns the REDCap Record Id involved in the update.
-     * @return [Integer] REDCap Record Id
-     */
-    val record: Int?
-
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
-}
+data class ManagementPortalInfo(@JsonProperty("project_name") val projectName: String)

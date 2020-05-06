@@ -1,4 +1,4 @@
-package org.radarcns.redcap.webapp.util;
+package org.radarcns.redcap.webapp.util
 
 /*
  * Copyright 2017 King's College London
@@ -14,19 +14,12 @@ package org.radarcns.redcap.webapp.util;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/**
+ */ /**
  * Static class for managing API path labels.
  */
-public final class PathLabels {
-
+object PathLabels {
     /**
      * Label identifying the function requested by the REDCap trigger.
      */
-    public static final String REDCAP_TRIGGER = "trigger";
-
-    private PathLabels() {
-        //Static class
-    }
+    const val REDCAP_TRIGGER = "trigger"
 }

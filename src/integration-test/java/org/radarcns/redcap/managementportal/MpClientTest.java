@@ -39,7 +39,8 @@ public class MpClientTest {
         mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1, WORK_PACKAGE + REDCAP_RECORD_ID_1, testAttributes);
         Subject subject = mpClient.getSubject(new URL(REDCAP_URL), REDCAP_PROJECT_ID, REDCAP_RECORD_ID_1);
 
-        assertEquals(Integer.valueOf(REDCAP_RECORD_ID_1), subject.getExternalId());
+        assertNotNull(subject);
+        assertEquals(REDCAP_RECORD_ID_1, subject.getExternalId());
         assertEquals(WORK_PACKAGE + REDCAP_RECORD_ID_1, subject.getHumanReadableIdentifier());
     }
 

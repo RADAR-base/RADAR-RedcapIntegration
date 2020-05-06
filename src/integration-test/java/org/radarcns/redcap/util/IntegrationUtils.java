@@ -4,12 +4,12 @@ import okhttp3.*;
 import org.radarcns.exception.TokenException;
 import org.radarcns.oauth.OAuth2Client;
 import org.radarcns.redcap.config.Properties;
-import org.radarcns.redcap.managementportal.MpClient;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.Duration;
 import java.util.logging.Logger;
+import org.radarcns.redcap.managementportal.MpClient;
 
 public class IntegrationUtils {
 
@@ -41,14 +41,10 @@ public class IntegrationUtils {
             + "radar_enrolment_complete=0" ;
 
     static {
-        try {
-            oauthClient = new OAuth2Client.Builder()
-                    .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
-                    .endpoint(Properties.getTokenEndPoint())
-                    .httpClient(httpClient).build();
-        } catch (MalformedURLException ex) {
-            throw new IllegalStateException("Failed to construct MP Token endpoint URL", ex);
-        }
+        oauthClient = new OAuth2Client.Builder()
+                .credentials(Properties.getOauthClientId(), Properties.getOauthClientSecret())
+                .endpoint(Properties.getTokenEndPoint())
+                .httpClient(httpClient).build();
     }
 
     /**

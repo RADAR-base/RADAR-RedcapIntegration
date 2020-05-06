@@ -1,4 +1,12 @@
-package org.radarcns.redcap.integration;
+package org.radarcns.redcap.integration
+
+import org.radarcns.redcap.config.Attribute
+import org.radarcns.redcap.config.RedCapInfo
+import org.radarcns.redcap.config.RedCapManager
+import org.radarcns.redcap.managementportal.MpClient
+import org.radarcns.redcap.util.RedCapClient
+import org.radarcns.redcap.util.RedCapTrigger
+import java.util.stream.Collectors
 
 /*
  * Copyright 2017 King's College London
@@ -14,53 +22,46 @@ package org.radarcns.redcap.integration;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */ /** Handler for updating Integrator Redcap form parameters. The input parameters are
+ * described by [IntegrationData].
  */
+class Integrator @JvmOverloads constructor(
+    private val trigger: RedCapTrigger, private val mpClient: MpClient,
+    private val redCapInfo: RedCapInfo = RedCapManager.getInfo(trigger),
+    private val mpIntegrator: MpIntegrator = MpIntegrator(mpClient),
+    private val redCapIntegrator: RedCapIntegator = RedCapIntegator(RedCapClient(redCapInfo))
+) {
 
-import java.net.URL;
-import java.util.*;
-import java.util.stream.Collectors;
+    fun handleDataEntryTrigger(): Boolean {
+        val recordId = trigger.record
+        val projectId = redCapInfo.projectId
+        val enrolmentEvent = redCapInfo.enrolmentEvent
+        val integrationFrom = redCapInfo.integrationForm
+        val url = redCapInfo.url
+        val attributeKeys =
+            redCapInfo.attributes?.stream()?.map { a: Attribute -> a.fieldName }
+                ?.collect(Collectors.toList())
+        checkNotNull(recordId)
+        checkNotNull(enrolmentEvent)
+        checkNotNull(integrationFrom)
 
-import org.radarcns.redcap.config.RedCapInfo;
-import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.managementportal.MpClient;
-import org.radarcns.redcap.managementportal.Subject;
-import org.radarcns.redcap.util.RedCapClient;
-import org.radarcns.redcap.util.RedCapTrigger;
-
-/** Handler for updating Integrator Redcap form parameters. The input parameters are
- *      described by {@link IntegrationData}.
- */
-public class Integrator {
-    private RedCapTrigger trigger;
-
-    private RedCapInfo redCapInfo;
-
-    private MpIntegrator mpIntegrator;
-
-    private RedCapIntegator redCapIntegrator;
-
-    /**
-     * Constructor.
-     * @param trigger {@link RedCapTrigger} that has hit the service
-     * @param mpClient {@link MpClient} used for making requests to Management Portal
-     */
-    public Integrator(RedCapTrigger trigger, MpClient mpClient) {
-        this.trigger = trigger;
-        this.mpIntegrator = new MpIntegrator(mpClient);
-        this.redCapInfo = RedCapManager.getInfo(trigger);
-        this.redCapIntegrator = new RedCapIntegator(new RedCapClient(redCapInfo));
+        val attributes = if (attributeKeys == null) {
+            emptyMap()
+        } else {
+            redCapIntegrator.pullRecordAttributes(attributeKeys, recordId)
+        }
+        val subject =
+            mpIntegrator.performSubjectUpdateOnMp(
+                url,
+                projectId,
+                recordId,
+                attributes.toMutableMap()
+            )
+        return redCapIntegrator.updateRedCapIntegrationForm(
+            subject,
+            recordId,
+            enrolmentEvent,
+            integrationFrom
+        )
     }
-
-    public boolean handleDataEntryTrigger(){
-        Integer recordId = trigger.getRecord();
-        Integer projectId = redCapInfo.getProjectId();
-        String enrolmentEvent = redCapInfo.getEnrolmentEvent();
-        String integrationFrom = redCapInfo.getIntegrationForm();
-        URL url = redCapInfo.getUrl();
-        List<String> attributeKeys = redCapInfo.getAttributes().stream().map(a->a.getFieldName()).collect(Collectors.toList());
-        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, recordId);
-        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, attributes);
-        return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);
-    }
-
 }

@@ -1,4 +1,15 @@
-package org.radarcns.redcap.managementportal;
+package org.radarcns.redcap.managementportal
+
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import okhttp3.Response
+import java.io.IOException
+import java.net.URL
 
 /*
  * Copyright 2017 King's College London
@@ -16,194 +27,129 @@ package org.radarcns.redcap.managementportal;
  * limitations under the License.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-
-import okhttp3.Response;
-
-public class Subject {
-
-    public enum SubjectStatus {
-        DEACTIVATED,
-        ACTIVATED,
-        DISCONTINUED,
-        INVALID
-    }
-
-    @JsonIgnore
-    public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
-
-    @JsonProperty("id")
-    private final Long mpId;
-    
-    @JsonProperty("login")
-    private final String subjectId;
-    private final Integer externalId;
-    private final URL externalLink;
-    //TODO remove email
-    @JsonProperty("email")
-    private final String email;
-    private final Project project;
-    private final Map<String,String> attributes;
-
-    @JsonProperty("status")
-    private final String status;
-
-
-    /**
-     * Constructor.
-     * @param subjectId {@link String} representing Management Portal Subject identifier
-     * @param externalId {@link Integer} representing the REDCap Record identifier
-     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
-     * @param project {@link Project} associated with the subject
-     * @param attributes {@link Map} of key,value pairs
-     */
-    public Subject(
-            @JsonProperty("id") Long mpId,
-            @JsonProperty("login") String subjectId,
-            @JsonProperty("externalId") Integer externalId,
-            @JsonProperty("externalLink") URL externalLink,
-            @JsonProperty("project") Project project,
-            @JsonProperty("attributes") Map<String,String> attributes) {
-        this.mpId = mpId;
-        this.subjectId = subjectId;
-        this.externalId = externalId;
-        this.externalLink = externalLink;
-        this.project = project;
-        this.attributes = attributes;
-        this.status = SubjectStatus.ACTIVATED.toString();
-
-        //TODO remove
-        this.email = "admin@localhost";
+/**
+ * Constructor.
+ * @param subjectId [String] representing Management Portal Subject identifier
+ * @param externalId [Integer] representing the REDCap Record identifier
+ * @param externalLink [URL] pointing the REDCap integration form / instrument
+ * @param project [Project] associated with the subject
+ * @param attributes [Map] of key,value pairs
+ */
+data class Subject(
+    @JsonProperty("id") val mpId: Long?,
+    @JsonProperty("login") val subjectId: String,
+    @JsonProperty("externalId") val externalId: Int,
+    @JsonProperty("externalLink") val externalLink: URL,
+    @JsonProperty("project") val project: Project,
+    @JsonProperty("attributes") val attributes: MutableMap<String, String>,
+    @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString()
+) {
+    enum class SubjectStatus {
+        DEACTIVATED, ACTIVATED, DISCONTINUED, INVALID
     }
 
     /**
      * Constructor.
-     * @param subjectId {@link String} representing Management Portal Subject identifier
-     * @param externalId {@link Integer} representing the REDCap Record identifier
-     * @param externalLink {@link URL} pointing the REDCap integration form / instrument
-     * @param project {@link Project} associated with the subject
-     * @param humanReadableId {@link String} representing the value associated with
-     *      {@link #HUMAN_READABLE_IDENTIFIER_KEY}
+     * @param subjectId [String] representing Management Portal Subject identifier
+     * @param externalId [Integer] representing the REDCap Record identifier
+     * @param externalLink [URL] pointing the REDCap integration form / instrument
+     * @param project [Project] associated with the subject
+     * @param humanReadableId [String] representing the value associated with
+     * [.HUMAN_READABLE_IDENTIFIER_KEY]
      */
-    public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
-            String humanReadableId) {
-        this.mpId = null;
-        this.subjectId = subjectId;
-        this.externalId = externalId;
-        this.externalLink = externalLink;
-        this.project = project;
-        this.status = SubjectStatus.ACTIVATED.toString();
+    constructor(
+        subjectId: String, externalId: Int, externalLink: URL, project: Project,
+        humanReadableId: String
+    ) : this(
+        null, subjectId, externalId, externalLink, project,
+        mutableMapOf<String, String>(Pair(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId))
+    )
 
-        Map<String,String> att = new HashMap<>();
-        att.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
-        this.attributes = att;
-
-        //TODO remove
-        this.email = "admin@localhost";
+    constructor(
+        subjectId: String,
+        externalId: Int,
+        externalLink: URL,
+        project: Project,
+        humanReadableId: String,
+        attributes: Map<String, String>
+    ) : this(subjectId, externalId, externalLink, project, humanReadableId) {
+        addAttributes(attributes)
     }
 
-    public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
-                   String humanReadableId, Map<String, String> attributes) {
-        this(subjectId, externalId, externalLink, project, humanReadableId);
-        this.setAttributes(attributes);
+    fun addAttributes(attributes: Map<String, String>) {
+        this.attributes.putAll(attributes)
     }
 
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes.putAll(attributes);
+    fun attributes(): Map<String, String> {
+        return attributes
     }
 
-    public Long getMpId() { return mpId; }
-
-    public String getStatus() { return status; }
-
-    public String getSubjectId() {
-        return subjectId;
-    }
-
-    public Integer getExternalId() {
-        return externalId;
-    }
-
-    public URL getExternalLink() {
-        return externalLink;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
 
     /**
      * Returns the Human Readable Identifier associated with this subject.
-     * @return {@link String} stating the Human Readable Identifier associated with this subject
+     * @return [String] stating the Human Readable Identifier associated with this subject
      */
-    @JsonIgnore
-    public String getHumanReadableIdentifier() {
-        return attributes.get(HUMAN_READABLE_IDENTIFIER_KEY);
-    }
+    @get:JsonIgnore
+    val humanReadableIdentifier: String?
+        get() = attributes[HUMAN_READABLE_IDENTIFIER_KEY]
 
     /**
-     * Converts the {@link Response#body()} to a {@link List} of {@link Subject} entity.
-     * @param response {@link Response} that has to be converted
-     * @return {@link Subject} stored in the {@link Response#body()}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static List<Subject> getObjects(Response response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        byte[] body = response.body().bytes();
-        response.close();
-        return mapper.readValue(body, new TypeReference<List<Subject>>(){});
-    }
-
-    /**
-     * Converts the {@link Response#body()} to a {@link Project} entity.
-     * @param response {@link Response} that has to be converted
-     * @return {@link Project} stored in the {@link Response#body()}
-     * @throws IOException in case the conversion cannot be computed
-     */
-    @JsonIgnore
-    public static Subject getObject(Response response) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        byte[] body = response.body().bytes();
-        response.close();
-        return mapper.readValue(body, Subject.class);
-    }
-
-    /**
-     * Generates the {@link JsonNode} representation of the current instance.
-     * @return {@link JsonNode} serialising this object
+     * Generates the [JsonNode] representation of the current instance.
+     * @return [JsonNode] serialising this object
      * @throws IOException in case the serialisation cannot be complete
      */
-    @JsonIgnore
-    public JsonNode getJson() throws IOException {
-        return new ObjectMapper().readTree(getJsonString());
-    }
+    @get:Throws(IOException::class)
+    @get:JsonIgnore
+    val json: JsonNode
+        get() = ObjectMapper().readTree(jsonString)
 
     /**
-     * Generates the JSON {@link String} representation of the current instance.
-     * @return {@link String} serialising this object
+     * Generates the JSON [String] representation of the current instance.
+     * @return [String] serialising this object
      * @throws IOException in case the serialisation cannot be complete
      */
-    @JsonIgnore
-    public String getJsonString() throws IOException {
-        return new ObjectMapper().writeValueAsString(this);
+    @get:Throws(IOException::class)
+    @get:JsonIgnore
+    val jsonString: String
+        get() = ObjectMapper().writeValueAsString(this)
+
+    companion object {
+        const val HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier"
+
+        private val mapper = ObjectMapper().also {
+            it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            it.registerModule(KotlinModule())
+        }
+
+        /**
+         * Converts the [Response.body] to a [List] of [Subject] entity.
+         * @param response [Response] that has to be converted
+         * @return [Subject] stored in the [Response.body]
+         * @throws IOException in case the conversion cannot be computed
+         */
+        @Throws(IOException::class)
+        fun subjects(response: Response): List<Subject> {
+            val body = response.body()!!.bytes()
+            response.close()
+            return mapper.readValue(
+                body,
+                object : TypeReference<List<Subject>>() {})
+        }
+
+        /**
+         * Converts the [Response.body] to a [Project] entity.
+         * @param response [Response] that has to be converted
+         * @return [Project] stored in the [Response.body]
+         * @throws IOException in case the conversion cannot be computed
+         */
+        @Throws(IOException::class)
+        fun subject(response: Response): Subject {
+            val body = response.body()!!.bytes()
+            response.close()
+            return mapper.readValue(
+                body,
+                Subject::class.java
+            )
+        }
     }
 }

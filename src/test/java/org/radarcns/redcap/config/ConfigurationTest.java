@@ -15,6 +15,7 @@ package org.radarcns.redcap.config;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -29,7 +30,7 @@ public class ConfigurationTest {
     @Test
     public void loadConfigTest() throws IOException {
         Configuration config = new YamlConfigLoader().load(new File(
-                ConfigurationTest.class.getClassLoader().getResource("config.yml").getFile()),
+                        ConfigurationTest.class.getClassLoader().getResource("config.yml").getFile()),
                 Configuration.class);
 
         assertEquals("1.0", config.getVersion());
@@ -43,7 +44,7 @@ public class ConfigurationTest {
 
         RedCapInfo redCapInfo = new RedCapInfo(new URL("https://localhost/"),
                 0, "enrolment", "radar_enrolment",
-                "1234567890");
+                "1234567890", Collections.emptySet());
         ManagementPortalInfo mpInfo = new ManagementPortalInfo("project-0");
 
         assertEquals(Collections.singleton(new ProjectInfo(redCapInfo, mpInfo)),

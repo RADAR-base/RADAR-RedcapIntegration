@@ -5,12 +5,13 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
 }
 
 group 'org.radarcns'
 version '0.1.0'
 
-mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
+mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServerKt'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -29,6 +30,8 @@ repositories {
 }
 
 sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.java.srcDirs += 'src/main/kotlin'
     integrationTest {
         java {
             compileClasspath += main.output + test.output + test.compileClasspath
@@ -48,11 +51,11 @@ ext.junitVersion = '4.12'
 ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
 ext.radarCommonsVersion = '0.9.0'
-ext.radarOauthClientVersion = '0.4.0'
+ext.radarOauthClientVersion = '0.5.8'
 ext.grizzlyVersion = '2.3.19'
 
 dependencies {
-    runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
+    runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
@@ -68,6 +71,11 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+"
+    compile "org.json:json:20170516"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
 }
@@ -86,7 +94,7 @@ checkstyle {
 
 pmd {
     // pmd version
-    toolVersion = '5.5.2'
+    toolVersion = '6.0.0'
     ignoreFailures = false
 
     sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
@@ -117,13 +125,13 @@ gradle.projectsEvaluated {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
+wrapper {
+    gradleVersion = '6.4'
 }
 
-tasks.withType(Tar){
+tasks.withType(Tar) {
     compression = Compression.GZIP
-    extension = 'tar'
+    extension("tar")
 }
 
 //---------------------------------------------------------------------------//
@@ -166,7 +174,7 @@ ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? [
 ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
 
 task installMP(type: Exec) {
-    doFirst{
+    doFirst {
         def lockFile = new File(lock)
         if (lockFile.exists()) {
             throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
@@ -190,7 +198,7 @@ task removeLock(type: Exec) {
     workingDir 'src/integration-test/'
     commandLine sudoLinux + ['docker-compose', 'down']
 
-    doLast{
+    doLast {
         new File(lock).delete()
     }
 }
@@ -202,5 +210,15 @@ task copyConf(type: Copy) {
     filter { String line ->
         line.replace("management_portal_url: http://managementportal-app:8090/",
                 "management_portal_url: http://localhost:8090/")
+    }
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }

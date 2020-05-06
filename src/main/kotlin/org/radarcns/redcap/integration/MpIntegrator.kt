@@ -1,4 +1,10 @@
-package org.radarcns.redcap.integration;
+package org.radarcns.redcap.integration
+
+import org.radarcns.redcap.managementportal.MpClient
+import org.radarcns.redcap.managementportal.Project
+import org.radarcns.redcap.managementportal.Subject
+import org.slf4j.LoggerFactory
+import java.net.URL
 
 /*
  * Copyright 2017 King's College London
@@ -14,93 +20,103 @@ package org.radarcns.redcap.integration;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-
-import org.radarcns.redcap.managementportal.MpClient;
-import org.radarcns.redcap.managementportal.Project;
-import org.radarcns.redcap.managementportal.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URL;
-import java.util.Map;
-
-/** Handler for updating Integrator Redcap form parameters. The input parameters are
- *      described by {@link IntegrationData}.
+ */ /** Handler for updating Integrator Redcap form parameters. The input parameters are
+ * described by [IntegrationData].
  * @see MpClient
  */
-public class MpIntegrator {
-
-    private static final Logger Logger = LoggerFactory.getLogger(MpIntegrator.class);
-
-    private static final String SEPARATOR = "-";
-
-    private static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
-
-    private MpClient mpClient;
-
-    public MpIntegrator(MpClient mpClient) {
-        this.mpClient = mpClient;
-    }
-
+class MpIntegrator(private val mpClient: MpClient) {
     /**
      * Performs update of the subject on Management portal from the information
      * sent from Redcap trigger. If subject does not exist, it creates a new one,
      * otherwise it just returns the subject.
      * TODO update the subject in case it exists
      * @see MpClient
+     *
      * @param redcapUrl the Redcap URL
      * @param projectId the Redcap Project ID
      * @param recordId the Redcap Record ID
-     * @return {@link Subject} from the Management Portal
+     * @return [Subject] from the Management Portal
      */
-    public Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
-                                             Integer recordId, Map<String, String> attributes) {
-        try {
-            Project project = mpClient.getProject(redcapUrl, projectId);
-            String radarWorkPackage = project.getWorkPackage().toUpperCase();
-            String location = project.getLocation().toUpperCase();
-            String humanReadableId = createHumanReadableId(radarWorkPackage, project.getId().toString(), location, recordId.toString());
-
-            Subject subject = subjectExistsUpdateElseCreate(redcapUrl, projectId, recordId, project, humanReadableId, attributes);
-            return subject;
-
-        } catch (NullPointerException exc) {
-            Logger.error("Project or Project attributes (Work Package, etc) cannot be null", exc);
-            throw new IllegalStateException("Project or Project attributes (Work Package, etc) in MP cannot be null.", exc);
-        } catch (Exception exc) {
-            Logger.error(exc.getMessage(), exc);
-            throw new IllegalStateException("Subject creation cannot be completed.", exc);
+    fun performSubjectUpdateOnMp(
+        redcapUrl: URL, projectId: Int,
+        recordId: Int, attributes: MutableMap<String, String>
+    ): Subject {
+        return try {
+            val project = mpClient.getProject(redcapUrl, projectId)
+            val radarWorkPackage = project.workPackage!!.toUpperCase()
+            val location = project.location.toUpperCase()
+            val humanReadableId = createHumanReadableId(
+                radarWorkPackage,
+                project.id.toString(),
+                location,
+                recordId.toString()
+            )
+            subjectExistsUpdateElseCreate(
+                redcapUrl, projectId, recordId, project, humanReadableId, attributes
+            )
+        } catch (exc: NullPointerException) {
+            throw IllegalStateException(
+                "Project or Project attributes (Work Package, etc) in MP cannot be null.",
+                exc
+            )
+        } catch (exc: Exception) {
+            throw IllegalStateException("Subject creation cannot be completed.", exc)
         }
     }
 
-    private Subject subjectExistsUpdateElseCreate(URL redcapUrl, Integer projectId, Integer recordId, Project project, String humanReadableId, Map<String, String> attributes){
-        try {
-            Subject subject = mpClient.getSubject(redcapUrl, projectId, recordId);
-            if(subject != null) {
-                Logger.info("Subject for Record Id: {} at {} is already available, updating...", recordId,
-                        redcapUrl);
-                attributes.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
-                subject.setAttributes(attributes);
-                subject = mpClient.updateSubject(subject);
+    private fun subjectExistsUpdateElseCreate(
+        redcapUrl: URL,
+        projectId: Int,
+        recordId: Int,
+        project: Project,
+        humanReadableId: String,
+        attributes: MutableMap<String, String>
+    ): Subject {
+        return try {
+            var subject =
+                mpClient.getSubject(redcapUrl, projectId, recordId)
+            if (subject != null) {
+                Logger.info(
+                    "Subject for Record Id: {} at {} is already available, updating...", recordId,
+                    redcapUrl
+                )
+                attributes[HUMAN_READABLE_IDENTIFIER_KEY] = humanReadableId
+                subject.addAttributes(attributes)
+                subject = mpClient.updateSubject(subject)
+            } else {
+                subject = mpClient.createSubject(
+                    redcapUrl,
+                    project,
+                    recordId,
+                    humanReadableId,
+                    attributes
+                )
+                Logger.info(
+                    "Created RADAR subject: {}. Human readable identifier is: {}",
+                    subject.subjectId, humanReadableId
+                )
             }
-            else {
-                subject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId, attributes);
-                Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",
-                        subject.getSubjectId(), humanReadableId);
-            }
-            return subject;
-        } catch (Exception e) {
-            throw new IllegalStateException("Subject creation cannot be completed.", e);
+            subject
+        } catch (e: Exception) {
+            throw IllegalStateException("Subject creation cannot be completed.", e)
         }
     }
 
-    private String createHumanReadableId(String a, String b, String c, String d){
-        String humanReadableId = a.concat(SEPARATOR).concat(
-               b).concat(SEPARATOR).concat(c).concat(
-                SEPARATOR).concat(d);
-        return humanReadableId;
+    private fun createHumanReadableId(
+        a: String,
+        b: String,
+        c: String,
+        d: String
+    ): String {
+        return a + SEPARATOR +
+                b + SEPARATOR + c +
+                SEPARATOR + d
+    }
+
+    companion object {
+        private val Logger = LoggerFactory.getLogger(MpIntegrator::class.java)
+        private const val SEPARATOR = "-"
+        private const val HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier"
     }
 
 }
