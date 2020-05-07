@@ -40,12 +40,22 @@ object Properties {
     /** API Config file name.  */
     private const val NAME_CONFIG_FILE = "radar.yml"
     /** Path where the config file is located.  */ //private static String validPath;
-    private var CONFIG: Configuration? = null
-
-    private val mapper = ObjectMapper(YAMLFactory()).apply {
-        registerModule(KotlinModule())
-        propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+    private val CONFIG: Configuration by lazy {
+        try {
+            loadApiConfig()
+        } catch (exec: IOException) {
+            LOGGER.error(exec.message, exec)
+            throw ExceptionInInitializerError(exec)
+        }
     }
+
+    private val mapper by lazy {
+        ObjectMapper(YAMLFactory()).apply {
+            registerModule(KotlinModule())
+            propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+        }
+    }
+
 
     /**
      * Loads the API configuration file. First of all, the `CONFIG_FOLDER` env variable is
@@ -55,13 +65,9 @@ object Properties {
      */
     @Throws(IOException::class)
     private fun loadApiConfig(): Configuration {
-        val paths = arrayOf(
-            System.getenv(CONFIG_FOLDER) ?: ".",
-            PATH_FILE
-        )
-        var config: Configuration?
+        val paths = arrayOf(System.getenv(CONFIG_FOLDER) ?: ".", PATH_FILE)
         for (path in paths) {
-            config = loadApiConfig(path)
+            val config = loadApiConfig(path)
             if (config != null) {
                 return config
             }
@@ -74,8 +80,7 @@ object Properties {
                 paths.size
             )
             LOGGER.error(
-                "Config file {} cannot be found at {} or in the resources"
-                        + "folder.",
+                "Config file {} cannot be found at {} or in the resources folder.",
                 NAME_CONFIG_FILE,
                 folders,
                 CONFIG_FOLDER
@@ -90,20 +95,15 @@ object Properties {
     private fun loadApiConfig(path: String): Configuration? { //validPath = path;
         val filePath = path + NAME_CONFIG_FILE
         if (checkFileExist(filePath)) {
-            LOGGER.info(
-                "Loading Config file located at : {}",
-                path
-            )
+            LOGGER.info("Loading Config file located at : {}", path)
             return loadConfig(File(filePath))
         }
         //validPath = null;
         return null
     }
 
-    fun loadConfig(file: File): Configuration {
-        return file.inputStream().use {
-            mapper.readValue(it, Configuration::class.java)
-        }
+    fun loadConfig(file: File): Configuration = file.inputStream().use {
+        mapper.readValue(it, Configuration::class.java)
     }
 
     /**
@@ -121,47 +121,26 @@ object Properties {
      * fails, it means that the config files are wrong.
      * @return a [String] representing the loaded configurations
      */
-    fun validate(): String {
-        return CONFIG.toString()
-    }
+    fun validate(): String = CONFIG.toString()
 
     @JvmStatic
     fun isSupportedInstance(url: URL, projectId: Int): Boolean {
         val identifier = RedCapInfo(url, projectId)
-        for (info in CONFIG!!.projects) {
-            if (info.redCapInfo.equals(identifier)) {
-                return true
-            }
-        }
-        return false
+        return CONFIG.projects.any { it.redCapInfo == identifier }
     }
 
     @JvmStatic
     fun getRedCapInfo(url: URL, projectId: Int): RedCapInfo {
         val identifier = RedCapInfo(url, projectId)
-        for (info in CONFIG!!.projects) {
-            if (info.redCapInfo.equals(identifier)) {
-                return info.redCapInfo
-            }
-        }
-        throw IllegalArgumentException(
-            "No project " + projectId + " for instance "
-                    + url.toString()
-        )
+        return CONFIG.projects.find { it.redCapInfo == identifier }?.redCapInfo
+            ?: throw IllegalArgumentException("No project $projectId for instance $url")
     }
 
     @JvmStatic
     fun getMpInfo(url: URL, projectId: Int): ManagementPortalInfo {
         val identifier = RedCapInfo(url, projectId)
-        for (info in CONFIG!!.projects) {
-            if (info.redCapInfo.equals(identifier)) {
-                return info.mpInfo
-            }
-        }
-        throw IllegalArgumentException(
-            "No project " + projectId + " for instance "
-                    + url.toString()
-        )
+        return CONFIG.projects.find { it.redCapInfo == identifier }?.mpInfo
+            ?: throw IllegalArgumentException("No project $projectId for instance $url")
     }
 
     /**
@@ -170,7 +149,7 @@ object Properties {
      */
     @JvmStatic
     val oauthClientId: String
-        get() = CONFIG!!.oauthClientId
+        get() = CONFIG.oauthClientId
 
     /**
      * Get the OAuth2 client secret to access ManagementPortal.
@@ -178,7 +157,7 @@ object Properties {
      */
     @JvmStatic
     val oauthClientSecret: String
-        get() = CONFIG!!.oauthClientSecret
+        get() = CONFIG.oauthClientSecret
 
     /**
      * Generates the token end point [URL] needed to refresh tokens against Management Portal.
@@ -188,10 +167,7 @@ object Properties {
     @JvmStatic
     @get:Throws(MalformedURLException::class)
     val tokenEndPoint: URL
-        get() = URL(
-            validateMpUrl(),
-            CONFIG!!.tokenEndpoint
-        )
+        get() = URL(validateMpUrl(), CONFIG.tokenEndpoint)
 
     /**
      * Generates the token end point [URL] needed to manage subjects on Management Portal.
@@ -200,10 +176,7 @@ object Properties {
      */
     @get:Throws(MalformedURLException::class)
     val subjectEndPoint: URL
-        get() = URL(
-            validateMpUrl(),
-            CONFIG!!.subjectEndpoint
-        )
+        get() = URL(validateMpUrl(), CONFIG.subjectEndpoint)
 
     /**
      * Generates the Project end point [URL] needed to read projects on Management Portal.
@@ -213,13 +186,9 @@ object Properties {
      * @throws MalformedURLException in case the [URL] cannot be generated
      */
     @Throws(MalformedURLException::class)
-    fun getProjectEndPoint(mpInfo: ManagementPortalInfo): URL {
-        return URL(
-            validateMpUrl(),
-            CONFIG!!.projectEndpoint +
-                    mpInfo.projectName
-        )
-    }
+    fun getProjectEndPoint(mpInfo: ManagementPortalInfo): URL = URL(
+        validateMpUrl(), CONFIG.projectEndpoint + mpInfo.projectName
+    )
 
     /**
      * Generates the base Project end point [URL] needed to read projects on Management Portal.
@@ -230,19 +199,14 @@ object Properties {
     @JvmStatic
     @get:Throws(MalformedURLException::class)
     val projectEndPoint: URL
-        get() = URL(
-            validateMpUrl(),
-            CONFIG!!.projectEndpoint
-        )
+        get() = URL(validateMpUrl(), CONFIG.projectEndpoint)
 
     /**
      * Checks if the provided [URL] is using a secure connection or not.
      * @param url [URL] to check
      * @return `true` if the protocol is `HTTPS`, `false` otherwise
      */
-    private fun isSecureConnection(url: URL): Boolean {
-        return url.protocol == HTTPS
-    }
+    private fun isSecureConnection(url: URL): Boolean = url.protocol == HTTPS
 
     /**
      * Returns a [URL] pointing a Management Portal instance and Checks if it is using a
@@ -250,13 +214,13 @@ object Properties {
      * @return [URL] pointing the Management Portal instance specified on the config file
      */
     fun validateMpUrl(): URL {
-        if (!isSecureConnection(CONFIG!!.managementPortalUrl)) {
+        if (!isSecureConnection(CONFIG.managementPortalUrl)) {
             LOGGER.warn(
                 "The provided Management Portal instance is not using an encrypted"
                         + " connection."
             )
         }
-        return CONFIG!!.managementPortalUrl
+        return CONFIG.managementPortalUrl
     }
 
     /**
@@ -270,14 +234,5 @@ object Properties {
             LOGGER.warn("The provided REDCap instance is not using an encrypted connection.")
         }
         return url
-    }
-
-    init {
-        CONFIG = try {
-            loadApiConfig()
-        } catch (exec: IOException) {
-            LOGGER.error(exec.message, exec)
-            throw ExceptionInInitializerError(exec)
-        }
     }
 }
