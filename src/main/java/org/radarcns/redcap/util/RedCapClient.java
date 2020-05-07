@@ -113,7 +113,7 @@ public class RedCapClient {
         }
     }
 
-    public Map<String, String> fetchFormDataForId(List<String> fields, Integer recordId) {
+    public Map<String, Object> fetchFormDataForId(List<String> fields, Integer recordId) {
         ArrayList<String> records = new ArrayList<String>();
         records.add(String.valueOf(recordId));
         Map<String, String> parameters = getFormFetchParameters(fields, records);
@@ -152,7 +152,7 @@ public class RedCapClient {
         Map<String, String> encoded = new HashMap<>();
         int index = 0;
         while (index < data.size()){
-            encoded.put(label + "[" + (String.valueOf(index)) +"]", data.get(index));
+            encoded.put(label + "[" + index + "]", data.get(index));
             index ++;
         }
         return encoded;

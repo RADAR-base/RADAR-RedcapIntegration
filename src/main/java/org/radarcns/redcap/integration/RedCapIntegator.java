@@ -19,6 +19,7 @@ package org.radarcns.redcap.integration;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
 import org.radarcns.redcap.managementportal.Subject;
+import org.radarcns.redcap.util.AttributeFieldParser;
 import org.radarcns.redcap.util.RedCapClient;
 import org.radarcns.redcap.util.RedCapInput;
 import org.radarcns.redcap.util.RedCapTrigger;
@@ -62,8 +63,12 @@ public class RedCapIntegator {
     }
 
     public Map<String, String> pullRecordAttributes(List<String> attributes, Integer recordId){
-            Map<String, String> data = redCapClient.fetchFormDataForId(attributes, recordId);
-            return data;
+            Map<String, String> fetchedAttributes = new HashMap<>();
+            AttributeFieldParser parser = new AttributeFieldParser();
+            Map<String, Object> fieldData = redCapClient.fetchFormDataForId(attributes, recordId);
+            for (Map.Entry<String, Object> entry : fieldData.entrySet())
+                fetchedAttributes.put(entry.getKey(), parser.parseField(entry.getValue()));
+            return fetchedAttributes;
     }
 
 }
