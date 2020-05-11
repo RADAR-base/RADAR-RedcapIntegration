@@ -39,7 +39,7 @@ object Properties {
     private const val CONFIG_FOLDER = "REDCAP_INTEGRATION_CONFIG_FOLDER"
     /** API Config file name.  */
     private const val NAME_CONFIG_FILE = "radar.yml"
-    /** Path where the config file is located.  */ //private static String validPath;
+    /** Path where the config file is located.  */
     val CONFIG: Configuration by lazy {
         try {
             loadApiConfig()
@@ -73,7 +73,6 @@ object Properties {
             }
         }
         val path = Properties::class.java.classLoader.getResource(NAME_CONFIG_FILE)?.file
-        //validPath = new File(path).getParent() + "/";
         val folders = paths.copyOfRange(
             if (System.getenv(CONFIG_FOLDER) == null) 1 else 0,
             paths.size
@@ -92,13 +91,12 @@ object Properties {
     }
 
     @Throws(IOException::class)
-    private fun loadApiConfig(path: String): Configuration? { //validPath = path;
+    private fun loadApiConfig(path: String): Configuration? {
         val filePath = path + NAME_CONFIG_FILE
         if (checkFileExist(filePath)) {
             LOGGER.info("Loading Config file located at : {}", path)
             return loadConfig(File(filePath))
         }
-        //validPath = null;
         return null
     }
 

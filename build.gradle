@@ -13,8 +13,8 @@ version '0.1.0'
 
 mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+targetCompatibility = '11'
+sourceCompatibility = '11'
 
 configurations {
     codacy
@@ -40,7 +40,7 @@ sourceSets {
         java {
             compileClasspath += main.output + test.output + test.compileClasspath
             runtimeClasspath += main.output + test.output + test.compileClasspath + test.runtimeClasspath + main.runtimeClasspath
-            srcDir file('src/integration-test/java')
+            srcDir file('src/integration-test/kotlin')
         }
         resources.srcDir file('src/integration-test/resources')
     }
@@ -83,8 +83,6 @@ dependencies {
     compile "org.json:json:20170516"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
-    testCompile "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+"
-    testCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.+"
 }
 
 //---------------------------------------------------------------------------//
@@ -158,7 +156,7 @@ task downloadApplicationDependencies {
     configurations.runtimeClasspath.files
 }
 
-task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
+task integrationTest(type: Test, dependsOn: ['copyConf']) { //['installMP', 'copyConf']) {
     description = "Run integration tests (located in src/integrationTest/...)."
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -174,7 +172,7 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     }
 }
 
-integrationTest.finalizedBy 'removeLock'
+//integrationTest.finalizedBy 'removeLock'
 
 ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
 ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
@@ -220,11 +218,11 @@ task copyConf(type: Copy) {
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }

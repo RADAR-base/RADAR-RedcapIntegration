@@ -1,63 +1,75 @@
-package org.radarcns.redcap.managementportal;
+package org.radarcns.redcap.managementportal
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.radarcns.redcap.util.IntegrationUtils.REDCAP_PROJECT_ID;
-import static org.radarcns.redcap.util.IntegrationUtils.REDCAP_RECORD_ID_1;
-import static org.radarcns.redcap.util.IntegrationUtils.REDCAP_URL;
-import static org.radarcns.redcap.util.IntegrationUtils.WORK_PACKAGE;
-import static org.radarcns.redcap.util.IntegrationUtils.mpClient;
-import static org.radarcns.redcap.util.IntegrationUtils.updateProjectAttributes;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-import org.radarcns.exception.TokenException;
+import org.junit.Assert
+import org.junit.Before
+import org.junit.FixMethodOrder
+import org.junit.Test
+import org.junit.runners.MethodSorters
+import org.radarcns.exception.TokenException
+import org.radarcns.redcap.util.IntegrationUtils
+import java.io.IOException
+import java.net.URISyntaxException
+import java.net.URL
+import java.util.*
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MpClientTest {
-    private Project project;
-    private Map<String, String> testAttributes = new HashMap<>();
+class MpClientTest {
+    private var project: Project? = null
+    private val testAttributes: Map<String, String> =
+        HashMap()
 
     @Before
-    public void init() throws IOException, TokenException {
-        updateProjectAttributes();
+    @Throws(IOException::class, TokenException::class)
+    fun init() {
+        IntegrationUtils.updateProjectAttributes()
+    }
+
+    @Throws(IOException::class)
+    @Test
+    fun projectTest() {
+        project = IntegrationUtils.mpClient.getProject(
+            URL(IntegrationUtils.REDCAP_URL),
+            IntegrationUtils.REDCAP_PROJECT_ID
+        )
+        Assert.assertEquals("radar", project!!.projectName)
     }
 
     @Test
-    public void getProjectTest() throws IOException {
-        project = mpClient.getProject(new URL(REDCAP_URL), REDCAP_PROJECT_ID);
-        assertEquals("radar", project.getProjectName());
-    }
-
-    @Test
-    public void createSubjectTest1() throws IOException, URISyntaxException {
-        if (project==null) {
-            getProjectTest();
+    @Throws(IOException::class, URISyntaxException::class)
+    fun createSubjectTest1() {
+        if (project == null) {
+            projectTest()
         }
-        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1,
-                WORK_PACKAGE + REDCAP_RECORD_ID_1, testAttributes);
-        Subject subject = mpClient.getSubject(new URL(REDCAP_URL), REDCAP_PROJECT_ID,
-                REDCAP_RECORD_ID_1);
-
-        assertNotNull(subject);
-        assertEquals(Integer.valueOf(REDCAP_RECORD_ID_1), subject.getExternalId());
-        assertEquals(WORK_PACKAGE + REDCAP_RECORD_ID_1, subject.getHumanReadableIdentifier());
+        IntegrationUtils.mpClient.createSubject(
+            URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
+        )
+        val subject =
+            IntegrationUtils.mpClient.getSubject(
+                URL(IntegrationUtils.REDCAP_URL), IntegrationUtils.REDCAP_PROJECT_ID,
+                IntegrationUtils.REDCAP_RECORD_ID_1
+            )
+        Assert.assertNotNull(subject)
+        Assert.assertEquals(
+            Integer.valueOf(IntegrationUtils.REDCAP_RECORD_ID_1),
+            subject!!.externalId
+        )
+        Assert.assertEquals(
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1,
+            subject.humanReadableIdentifier
+        )
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void createSubjectTest2() throws IOException {
-        if (project==null) {
-            getProjectTest();
+    @Test(expected = IllegalStateException::class)
+    @Throws(IOException::class)
+    fun createSubjectTest2() {
+        if (project == null) {
+            projectTest()
         }
         // This should throw exception since subject already exists
-        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1,
-                WORK_PACKAGE + REDCAP_RECORD_ID_1, testAttributes);
+        IntegrationUtils.mpClient.createSubject(
+            URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
+        )
     }
 }
