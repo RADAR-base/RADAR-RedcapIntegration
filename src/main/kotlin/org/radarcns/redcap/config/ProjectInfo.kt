@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Configuration file entry to define Project settings. Each item provides an instance of
  * [RedCapInfo] and an instance of [ManagementPortalInfo] defining respectively
  * REDCap and Management Portal configurations.

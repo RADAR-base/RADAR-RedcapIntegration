@@ -1,8 +1,10 @@
 package org.radarcns.redcap.managementportal
 
+import okhttp3.MediaType.parse
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import org.radarcns.exception.TokenException
 import org.radarcns.oauth.OAuth2Client
 import org.radarcns.redcap.config.Properties
@@ -55,63 +57,54 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
 
     @Throws(IOException::class)
     fun getProject(redcapUrl: URL, projectId: Int): Project {
-        val mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId)
-        val request =
-            getBuilder(Properties.getProjectEndPoint(mpInfo)).get()
-                .build()
-        try {
-            httpClient.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    val project = Project.project(response)
-                    validateProject(
-                        Properties.getProjectEndPoint(mpInfo),
-                        project, redcapUrl, projectId
-                    )
-                    LOGGER.debug("Retrieve project {}", project.toString())
-                    return project
-                }
-                throw IllegalStateException(
-                    "Error while retrieving project info from "
-                            + Properties.getProjectEndPoint(mpInfo) + ". Response code: "
-                            + response.code() + " Message: " + response.message()
+        val projectEndpoint =
+            Properties.getProjectEndPoint(RedCapManager.getRelatedMpInfo(redcapUrl, projectId))
+        val request = getBuilder(projectEndpoint).get().build()
+        val errorMessage = "Error while retrieving project info from $projectEndpoint."
+
+        return performRequest(
+            request = request,
+            onSuccess = { response ->
+                val project =
+                    Project.project(response)
+                validateProject(projectEndpoint, project, redcapUrl, projectId)
+                LOGGER.debug("Retrieved project {}", project.toString())
+                project
+            },
+            onError = { response ->
+                throw IOException(
+                    errorMessage +
+                            " Response code: ${response.code()} Message: ${response.message()}"
                 )
-            }
-        } catch (ex: IOException) {
-            throw IllegalStateException(
-                "IO error while retrieving project info from "
-                        + Properties.getProjectEndPoint(mpInfo) + ".",
-                ex
-            )
-        }
+            },
+            errorMessage = errorMessage
+        ) ?: throw IOException(errorMessage)
     }
 
     fun updateSubject(subject: Subject): Subject {
-        return try {
-            val request =
-                getBuilder(Properties.subjectEndPoint)
-                    .put(
-                        RequestBody.create(
-                            okhttp3.MediaType.parse(MediaType.APPLICATION_JSON), subject.jsonString
-                        )
-                    )
-                    .build()
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
+        val request =
+            getBuilder(Properties.subjectEndPoint)
+                .put(RequestBody.create(parse(MediaType.APPLICATION_JSON), subject.jsonString))
+                .build()
+        val errorMessage = "Subject cannot be updated."
+        return performRequest(
+            request = request,
+            onSuccess = {
                 LOGGER.debug(
                     "Successfully updated subject: {}",
                     subject.jsonString
                 )
                 subject
-            } else {
+            },
+            onError = { response ->
                 throw IllegalStateException(
-                    "Subject cannot be updated. Response code: "
-                            + response.code() + " Message: " + response.message() + " Info: "
-                            + response.body()!!.string()
+                    errorMessage + "Response code: " + response.code() +
+                            " Message: " + response.message() +
+                            " Info: " + response.body()!!.string()
                 )
-            }
-        } catch (exc: IOException) {
-            throw IllegalStateException("Subject cannot be created", exc)
-        }
+            },
+            errorMessage = errorMessage
+        ) ?: throw IOException(errorMessage)
     }
 
     fun createSubject(
@@ -120,42 +113,44 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         recordId: Int,
         humanReadableId: String,
         attributes: Map<String, String>
-    ): Subject { //TODO check how to generate UUID
-        return try {
-            val radarSubjectId = UUID.randomUUID().toString()
-            val subject =
-                Subject(
-                    radarSubjectId, recordId,
-                    RedCapManager.getRecordUrl(redcapUrl, project.redCapId!!, recordId),
-                    project, humanReadableId, attributes
+    ): Subject {
+
+        val radarSubjectId = UUID.randomUUID().toString()
+        val subject = Subject(
+            subjectId = radarSubjectId,
+            externalId = recordId,
+            externalLink = RedCapManager.getRecordUrl(redcapUrl, project.redCapId!!, recordId),
+            project = project,
+            humanReadableId = humanReadableId,
+            attributes = attributes
+        )
+        val request =
+            getBuilder(Properties.subjectEndPoint).post(
+                RequestBody.create(
+                    parse(MediaType.APPLICATION_JSON), subject.jsonString
                 )
-            val request =
-                getBuilder(Properties.subjectEndPoint)
-                    .post(
-                        RequestBody.create(
-                            okhttp3.MediaType.parse(
-                                MediaType.APPLICATION_JSON
-                            ), subject.jsonString
-                        )
-                    )
-                    .build()
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
+            ).build()
+
+        val errorMessage = "Subject cannot be created."
+
+        return performRequest(
+            request = request,
+            onSuccess = {
                 LOGGER.debug(
                     "Successfully created subject: {}",
                     subject.jsonString
                 )
                 subject
-            } else {
+            },
+            onError = { response ->
                 throw IllegalStateException(
-                    "Subject cannot be created. Response code: "
+                    errorMessage + " Response code: "
                             + response.code() + " Message: " + response.message() + " Info: "
                             + response.body()!!.string()
                 )
-            }
-        } catch (exc: IOException) {
-            throw IllegalStateException("Subject cannot be created", exc)
-        }
+            },
+            errorMessage = errorMessage
+        ) ?: throw IOException("Subject cannot be created")
     }
 
     @Throws(IOException::class, URISyntaxException::class)
@@ -167,67 +162,75 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         val mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId)
         val request = getBuilder(
             getSubjectUrl(
-                Properties.subjectEndPoint,
-                mpInfo.projectName, recordId
+                Properties.subjectEndPoint, mpInfo.projectName, recordId
             )
         ).get().build()
-        try {
+
+        return performRequest(
+            request = request,
+            onSuccess = { response ->
+                val subjects = Subject.subjects(response)
+                check(subjects.size <= 1) {
+                    ("More than 1 subjects exist with same "
+                            + "externalId in the same Project")
+                }
+                subjects[0]
+            },
+            onError = {
+                LOGGER.info("Subject is not present")
+                null
+            },
+            errorMessage = "Subject could not be retrieved"
+        )
+    }
+
+    @Throws(IOException::class)
+    private fun <T> performRequest(
+        request: Request,
+        onSuccess: (Response) -> T,
+        onError: (Response) -> T? = { throw IOException("Error when performing request: $it") },
+        errorMessage: String = "Problem performing operation on Entity."
+    ): T? {
+
+        return try {
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    val subjects =
-                        Subject.subjects(response)
-                    check(subjects.size <= 1) {
-                        ("More than 1 subjects exist with same "
-                                + "externalId in the same Project")
-                    }
-                    return subjects[0]
+                    onSuccess(response)
+                } else {
+                    onError(response)
                 }
-                LOGGER.info("Subject is not present")
-                return null
             }
-        } catch (exc: IOException) {
-            throw IllegalStateException("Subject could not be retrieved", exc)
+        } catch (ex: IOException) {
+            throw IOException(errorMessage, ex)
         }
     }
 
     @Throws(IOException::class)
-    private fun getBuilder(url: URL): Request.Builder {
-        return Request.Builder()
-            .url(url)
-            .addHeader("Authorization", "Bearer $token")
-    }
+    private fun getBuilder(url: URL) =
+        Request.Builder().url(url).addHeader("Authorization", "Bearer $token")
 
     companion object {
-        private val LOGGER =
-            LoggerFactory.getLogger(MpClient::class.java)
+        private val LOGGER = LoggerFactory.getLogger(MpClient::class.java)
 
-        private fun validateProject(
-            mp: URL, project: Project,
-            redcapUrl: URL, projectId: Int
-        ) {
+        private fun validateProject(mp: URL, project: Project, redcapUrl: URL, projectId: Int) {
             val message = ("Project " + project.id + " at "
                     + mp.toString() + " seems to be not linked to the REDCap project " + projectId
                     + " at " + redcapUrl + ". Please check values set for "
                     + Project.EXTERNAL_PROJECT_URL_KEY + " and " + Project.EXTERNAL_PROJECT_ID_KEY
                     + " for Project " + project.id + " at " + mp.toString())
             try {
-                require(
-                    !(project.redCapId != projectId
-                            || project.redCapUrl == redcapUrl)
-                ) { message }
+                require(!(project.redCapId != projectId || project.redCapUrl == redcapUrl)) {
+                    message
+                }
             } catch (exc: MalformedURLException) {
                 throw IllegalArgumentException(message + " " + exc.message)
             }
         }
 
         @Throws(URISyntaxException::class, MalformedURLException::class)
-        private fun getSubjectUrl(
-            url: URL,
-            projectName: String,
-            recordId: Int
-        ): URL {
+        private fun getSubjectUrl(url: URL, projectName: String, recordId: Int): URL {
             val oldUri = url.toURI()
-            val parameters = "projectName=" + projectName + "&externalId=" + recordId.toString()
+            val parameters = "projectName=$projectName&externalId=$recordId"
             var newQuery = oldUri.query
             if (newQuery == null) {
                 newQuery = parameters

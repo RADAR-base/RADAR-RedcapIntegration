@@ -14,7 +14,8 @@ package org.radarcns.redcap.webapp.util
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Static class for managing API path labels.
  */
 object PathLabels {

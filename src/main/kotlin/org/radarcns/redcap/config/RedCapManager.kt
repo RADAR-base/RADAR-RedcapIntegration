@@ -22,7 +22,8 @@ import java.net.URL
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Information about the REDCap user used to query the REDCap API.
  */
 object RedCapManager {
@@ -93,19 +94,19 @@ object RedCapManager {
      * @return [URL] pointing the integration form for the given REDCap Record identifier
      * within the specified project.
      * @throws MalformedURLException In case the [URL] cannot be generated
+     * @throws NoSuchElementException In case the [URL] does not contain any characters
      */
-    @Throws(MalformedURLException::class)
+    @Throws(MalformedURLException::class, NoSuchElementException::class)
     fun getRecordUrl(redCapUrl: URL, projectId: Int, recordId: Int): URL {
-        var redCap =
-            getRedCapInfo(redCapUrl, projectId).url.toString()
-        if (redCap[redCap.length - 1] != '/') {
+        val redCapInfo = getRedCapInfo(redCapUrl, projectId)
+        var redCap = redCapInfo.url.toString()
+
+        if (redCap.last() != '/') {
             redCap = "$redCap/"
         }
-        redCap = redCap + PROJECT_ID + projectId.toString()
-        redCap = redCap + RECORD_ID + recordId.toString()
-        val (_, _, enrolmentEvent, integrationForm) = getRedCapInfo(redCapUrl, projectId)
-        redCap = redCap + EVENT_ID + enrolmentEvent
-        redCap = redCap + PAGE_NAME + integrationForm
+
+        redCap = "$redCap$PROJECT_ID$projectId$RECORD_ID$recordId" +
+                "$EVENT_ID${redCapInfo.enrolmentEvent}$PAGE_NAME${redCapInfo.integrationForm}"
         return URL(redCap)
     }
 }

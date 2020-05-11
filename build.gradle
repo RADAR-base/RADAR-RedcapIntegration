@@ -57,6 +57,7 @@ ext.okhttp3Version = '3.8.1'
 ext.radarCommonsVersion = '0.9.0'
 ext.radarOauthClientVersion = '0.5.8'
 ext.grizzlyVersion = '2.4.4'
+ext.jacksonVersion = '2.11.+'
 
 dependencies {
     runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
@@ -78,8 +79,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.+"
-    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.+"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
     compile "org.json:json:20170516"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion

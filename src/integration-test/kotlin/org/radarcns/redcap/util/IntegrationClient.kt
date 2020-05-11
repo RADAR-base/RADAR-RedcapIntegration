@@ -11,7 +11,6 @@ object IntegrationClient {
     private const val WEBAPP_HOST = "http://localhost"
     private const val WEBAPP_PORT = "8080"
 
-    @JvmStatic
     fun makeTriggerRequest(body: String, mediaType: String): Response? {
         val request = Request.Builder()
             .url(WEBAPP_HOST + ":" + WEBAPP_PORT + "/redcap/" + PathLabels.REDCAP_TRIGGER)
@@ -20,7 +19,9 @@ object IntegrationClient {
         try {
             IntegrationUtils.httpClient.newCall(request).execute().use { response ->
                 if (response.code() != 200) {
-                    IntegrationUtils.LOGGER.info("Code: " + response.code() + ", Info: " + response.body()!!.string())
+                    IntegrationUtils.LOGGER.info(
+                        "Code: " + response.code() + ", Info: " + response.body()!!.string()
+                    )
                 }
                 return response
             }

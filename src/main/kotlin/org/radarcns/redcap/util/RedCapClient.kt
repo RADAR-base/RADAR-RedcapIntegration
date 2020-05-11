@@ -2,7 +2,9 @@ package org.radarcns.redcap.util
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -50,6 +52,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             params.forEach { entry -> add(entry.key, entry.value) }
             add(TOKEN_LABEL, redCapInfo.token!!)
         }.build()
+
         return Request.Builder()
             .url(apiUrl)
             .post(body)
@@ -57,94 +60,86 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
     }
 
     fun updateForm(formData: Set<RedCapInput>, recordId: Int): Boolean {
-        val parameters =
-            getFormUpdateParameters(formData)
+        val parameters = getFormUpdateParameters(formData)
         return try {
             val request = createRequest(parameters)
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
-                LOGGER.info("Successful update for record {}", recordId)
+            httpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    LOGGER.info("Successful update for record {}", recordId)
+                }
+                response.isSuccessful
             }
-            response.isSuccessful
         } catch (exc: IOException) {
             throw IllegalStateException("Error updating RedCap form", exc)
         }
     }
 
-    private fun getFormUpdateParameters(formData: Set<RedCapInput>): Map<String, String> {
-        val parameters: MutableMap<String, String> =
-            HashMap()
-        parameters[DATA_LABEL] = convertRedCapInputSetToString(formData)
-        parameters["content"] = "record"
-        parameters["format"] = "json"
-        parameters["type"] = "eav"
-        parameters["overwriteBehavior"] = "overwrite"
-        parameters["returnContent"] = "count"
-        parameters["returnFormat"] = "json"
-        return parameters
-    }
+    private fun getFormUpdateParameters(formData: Set<RedCapInput>) = mapOf(
+        Pair(DATA_LABEL, convertRedCapInputSetToString(formData)),
+        Pair("content", "record"),
+        Pair("format", "json"),
+        Pair("type", "eav"),
+        Pair("overwriteBehavior", "overwrite"),
+        Pair("returnContent", "count"),
+        Pair("returnFormat", "json")
+    )
 
-    private fun convertRedCapInputSetToString(data: Set<RedCapInput>): String {
-        return try {
-            ObjectMapper().writeValueAsString(data)
+    private fun convertRedCapInputSetToString(data: Set<RedCapInput>) =
+        try {
+            mapper.writeValueAsString(data)
         } catch (exc: JsonProcessingException) {
-            throw IllegalArgumentException(exc)
+            throw IOException("Error while serializing RedCapInput", exc)
         }
-    }
+
 
     fun fetchFormDataForId(
         fields: List<String>,
         recordId: Int
-    ): Map<String, String> {
-        val records = ArrayList<String>().also { it.add(recordId.toString()) }
-        val parameters =
-            getFormFetchParameters(fields, records)
+    ): MutableMap<String, String> {
+        val records = listOf(recordId.toString())
+        val parameters = getFormFetchParameters(fields, records)
         return try {
             val request = createRequest(parameters)
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
-                LOGGER.info("Successful fetch for record {}", recordId)
+            httpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    LOGGER.info("Successful fetch for record {}", recordId)
+                }
+                val result = response.body()!!.string()
+                val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
+                mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
             }
-            val result = response.body()!!.string()
-            val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
-            ObjectMapper().readValue(data, object : TypeReference<HashMap<String, String>>() {})
         } catch (exc: IOException) {
             throw IllegalStateException("Error fetching RedCap form", exc)
         }
     }
 
-    protected fun getFormFetchParameters(
+    private fun getFormFetchParameters(
         fields: List<String>,
         records: List<String>
     ): Map<String, String> {
-        val parameters: MutableMap<String, String> =
-            HashMap()
+        val parameters: MutableMap<String, String> = mutableMapOf()
         parameters["content"] = "record"
         parameters["format"] = "json"
         parameters["type"] = "flat"
         parameters["rawOrLabel"] = "label"
-        val fieldsEncoded = encodeListParams(fields, FIELDS_LABEL)
-        val recordIdsEncoded = encodeListParams(records, RECORDS_LABEL)
-        parameters.putAll(fieldsEncoded)
-        parameters.putAll(recordIdsEncoded)
+        parameters.putAll(encodeListParams(fields, FIELDS_LABEL))
+        parameters.putAll(encodeListParams(records, RECORDS_LABEL))
         return parameters
     }
 
-    private fun encodeListParams(
-        data: List<String>,
-        label: String
-    ): Map<String, String> {
-        val encoded: MutableMap<String, String> =
-            HashMap()
-        var index = 0
-        while (index < data.size) {
-            encoded["$label[$index]"] = data[index]
-            index++
+    private fun encodeListParams(data: List<String>, label: String) =
+        mutableMapOf<String, String>().apply {
+            data.forEachIndexed { index, value ->
+                this["$label[$index]"] = value
+            }
         }
-        return encoded
-    }
 
     companion object {
+        private val mapper = ObjectMapper().apply {
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            registerModule(KotlinModule(nullIsSameAsDefault = true))
+        }
+
         private val LOGGER = LoggerFactory.getLogger(RedCapClient::class.java)
         private const val API_ROOT = "/redcap/api/"
         private const val TOKEN_LABEL = "token"

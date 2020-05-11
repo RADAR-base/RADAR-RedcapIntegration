@@ -51,10 +51,8 @@ data class Project(
     @get:Throws(MalformedURLException::class)
     @get:JsonIgnore
     val redCapUrl: URL?
-        get() {
-            val temp = attribute(EXTERNAL_PROJECT_URL_KEY)
-            return temp?.let { URL(it) }
-        }
+        get() = attribute(EXTERNAL_PROJECT_URL_KEY)?.let { URL(it) }
+
 
     /**
      * Returns the value associated with the key [.EXTERNAL_PROJECT_ID_KEY].
@@ -62,11 +60,9 @@ data class Project(
      * `null` otherwise
      */
     @get:JsonIgnore
+    @get:Throws(NumberFormatException::class)
     val redCapId: Int?
-        get() {
-            val temp = attribute(EXTERNAL_PROJECT_ID_KEY)
-            return if (temp == null) null else Integer.valueOf(temp)
-        }
+        get() = attribute(EXTERNAL_PROJECT_ID_KEY)?.toInt()
 
     /**
      * Returns the value associated with the key [.WORK_PACKAGE_KEY].
@@ -82,17 +78,8 @@ data class Project(
      * @return [String] value associated with the given key
      */
     @JsonIgnore
-    fun attribute(key: String?): String? {
+    fun attribute(key: String): String? {
         return attributes[key]
-    }
-
-    override fun toString(): String {
-        return ("Project{" + '\n'
-                + "id=" + id + '\n'
-                + "projectName='" + projectName + "'\n"
-                + "organization='" + organization + "'\n"
-                + "location='" + location + "'\n"
-                + "attributes=" + attributes + '}')
     }
 
     companion object {
@@ -105,6 +92,11 @@ data class Project(
         /** Label representing the key of the tag stating the project phase.  */
         const val PHASE_KEY = "Phase"
 
+        private val mapper = ObjectMapper().apply {
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            registerModule(KotlinModule(nullIsSameAsDefault = true))
+        }
+
         /**
          * Converts the [Response.body] to a [Project] entity.
          * @param response [Response] that has to be converted
@@ -113,10 +105,6 @@ data class Project(
          */
         @Throws(IOException::class)
         fun project(response: Response): Project {
-            val mapper = ObjectMapper().apply {
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                registerModule(KotlinModule(nullIsSameAsDefault = true))
-            }
             val body = response.body()!!.bytes()
             response.close()
             return mapper.readValue(body, Project::class.java)

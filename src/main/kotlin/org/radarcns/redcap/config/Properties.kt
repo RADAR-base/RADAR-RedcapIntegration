@@ -121,20 +121,17 @@ object Properties {
      */
     fun validate(): String = CONFIG.toString()
 
-    @JvmStatic
     fun isSupportedInstance(url: URL, projectId: Int): Boolean {
         val identifier = RedCapInfo(url, projectId)
         return CONFIG.projects.any { it.redCapInfo == identifier }
     }
 
-    @JvmStatic
     fun getRedCapInfo(url: URL, projectId: Int): RedCapInfo {
         val identifier = RedCapInfo(url, projectId)
         return CONFIG.projects.find { it.redCapInfo == identifier }?.redCapInfo
             ?: throw IllegalArgumentException("No project $projectId for instance $url")
     }
 
-    @JvmStatic
     fun getMpInfo(url: URL, projectId: Int): ManagementPortalInfo {
         val identifier = RedCapInfo(url, projectId)
         return CONFIG.projects.find { it.redCapInfo == identifier }?.mpInfo
@@ -145,7 +142,6 @@ object Properties {
      * Get the OAuth2 client id to access ManagementPortal.
      * @return the client id
      */
-    @JvmStatic
     val oauthClientId: String
         get() = CONFIG.oauthClientId
 
@@ -153,7 +149,6 @@ object Properties {
      * Get the OAuth2 client secret to access ManagementPortal.
      * @return the client secret
      */
-    @JvmStatic
     val oauthClientSecret: String
         get() = CONFIG.oauthClientSecret
 
@@ -162,7 +157,6 @@ object Properties {
      * @return [URL] useful to refresh tokens
      * @throws MalformedURLException in case the [URL] cannot be generated
      */
-    @JvmStatic
     @get:Throws(MalformedURLException::class)
     val tokenEndPoint: URL
         get() = URL(validateMpUrl(), CONFIG.tokenEndpoint)
@@ -194,7 +188,6 @@ object Properties {
      * @return [URL] useful to read project information
      * @throws MalformedURLException in case the [URL] cannot be generated
      */
-    @JvmStatic
     @get:Throws(MalformedURLException::class)
     val projectEndPoint: URL
         get() = URL(validateMpUrl(), CONFIG.projectEndpoint)
@@ -226,7 +219,6 @@ object Properties {
      * @param url [URL] to has to be checked
      * @return the provided [URL]
      */
-    @JvmStatic
     fun validateRedcapUrl(url: URL): URL {
         if (!isSecureConnection(url)) {
             LOGGER.warn("The provided REDCap instance is not using an encrypted connection.")

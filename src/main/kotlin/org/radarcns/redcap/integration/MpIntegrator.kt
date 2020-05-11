@@ -20,7 +20,8 @@ import java.net.URL
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /** Handler for updating Integrator Redcap form parameters. The input parameters are
+ */
+/** Handler for updating Integrator Redcap form parameters. The input parameters are
  * described by [IntegrationData].
  * @see MpClient
  */
@@ -29,7 +30,6 @@ class MpIntegrator(private val mpClient: MpClient) {
      * Performs update of the subject on Management portal from the information
      * sent from Redcap trigger. If subject does not exist, it creates a new one,
      * otherwise it just returns the subject.
-     * TODO update the subject in case it exists
      * @see MpClient
      *
      * @param redcapUrl the Redcap URL
@@ -43,21 +43,25 @@ class MpIntegrator(private val mpClient: MpClient) {
     ): Subject {
         return try {
             val project = mpClient.getProject(redcapUrl, projectId)
-            val radarWorkPackage = project.workPackage!!.toUpperCase()
-            val location = project.location.toUpperCase()
+            val workPackage = project.workPackage
+            if (workPackage == null) {
+                Logger.error("Work package in Management portal is null")
+                throw IllegalStateException("Work Package in MP cannot be null.")
+            }
+            if (project.location.isEmpty()) {
+                Logger.error("Location is empty in management portal Project.")
+                throw IllegalStateException("Location for the project cannot be empty.")
+            }
+
             val humanReadableId = createHumanReadableId(
-                radarWorkPackage,
+                workPackage.toUpperCase(),
                 project.id.toString(),
-                location,
+                project.location.toUpperCase(),
                 recordId.toString()
             )
+
             subjectExistsUpdateElseCreate(
                 redcapUrl, projectId, recordId, project, humanReadableId, attributes
-            )
-        } catch (exc: NullPointerException) {
-            throw IllegalStateException(
-                "Project or Project attributes (Work Package, etc) in MP cannot be null.",
-                exc
             )
         } catch (exc: Exception) {
             throw IllegalStateException("Subject creation cannot be completed.", exc)
@@ -73,8 +77,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         attributes: MutableMap<String, String>
     ): Subject {
         return try {
-            var subject =
-                mpClient.getSubject(redcapUrl, projectId, recordId)
+            var subject = mpClient.getSubject(redcapUrl, projectId, recordId)
             if (subject != null) {
                 Logger.info(
                     "Subject for Record Id: {} at {} is already available, updating...", recordId,
@@ -102,6 +105,12 @@ class MpIntegrator(private val mpClient: MpClient) {
         }
     }
 
+    companion object {
+        private val Logger = LoggerFactory.getLogger(MpIntegrator::class.java)
+        private const val SEPARATOR = "-"
+        private const val HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier"
+    }
+
     private fun createHumanReadableId(
         a: String,
         b: String,
@@ -111,12 +120,6 @@ class MpIntegrator(private val mpClient: MpClient) {
         return a + SEPARATOR +
                 b + SEPARATOR + c +
                 SEPARATOR + d
-    }
-
-    companion object {
-        private val Logger = LoggerFactory.getLogger(MpIntegrator::class.java)
-        private const val SEPARATOR = "-"
-        private const val HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier"
     }
 
 }

@@ -16,10 +16,7 @@ class HttpClientFactory :
             executorService.awaitTermination(3, TimeUnit.MINUTES)
             logger.info("OkHttp ExecutorService closed.")
         } catch (e: InterruptedException) {
-            logger.warn(
-                "InterruptedException on destroy()",
-                e
-            )
+            logger.warn("InterruptedException on destroy()", e)
         }
     }
 

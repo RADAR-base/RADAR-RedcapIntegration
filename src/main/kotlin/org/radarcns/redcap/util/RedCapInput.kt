@@ -14,7 +14,8 @@ package org.radarcns.redcap.util
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Interface that generalises REDCap input parameters. It forces the override of
  * [Object.equals] and [Object.hashCode] in order to create
  * [java.util.Set] of [RedCapInput] leaving to Java the overhead of checking for

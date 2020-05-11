@@ -20,7 +20,8 @@ import org.radarcns.redcap.util.RedCapTrigger
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /** Handler for updating Integrator Redcap form parameters. The input parameters are
+ */
+/** Handler for updating Integrator Redcap form parameters. The input parameters are
  * described by [IntegrationData].
  * @see RedCapClient
  */
@@ -30,11 +31,10 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         recordId: Int,
         enrolmentEvent: String,
         integrationForm: String
-    ): Boolean {
-        val data =
-            getFormDataToUpdate(subject, recordId, enrolmentEvent, integrationForm)
-        return redCapClient.updateForm(data, recordId)
-    }
+    ): Boolean = redCapClient.updateForm(
+        getFormDataToUpdate(subject, recordId, enrolmentEvent, integrationForm),
+        recordId
+    )
 
     /**
      * Generates the [Set] of inputs that will be written in REDCap for finalising the
@@ -65,16 +65,13 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
         add(
             IntegrationData(
-                recordId, enrolmentEvent,
-                RedCapManager.getStatusField(integrationForm),
+                recordId, enrolmentEvent, RedCapManager.getStatusField(integrationForm),
                 RedCapTrigger.InstrumentStatus.COMPLETE.status.toString()
             )
         )
     }
 
-    fun pullRecordAttributes(
-        attributes: List<String>,
-        recordId: Int
-    ): Map<String, String> = redCapClient.fetchFormDataForId(attributes, recordId)
+    fun pullRecordAttributes(attributes: List<String>, recordId: Int) =
+        redCapClient.fetchFormDataForId(attributes, recordId)
 
 }

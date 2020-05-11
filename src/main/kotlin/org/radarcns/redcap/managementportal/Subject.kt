@@ -80,10 +80,6 @@ data class Subject(
         this.attributes.putAll(attributes)
     }
 
-    fun attributes(): Map<String, String> {
-        return attributes
-    }
-
 
     /**
      * Returns the Human Readable Identifier associated with this subject.
@@ -100,8 +96,8 @@ data class Subject(
      */
     @get:Throws(IOException::class)
     @get:JsonIgnore
-    val json: JsonNode
-        get() = ObjectMapper().readTree(jsonString)
+    private val json: JsonNode
+        get() = mapper.readTree(jsonString)
 
     /**
      * Generates the JSON [String] representation of the current instance.
@@ -111,7 +107,7 @@ data class Subject(
     @get:Throws(IOException::class)
     @get:JsonIgnore
     val jsonString: String
-        get() = ObjectMapper().writeValueAsString(this)
+        get() = mapper.writeValueAsString(this)
 
     companion object {
         const val HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier"

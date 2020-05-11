@@ -20,10 +20,11 @@ import java.net.URL
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Configuration file entry to define REDCap settings.
  */
-data class RedCapInfo @JvmOverloads constructor(
+data class RedCapInfo(
     @JsonProperty("url") var url: URL,
     @JsonProperty("project_id") val projectId: Int,
     @JsonProperty("enrolment_event") val enrolmentEvent: String? = null,

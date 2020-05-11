@@ -1,12 +1,10 @@
 package org.radarcns.redcap.integration
 
-import org.radarcns.redcap.config.Attribute
 import org.radarcns.redcap.config.RedCapInfo
 import org.radarcns.redcap.config.RedCapManager
 import org.radarcns.redcap.managementportal.MpClient
 import org.radarcns.redcap.util.RedCapClient
 import org.radarcns.redcap.util.RedCapTrigger
-import java.util.stream.Collectors
 
 /*
  * Copyright 2017 King's College London
@@ -22,10 +20,11 @@ import java.util.stream.Collectors
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /** Handler for updating Integrator Redcap form parameters. The input parameters are
+ */
+/** Handler for updating Integrator Redcap form parameters. The input parameters are
  * described by [IntegrationData].
  */
-class Integrator @JvmOverloads constructor(
+class Integrator(
     private val trigger: RedCapTrigger, private val mpClient: MpClient,
     private val redCapInfo: RedCapInfo = RedCapManager.getInfo(trigger),
     private val mpIntegrator: MpIntegrator = MpIntegrator(mpClient),
@@ -34,28 +33,25 @@ class Integrator @JvmOverloads constructor(
 
     fun handleDataEntryTrigger(): Boolean {
         val recordId = trigger.record
-        val projectId = redCapInfo.projectId
         val enrolmentEvent = redCapInfo.enrolmentEvent
         val integrationFrom = redCapInfo.integrationForm
-        val url = redCapInfo.url
-        val attributeKeys =
-            redCapInfo.attributes?.stream()?.map { a: Attribute -> a.fieldName }
-                ?.collect(Collectors.toList())
-        checkNotNull(recordId)
-        checkNotNull(enrolmentEvent)
-        checkNotNull(integrationFrom)
+        val attributeKeys = redCapInfo.attributes?.map { a -> a.fieldName }
+
+        checkNotNull(recordId) { "Record ID cannot be null." }
+        checkNotNull(enrolmentEvent) { "Enrolment event cannot be null" }
+        checkNotNull(integrationFrom) { "Integration Form cannot be null" }
 
         val attributes = if (attributeKeys == null) {
-            emptyMap()
+            mutableMapOf()
         } else {
             redCapIntegrator.pullRecordAttributes(attributeKeys, recordId)
         }
         val subject =
             mpIntegrator.performSubjectUpdateOnMp(
-                url,
-                projectId,
+                redCapInfo.url,
+                redCapInfo.projectId,
                 recordId,
-                attributes.toMutableMap()
+                attributes
             )
         return redCapIntegrator.updateRedCapIntegrationForm(
             subject,

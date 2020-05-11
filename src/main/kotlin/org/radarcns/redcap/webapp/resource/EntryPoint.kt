@@ -31,7 +31,8 @@ import javax.ws.rs.core.UriInfo
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  *
  * Entry point hits by REDCap trigger functionality.
  *
@@ -54,7 +55,8 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
     @Produces(MediaType.APPLICATION_JSON)
     fun handlerPostRequest(@Context ui: UriInfo, body: String?): Response {
         return try {
-            if (body == null) {
+            if (body == null || body.isEmpty()) {
+                LOGGER.error("The body in the POST request cannot be empty or null.")
                 return Response.status(Response.Status.BAD_REQUEST).build()
             }
             val trigger = RedCapTrigger(body)
@@ -67,7 +69,7 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
             }
             if (trigger.isEnrolment) {
                 val enrolment = Integrator(trigger, mpClient)
-                if (enrolment.handleDataEntryTrigger()) {
+                return if (enrolment.handleDataEntryTrigger()) {
                     response(ui.requestUri)
                 } else {
                     errorResponse(ui.requestUri, "Redcap From update was not successful.")

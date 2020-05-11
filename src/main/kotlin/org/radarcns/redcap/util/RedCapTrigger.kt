@@ -7,7 +7,6 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.*
 
 /*
  * Copyright 2017 King's College London
@@ -23,7 +22,8 @@ import java.util.*
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  *
  * Represents data send by REDCap upon triggering.
  *
@@ -56,7 +56,6 @@ import java.util.*
  *
  */
 class RedCapTrigger(value: String) {
-    //private static final Logger LOGGER = LoggerFactory.getLogger(RedCapTrigger.class);
     enum class InstrumentStatus(val status: Int) {
         INCOMPLETE(0), UNVERIFIED(1), COMPLETE(2);
     }
@@ -98,6 +97,16 @@ class RedCapTrigger(value: String) {
     var redcapUrl: URL? = null
         private set
 
+    init {
+        try {
+            val bytes = value.toByteArray(StandardCharsets.UTF_8)
+            val input = bytes.toString(StandardCharsets.UTF_8)
+            parser(input.split("&").toTypedArray())
+        } catch (exc: IOException) {
+            throw IllegalArgumentException(exc)
+        }
+    }
+
     /** REDCap provides trigger parameters as a sequence of values separated by &.  */
     @Throws(UnsupportedEncodingException::class, MalformedURLException::class)
     private fun parser(values: Array<String>) {
@@ -111,6 +120,7 @@ class RedCapTrigger(value: String) {
                         StandardCharsets.UTF_8.name()
                     )
                 )
+
                 TriggerParameter.PROJECT_URL -> {
                     projectUrl = URL(
                         URLDecoder.decode(
@@ -122,30 +132,39 @@ class RedCapTrigger(value: String) {
                     val temp = projectUrl.toString()
                     redcapUrl = URL(temp.substring(0, temp.indexOf("index.php?")))
                 }
+
                 TriggerParameter.PROJECT_ID -> projectId =
                     value.substring(markerIndex + 1).trim { it <= ' ' }.toInt()
+
                 TriggerParameter.USERNAME -> username =
                     value.substring(markerIndex + 1).trim { it <= ' ' }
+
                 TriggerParameter.RECORD -> record =
                     value.substring(markerIndex + 1).trim { it <= ' ' }.toInt()
+
                 TriggerParameter.REDCAP_EVENT_NAME -> redcapEventName =
                     value.substring(markerIndex + 1).trim { it <= ' ' }
+
                 TriggerParameter.INSTRUMENT -> instrument =
                     value.substring(markerIndex + 1).trim { it <= ' ' }
+
                 TriggerParameter.REDCAP_DATA_ACCESS_GROUP -> redcapDataAccessGroup =
                     value.substring(markerIndex + 1).trim { it <= ' ' }
-                TriggerParameter.INSTRUMENT_STATUS -> status =
-                    instrumentStatus(
-                        Integer.valueOf(
-                            value.substring(markerIndex + 1)
-                        )
-                    )
+
+                TriggerParameter.INSTRUMENT_STATUS ->
+                    status = instrumentStatus(value.substring(markerIndex + 1).toInt())
+
                 else -> throw IllegalArgumentException("$value cannot be parsed.")
             }
         }
     }
 
     private fun convertParameter(value: String, markerIndex: Int): TriggerParameter {
+        require(markerIndex > 0) {
+            "No value found for the parameter. Please check that " +
+                    "the request query parameters are correct."
+        }
+
         val name = value.substring(0, markerIndex).trim { it <= ' ' }
         for (param in TriggerParameter.values()) {
             if (param.value == name) {
@@ -200,20 +219,8 @@ class RedCapTrigger(value: String) {
          * @param instrument [String] representing instrument field
          * @return [String] representing status field related to the given instrument
          */
-        @JvmStatic
         fun instrumentStatusField(instrument: String): String {
-            Objects.requireNonNull(instrument)
             return instrument + TriggerParameter.INSTRUMENT_STATUS.value
-        }
-    }
-
-    init {
-        try {
-            val bytes = value.toByteArray(StandardCharsets.UTF_8)
-            val input = String(bytes, StandardCharsets.UTF_8)
-            parser(input.split("&").toTypedArray())
-        } catch (exc: IOException) {
-            throw IllegalArgumentException(exc)
         }
     }
 }

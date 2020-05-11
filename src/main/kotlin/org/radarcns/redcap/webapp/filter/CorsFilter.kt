@@ -16,11 +16,12 @@ class CorsFilter : ContainerResponseFilter {
         requestContext: ContainerRequestContext,
         responseContext: ContainerResponseContext
     ) {
-        val headers = responseContext.headers
-        headers.add("Access-Control-Allow-Origin", "*")
-        headers.add("Access-Control-Allow-Headers", "origin, content-type, accept")
-        headers.add("Access-Control-Allow-Credentials", "true")
-        headers.add("Access-Control-Allow-Methods", "POST, OPTIONS, HEAD")
-        headers.add("Access-Control-Max-Age", "1209600")
+        responseContext.headers.apply {
+            add("Access-Control-Allow-Origin", "*")
+            add("Access-Control-Allow-Headers", "origin, content-type, accept")
+            add("Access-Control-Allow-Credentials", "true")
+            add("Access-Control-Allow-Methods", "POST, OPTIONS, HEAD")
+            add("Access-Control-Max-Age", "1209600")
+        }
     }
 }

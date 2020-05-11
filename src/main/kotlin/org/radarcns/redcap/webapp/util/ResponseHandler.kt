@@ -18,18 +18,19 @@ import javax.ws.rs.core.Response
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /**
+ */
+/**
  * Generic response handler.
  */
 object ResponseHandler {
     private val LOGGER = LoggerFactory.getLogger(ResponseHandler::class.java)
+
     /**
      * Response generator in case of success.
      * @param uri [URI] that has generated the computation
      * @return [Response] sent back to the API consumer
      */
-    @JvmStatic
-    fun response(uri: URI?): Response {
+    fun response(uri: URI): Response {
         val status = Response.Status.OK
         LOGGER.info("[{}] {}", status.statusCode, uri)
         return Response.status(status.statusCode).entity("").build()
@@ -40,8 +41,7 @@ object ResponseHandler {
      * @param uri [URI] that has generated the computation
      * @return [Response] sent back to the API consumer
      */
-    @JvmStatic
-    fun errorResponse(uri: URI?, logMessage: String? = null): Response {
+    fun errorResponse(uri: URI, logMessage: String? = null): Response {
         LOGGER.error(
             "[{}] {}: {}",
             Response.Status.INTERNAL_SERVER_ERROR.statusCode,

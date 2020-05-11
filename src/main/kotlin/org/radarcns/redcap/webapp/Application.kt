@@ -14,8 +14,6 @@ import javax.ws.rs.ext.ContextResolver
 /**
  * Application configuration.
  *
- *
- * Replaces previous `web.xml`.
  */
 internal class Application : ResourceConfig() {
     init {
