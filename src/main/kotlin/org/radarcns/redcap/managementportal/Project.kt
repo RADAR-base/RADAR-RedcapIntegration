@@ -30,9 +30,9 @@ import java.net.URL
 data class Project(
     @JsonProperty("id") val id: Int,
     @JsonProperty("projectName") val projectName: String,
-    @JsonProperty("organization") val organization: String,
-    @JsonProperty("location") val location: String,
-    @JsonProperty("attributes") val attributes: Map<String, String>
+    @JsonProperty("organization") val organization: String = "",
+    @JsonProperty("location") val location: String = "",
+    @JsonProperty("attributes") val attributes: Map<String, String> = emptyMap()
 ) {
 
     /**
@@ -113,9 +113,9 @@ data class Project(
          */
         @Throws(IOException::class)
         fun project(response: Response): Project {
-            val mapper = ObjectMapper().also {
-                it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                it.registerModule(KotlinModule())
+            val mapper = ObjectMapper().apply {
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                registerModule(KotlinModule(nullIsSameAsDefault = true))
             }
             val body = response.body()!!.bytes()
             response.close()

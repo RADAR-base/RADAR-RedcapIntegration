@@ -1,5 +1,7 @@
 package org.radarcns.redcap.webapp
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import okhttp3.OkHttpClient
 import org.glassfish.jersey.internal.inject.AbstractBinder
 import org.glassfish.jersey.server.ResourceConfig
@@ -7,6 +9,7 @@ import org.radarcns.redcap.listener.HttpClientFactory
 import org.radarcns.redcap.managementportal.MpClient
 import org.radarcns.redcap.webapp.filter.CorsFilter
 import javax.inject.Singleton
+import javax.ws.rs.ext.ContextResolver
 
 /**
  * Application configuration.
@@ -16,7 +19,10 @@ import javax.inject.Singleton
  */
 internal class Application : ResourceConfig() {
     init {
-        packages("org.radarcns.redcap.webapp.resource")
+        packages(
+            "org.radarcns.redcap.webapp.resource",
+            "org.radarcns.redcap.managementportal"
+        )
         register(object : AbstractBinder() {
             override fun configure() {
                 bindFactory(HttpClientFactory::class.java)
@@ -28,5 +34,8 @@ internal class Application : ResourceConfig() {
             }
         })
         register(CorsFilter::class.java)
+        register(ContextResolver<ObjectMapper> {
+            ObjectMapper().registerModule(KotlinModule())
+        })
     }
 }

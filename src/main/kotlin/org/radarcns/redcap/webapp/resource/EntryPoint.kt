@@ -42,7 +42,7 @@ import javax.ws.rs.core.UriInfo
  * @see RedCapTrigger
  */
 @Path("/" + PathLabels.REDCAP_TRIGGER)
-class EntryPoint(@Inject private val mpClient: MpClient) {
+class EntryPoint @Inject constructor(private val mpClient: MpClient) {
 
     /**
      * HTTP POST request handler. This function trigger a subject creation in the Management
@@ -54,20 +54,23 @@ class EntryPoint(@Inject private val mpClient: MpClient) {
     @Produces(MediaType.APPLICATION_JSON)
     fun handlerPostRequest(@Context ui: UriInfo, body: String?): Response {
         return try {
-            val trigger = RedCapTrigger(body!!)
+            if (body == null) {
+                return Response.status(Response.Status.BAD_REQUEST).build()
+            }
+            val trigger = RedCapTrigger(body)
             if (!RedCapManager.isSupportedInstance(trigger)) {
-                LOGGER.error(
-                    "Requests coming from " + trigger.redcapUrl + " for project Id "
-                            + trigger.projectId + " cannot be managed."
+                return errorResponse(
+                    ui.requestUri,
+                    "Requests coming from ${trigger.redcapUrl} for " +
+                            "project Id ${trigger.projectId} cannot be managed."
                 )
-                return errorResponse(ui.requestUri)
             }
             if (trigger.isEnrolment) {
                 val enrolment = Integrator(trigger, mpClient)
                 if (enrolment.handleDataEntryTrigger()) {
                     response(ui.requestUri)
                 } else {
-                    errorResponse(ui.requestUri)
+                    errorResponse(ui.requestUri, "Redcap From update was not successful.")
                 }
             } else {
                 LOGGER.info(
@@ -78,8 +81,7 @@ class EntryPoint(@Inject private val mpClient: MpClient) {
                 response(ui.requestUri)
             }
         } catch (exc: Exception) {
-            LOGGER.error(exc.message, exc)
-            errorResponse(ui.requestUri)
+            errorResponse(ui.requestUri, "${exc.message}: ${exc.stackTrace}")
         }
     }
 

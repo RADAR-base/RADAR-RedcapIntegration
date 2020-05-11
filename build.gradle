@@ -11,7 +11,7 @@ plugins {
 group 'org.radarcns'
 version '0.1.0'
 
-mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServerKt'
+mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -49,14 +49,14 @@ sourceSets {
 
 ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
-ext.jerseyVersion = '2.27'
-ext.jerseymediaVersion = '2.27'
+ext.jerseyVersion = '2.30.1'
+ext.jerseymediaVersion = '2.30.1'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
 ext.radarCommonsVersion = '0.9.0'
 ext.radarOauthClientVersion = '0.5.8'
-ext.grizzlyVersion = '2.3.19'
+ext.grizzlyVersion = '2.4.4'
 
 dependencies {
     runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
@@ -158,7 +158,6 @@ task downloadApplicationDependencies {
     configurations.runtimeClasspath.files
 }
 
-
 task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     description = "Run integration tests (located in src/integrationTest/...)."
 
@@ -171,7 +170,7 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     exclude '**/*EntryPointTest*'
     // This is not needed, but I like to see which tests have run
     testLogging {
-        events "skipped", "failed", "passed"
+        events "skipped", "failed", "passed", "STANDARD_OUT", "STANDARD_ERROR"
     }
 }
 

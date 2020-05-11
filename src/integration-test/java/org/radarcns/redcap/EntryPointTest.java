@@ -33,7 +33,7 @@ public class EntryPointTest {
         // But we can verify if the corresponding subject creation in MP works fine.
         Subject subject = mpClient.getSubject(new URL(REDCAP_URL), REDCAP_PROJECT_ID, REDCAP_RECORD_ID_2);
         assertNotNull(subject);
-        assertEquals(REDCAP_RECORD_ID_2, subject.getExternalId());
+        assertEquals(Integer.valueOf(REDCAP_RECORD_ID_2), subject.getExternalId());
         assertEquals(WORK_PACKAGE + "-" + MP_PROJECT_ID + "-" + MP_PROJECT_LOCATION + "-" + REDCAP_RECORD_ID_2
                 , subject.getHumanReadableIdentifier());
         assertEquals("radar", subject.getProject().getProjectName());

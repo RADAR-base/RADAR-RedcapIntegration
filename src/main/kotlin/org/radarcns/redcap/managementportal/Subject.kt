@@ -38,10 +38,10 @@ import java.net.URL
 data class Subject(
     @JsonProperty("id") val mpId: Long?,
     @JsonProperty("login") val subjectId: String,
-    @JsonProperty("externalId") val externalId: Int,
-    @JsonProperty("externalLink") val externalLink: URL,
+    @JsonProperty("externalId") val externalId: Int? = null,
+    @JsonProperty("externalLink") val externalLink: URL? = null,
     @JsonProperty("project") val project: Project,
-    @JsonProperty("attributes") val attributes: MutableMap<String, String>,
+    @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString()
 ) {
     enum class SubjectStatus {
@@ -118,7 +118,7 @@ data class Subject(
 
         private val mapper = ObjectMapper().also {
             it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            it.registerModule(KotlinModule())
+            it.registerModule(KotlinModule(nullIsSameAsDefault = true))
         }
 
         /**

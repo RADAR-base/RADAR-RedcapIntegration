@@ -40,7 +40,7 @@ object Properties {
     /** API Config file name.  */
     private const val NAME_CONFIG_FILE = "radar.yml"
     /** Path where the config file is located.  */ //private static String validPath;
-    private val CONFIG: Configuration by lazy {
+    val CONFIG: Configuration by lazy {
         try {
             loadApiConfig()
         } catch (exec: IOException) {
@@ -74,11 +74,11 @@ object Properties {
         }
         val path = Properties::class.java.classLoader.getResource(NAME_CONFIG_FILE)?.file
         //validPath = new File(path).getParent() + "/";
-        if (checkFileExist(path)) {
-            val folders = paths.copyOfRange(
-                if (System.getenv(CONFIG_FOLDER) == null) 1 else 0,
-                paths.size
-            )
+        val folders = paths.copyOfRange(
+            if (System.getenv(CONFIG_FOLDER) == null) 1 else 0,
+            paths.size
+        )
+        if (!checkFileExist(path) && !folders.any { checkFileExist(it) }) {
             LOGGER.error(
                 "Config file {} cannot be found at {} or in the resources folder.",
                 NAME_CONFIG_FILE,

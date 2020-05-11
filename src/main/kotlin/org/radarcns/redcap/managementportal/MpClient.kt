@@ -36,12 +36,19 @@ import javax.ws.rs.core.MediaType
 /**
  * Client to interact with the RADAR Management Portal.
  */
-class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
-    private var oauthClient: OAuth2Client? = null
+open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
+
+    private val oauthClient: OAuth2Client by lazy {
+        OAuth2Client.Builder()
+            .credentials(Properties.oauthClientId, Properties.oauthClientSecret)
+            .endpoint(Properties.tokenEndPoint)
+            .httpClient(httpClient).build()
+    }
+
     @get:Throws(IOException::class)
     private val token: String
         get() = try {
-            oauthClient!!.getValidToken(Duration.ofSeconds(30)).accessToken
+            oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
         } catch (ex: TokenException) {
             throw IOException(ex)
         }
@@ -84,9 +91,7 @@ class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 getBuilder(Properties.subjectEndPoint)
                     .put(
                         RequestBody.create(
-                            okhttp3.MediaType.parse(
-                                MediaType.APPLICATION_JSON
-                            ), subject.jsonString
+                            okhttp3.MediaType.parse(MediaType.APPLICATION_JSON), subject.jsonString
                         )
                     )
                     .build()
@@ -222,8 +227,7 @@ class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             recordId: Int
         ): URL {
             val oldUri = url.toURI()
-            val parameters = "projectName=" + projectName + "&externalId=" +
-                    recordId.toString()
+            val parameters = "projectName=" + projectName + "&externalId=" + recordId.toString()
             var newQuery = oldUri.query
             if (newQuery == null) {
                 newQuery = parameters
@@ -231,25 +235,10 @@ class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 newQuery += parameters
             }
             val newUri = URI(
-                oldUri.scheme, oldUri.authority, oldUri.path, newQuery,
-                oldUri.fragment
+                oldUri.scheme, oldUri.authority, oldUri.path, newQuery, oldUri.fragment
             )
             LOGGER.info("URI = $newUri")
             return newUri.toURL()
-        }
-    }
-
-    init {
-        oauthClient = try {
-            OAuth2Client.Builder()
-                .credentials(
-                    Properties.oauthClientId,
-                    Properties.oauthClientSecret
-                )
-                .endpoint(Properties.tokenEndPoint)
-                .httpClient(httpClient).build()
-        } catch (ex: MalformedURLException) {
-            throw IllegalStateException("Failed to construct MP Token endpoint URL", ex)
         }
     }
 }

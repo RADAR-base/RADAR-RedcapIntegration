@@ -41,8 +41,13 @@ object ResponseHandler {
      * @return [Response] sent back to the API consumer
      */
     @JvmStatic
-    fun errorResponse(uri: URI?): Response {
-        LOGGER.error("[{}] {}", Response.Status.INTERNAL_SERVER_ERROR.statusCode, uri)
+    fun errorResponse(uri: URI?, logMessage: String? = null): Response {
+        LOGGER.error(
+            "[{}] {}: {}",
+            Response.Status.INTERNAL_SERVER_ERROR.statusCode,
+            uri,
+            logMessage
+        )
         return Response.serverError().build()
     }
 }
