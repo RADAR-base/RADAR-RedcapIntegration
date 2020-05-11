@@ -1,7 +1,5 @@
-dist: trusty
+dist: bionic
 language: java
-jdk:
-  - oraclejdk8
 sudo: required
 
 services:
