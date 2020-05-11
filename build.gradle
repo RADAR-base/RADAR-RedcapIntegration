@@ -24,7 +24,6 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url 'https://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
 }
@@ -54,13 +53,12 @@ ext.jerseymediaVersion = '2.30.1'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
-ext.radarCommonsVersion = '0.9.0'
 ext.radarOauthClientVersion = '0.5.8'
 ext.grizzlyVersion = '2.4.4'
 ext.jacksonVersion = '2.11.+'
 
 dependencies {
-    runtimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
@@ -69,7 +67,6 @@ dependencies {
     compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
 
-    compile group: 'org.radarcns', name: 'radar-commons-server', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
     compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion

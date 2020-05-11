@@ -153,8 +153,6 @@ class RedCapTrigger(value: String) {
 
                 TriggerParameter.INSTRUMENT_STATUS ->
                     status = instrumentStatus(value.substring(markerIndex + 1).toInt())
-
-                else -> throw IllegalArgumentException("$value cannot be parsed.")
             }
         }
     }
