@@ -48,7 +48,6 @@ public class MpIntegrator {
      * Performs update of the subject on Management portal from the information
      * sent from Redcap trigger. If subject does not exist, it creates a new one,
      * otherwise it just returns the subject.
-     * TODO update the subject in case it exists
      * @see MpClient
      * @param redcapUrl the Redcap URL
      * @param projectId the Redcap Project ID
@@ -82,8 +81,12 @@ public class MpIntegrator {
                 Logger.info("Subject for Record Id: {} at {} is already available, updating...", recordId,
                         redcapUrl);
                 attributes.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
-                subject.setAttributes(attributes);
-                subject = mpClient.updateSubject(subject);
+                Map<String, String> existingAttributes = subject.getAttributes();
+                if(!existingAttributes.equals(attributes)) {
+                    subject.setAttributes(attributes);
+                    subject = mpClient.updateSubject(subject);
+                }
+                else Logger.info("Existing attributes match new attributes! Not updating.");
             }
             else {
                 subject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId, attributes);
