@@ -47,7 +47,7 @@ public class RedCapClient {
 
     private final RedCapInfo redCapInfo;
 
-    public final OkHttpClient httpClient = new OkHttpClient();
+    private final OkHttpClient httpClient = new OkHttpClient();
 
     public RedCapClient(RedCapInfo redCapInfo) {
         this.redCapInfo = redCapInfo;
@@ -113,7 +113,7 @@ public class RedCapClient {
         }
     }
 
-    public Map<String, Object> fetchFormDataForId(List<String> fields, Integer recordId) {
+    public Map<String, String> fetchFormDataForId(List<String> fields, Integer recordId) {
         ArrayList<String> records = new ArrayList<String>();
         records.add(String.valueOf(recordId));
         Map<String, String> parameters = getFormFetchParameters(fields, records);

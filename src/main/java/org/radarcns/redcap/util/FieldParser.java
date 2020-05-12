@@ -1,6 +1,6 @@
 package org.radarcns.redcap.util;
 
-public interface FieldParser<T> {
+public interface FieldParser<T, R> {
 
-    T parseField(Object fieldValue);
+    T parseField(R fieldValue);
 }

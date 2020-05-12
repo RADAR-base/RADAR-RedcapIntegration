@@ -65,8 +65,8 @@ public class RedCapIntegator {
     public Map<String, String> pullRecordAttributes(List<String> attributes, Integer recordId){
             Map<String, String> fetchedAttributes = new HashMap<>();
             AttributeFieldParser parser = new AttributeFieldParser();
-            Map<String, Object> fieldData = redCapClient.fetchFormDataForId(attributes, recordId);
-            for (Map.Entry<String, Object> entry : fieldData.entrySet())
+            Map<String, String> fieldData = redCapClient.fetchFormDataForId(attributes, recordId);
+            for (Map.Entry<String, String> entry : fieldData.entrySet())
                 fetchedAttributes.put(entry.getKey(), parser.parseField(entry.getValue()));
             return fetchedAttributes;
     }
