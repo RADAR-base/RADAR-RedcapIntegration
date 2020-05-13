@@ -1,14 +1,11 @@
 package org.radarcns.redcap.integration;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.radarcns.exception.TokenException;
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
-import org.radarcns.redcap.managementportal.Project;
 import org.radarcns.redcap.managementportal.Subject;
 import org.radarcns.redcap.util.RedCapClient;
 import org.radarcns.redcap.util.RedCapTrigger;
@@ -22,14 +19,12 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.radarcns.redcap.util.IntegrationUtils.*;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class IntegratorTest {
-    private Project project;
     private Map<String, String> testAttributes = new HashMap<>();
     private RedCapClient redCapClient;
     private RedCapIntegator redCapIntegrator;
     private MpIntegrator mpIntegrator = new MpIntegrator(mpClient);
-    List<String> attributeKeys;
+    private List<String> attributeKeys;
     public static RedCapTrigger trigger = new RedCapTrigger(TRIGGER_BODY);
     public static final RedCapInfo redCapInfo = RedCapManager.getInfo(trigger);
 
@@ -43,7 +38,8 @@ public class IntegratorTest {
     public static final String REDCAP_ATTRIBUTE_2_VAL = "test";
 
     public static final String HUMAN_READABLE_ID_KEY = "Human-readable-identifier";
-    public static final String HUMAN_READABLE_ID = WORK_PACKAGE + "-" + MP_PROJECT_ID + "-" + MP_PROJECT_LOCATION + "-"+ REDCAP_RECORD_ID_1;
+    public static final String HUMAN_READABLE_ID = WORK_PACKAGE + "-" + MP_PROJECT_ID + "-" + MP_PROJECT_LOCATION + "-"+ REDCAP_RECORD_ID_2;
+    public static final String REDCAP_SUBJECT_ID_FIELD = "subject_id";
 
     @Before
     public void init() throws IOException, TokenException {
@@ -64,32 +60,41 @@ public class IntegratorTest {
         assertEquals(integrator.handleDataEntryTrigger(), false);
     }
 
-
     @Test
     public void updateAttributesInMpTest() throws IOException, URISyntaxException {
-        Mockito.when(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1)).thenReturn(testAttributes);
-        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, REDCAP_RECORD_ID_1);
+        Mockito.when(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_2)).thenReturn(testAttributes);
+        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, REDCAP_RECORD_ID_2);
 
-        assertEquals(attributes, testAttributes);
+        assertEquals(testAttributes, attributes);
 
-        Subject subject = mpIntegrator.performSubjectUpdateOnMp(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_1, attributes);
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_2, attributes, "");
 
-        assertEquals(subject.getAttributes(), attributes);
+        assertEquals(attributes, subject.getAttributes());
 
-        assertEquals(subject.getHumanReadableIdentifier(), HUMAN_READABLE_ID);
+        assertEquals(HUMAN_READABLE_ID, subject.getHumanReadableIdentifier());
     }
 
     @Test
     public void updateAttributesInMpWhenSubjectExistsTest() throws IOException, URISyntaxException {
         testAttributes.put(REDCAP_ATTRIBUTE_1, REDCAP_ATTRIBUTE_1_VAL_2);
-        Mockito.when(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1)).thenReturn(testAttributes);
-        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, REDCAP_RECORD_ID_1);
+        Mockito.when(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_2)).thenReturn(testAttributes);
+        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, REDCAP_RECORD_ID_2);
 
-        Subject subject = mpIntegrator.performSubjectUpdateOnMp(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_1, attributes);
+        String existingSubjectId = mpClient.getSubject(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_2).getSubjectId();
 
-        assertEquals(subject.getAttributes(), attributes);
-        assertEquals(subject.getAttributes().get(REDCAP_ATTRIBUTE_1), REDCAP_ATTRIBUTE_1_VAL_2);
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_2, attributes,existingSubjectId);
 
-        assertEquals(subject.getHumanReadableIdentifier(), HUMAN_READABLE_ID);
+        assertEquals(attributes, subject.getAttributes());
+        assertEquals(REDCAP_ATTRIBUTE_1_VAL_2, subject.getAttributes().get(REDCAP_ATTRIBUTE_1));
+
+        assertEquals(HUMAN_READABLE_ID, subject.getHumanReadableIdentifier());
+    }
+
+    @Test
+    public void createSubjectWhenSubjectExistsInMpTest() throws IOException, URISyntaxException {
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(redCapInfo.getUrl(), redCapInfo.getProjectId(), REDCAP_RECORD_ID_2, new HashMap<>(),"");
+
+        // This should fail since MP project exists but REDCap project does not exists/was deleted
+        assertEquals(Subject.SubjectOperationStatus.FAILED, subject.getOprationStatus());
     }
 }
