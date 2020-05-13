@@ -58,9 +58,10 @@ public class Integrator {
         URL url = redCapInfo.getUrl();
         List<String> attributeKeys = redCapInfo.getAttributeFieldNames();
 
-        Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, recordId);
-        String redcapSubjectId = redCapIntegrator.pullRecordSubjectId(recordId);
-        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, attributes, redcapSubjectId);
+        Map<String, String> data = redCapIntegrator.pullRecordSubjectIdAndAttributes(attributeKeys, recordId);
+        String redcapSubjectId = data.get(IntegrationData.SUBJECT_ID_LABEL);
+        data.remove(IntegrationData.SUBJECT_ID_LABEL);
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, data, redcapSubjectId);
         Subject.SubjectOperationStatus result = subject.getOprationStatus();
         if(result.equals(Subject.SubjectOperationStatus.CREATED) ){
             return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);

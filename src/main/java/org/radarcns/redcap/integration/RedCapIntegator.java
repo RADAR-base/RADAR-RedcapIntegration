@@ -78,4 +78,15 @@ public class RedCapIntegator {
         return fieldData.get(IntegrationData.SUBJECT_ID_LABEL);
     }
 
+    public Map<String, String> pullRecordSubjectIdAndAttributes(List<String> attributes, Integer recordId) {
+        // Add subject_id field to attribute fields list
+        attributes.add(IntegrationData.SUBJECT_ID_LABEL);
+        Map<String, String> data = new HashMap<>();
+        AttributeFieldParser parser = new AttributeFieldParser();
+        Map<String, String> fieldData = redCapClient.fetchFormDataForId(attributes, recordId);
+        for (Map.Entry<String, String> entry : fieldData.entrySet())
+            data.put(entry.getKey(), parser.parseField(entry.getValue()));
+        return data;
+    }
+
 }

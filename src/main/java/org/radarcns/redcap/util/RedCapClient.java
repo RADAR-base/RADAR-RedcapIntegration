@@ -1,6 +1,7 @@
 package org.radarcns.redcap.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -120,16 +121,18 @@ public class RedCapClient {
         try {
             Request request = createRequest(parameters);
             Response response = httpClient.newCall(request).execute();
-            if (response.isSuccessful()) {
-                LOGGER.info("Successful fetch for record {}", recordId);
+            if (!response.isSuccessful()) {
+                LOGGER.error("Request unsuccessful for record {}", recordId);
+                return new HashMap<String, String>();
             }
+            LOGGER.info("Successful fetch for record {}", recordId);
             String result = response.body().string();
             JSONArray jsonData = new JSONArray(result);
             if(jsonData.length() > 0) {
-                return new ObjectMapper().readValue(jsonData.get(REDCAP_RESULT_INDEX).toString(), HashMap.class);
+                return new ObjectMapper().readValue(jsonData.get(REDCAP_RESULT_INDEX).toString(), new TypeReference<HashMap<String, String>>() {} );
             }
             else {
-                return new HashMap<>();
+                return new HashMap<String, String>();
             }
         }
         catch(IOException exc){
