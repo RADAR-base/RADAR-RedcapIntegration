@@ -106,7 +106,7 @@ public class MpIntegrator {
             updatedSubject.setOprationStatus(Subject.SubjectOperationStatus.UPDATED);
             return updatedSubject;
         } else {
-            subject.setOprationStatus(Subject.SubjectOperationStatus.OTHER);
+            subject.setOprationStatus(Subject.SubjectOperationStatus.NOOP);
             Logger.info("Existing attributes match new attributes! Not updating.");
             return subject;
         }

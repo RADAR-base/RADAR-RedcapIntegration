@@ -41,7 +41,8 @@ public class Subject {
         UPDATED,
         CREATED,
         FAILED,
-        OTHER
+        OTHER,
+        NOOP
     }
 
     @JsonIgnore
@@ -64,7 +65,7 @@ public class Subject {
     private final String status;
 
     @JsonIgnore
-    private SubjectOperationStatus operationStatus;
+    private SubjectOperationStatus operationStatus = SubjectOperationStatus.NOOP;
 
 
     /**
