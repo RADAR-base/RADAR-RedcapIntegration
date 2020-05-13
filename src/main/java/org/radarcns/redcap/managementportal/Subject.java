@@ -37,6 +37,13 @@ public class Subject {
         INVALID
     }
 
+    public enum SubjectOperationStatus {
+        UPDATED,
+        CREATED,
+        FAILED,
+        OTHER
+    }
+
     @JsonIgnore
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
@@ -55,6 +62,9 @@ public class Subject {
 
     @JsonProperty("status")
     private final String status;
+
+    @JsonIgnore
+    private SubjectOperationStatus operationStatus;
 
 
     /**
@@ -120,9 +130,15 @@ public class Subject {
         this.attributes.putAll(attributes);
     }
 
+    public void setOprationStatus(SubjectOperationStatus operationStatus) {
+        this.operationStatus = operationStatus;
+    }
+
     public Long getMpId() { return mpId; }
 
     public String getStatus() { return status; }
+
+    public SubjectOperationStatus getOprationStatus() { return operationStatus; }
 
     public String getSubjectId() {
         return subjectId;

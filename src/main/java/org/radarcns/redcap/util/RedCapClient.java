@@ -124,8 +124,13 @@ public class RedCapClient {
                 LOGGER.info("Successful fetch for record {}", recordId);
             }
             String result = response.body().string();
-            String data = new JSONArray(result).get(REDCAP_RESULT_INDEX).toString();
-            return new ObjectMapper().readValue(data, HashMap.class);
+            JSONArray jsonData = new JSONArray(result);
+            if(jsonData.length() > 0) {
+                return new ObjectMapper().readValue(jsonData.get(REDCAP_RESULT_INDEX).toString(), HashMap.class);
+            }
+            else {
+                return new HashMap<>();
+            }
         }
         catch(IOException exc){
             throw new IllegalStateException("Error fetching RedCap form", exc);

@@ -55,14 +55,14 @@ public class MpIntegrator {
      * @return {@link Subject} from the Management Portal
      */
     public Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
-                                             Integer recordId, Map<String, String> attributes) {
+                                             Integer recordId, Map<String, String> attributes, String redcapSubjectId) {
         try {
             Project project = mpClient.getProject(redcapUrl, projectId);
             String radarWorkPackage = project.getWorkPackage().toUpperCase();
             String location = project.getLocation().toUpperCase();
             String humanReadableId = createHumanReadableId(radarWorkPackage, project.getId().toString(), location, recordId.toString());
 
-            Subject subject = subjectExistsUpdateElseCreate(redcapUrl, projectId, recordId, project, humanReadableId, attributes);
+            Subject subject = subjectExistsUpdateElseCreate(redcapUrl, projectId, recordId, project, humanReadableId, attributes, redcapSubjectId);
             return subject;
 
         } catch (NullPointerException exc) {
@@ -74,29 +74,50 @@ public class MpIntegrator {
         }
     }
 
-    private Subject subjectExistsUpdateElseCreate(URL redcapUrl, Integer projectId, Integer recordId, Project project, String humanReadableId, Map<String, String> attributes){
+    private Subject subjectExistsUpdateElseCreate(URL redcapUrl, Integer projectId, Integer recordId,
+                                                  Project project, String humanReadableId, Map<String, String> attributes, String redcapSubjectId){
         try {
             Subject subject = mpClient.getSubject(redcapUrl, projectId, recordId);
             if(subject != null) {
-                Logger.info("Subject for Record Id: {} at {} is already available, updating...", recordId,
-                        redcapUrl);
-                attributes.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
-                Map<String, String> existingAttributes = subject.getAttributes();
-                if(!existingAttributes.equals(attributes)) {
-                    subject.setAttributes(attributes);
-                    subject = mpClient.updateSubject(subject);
+                if(subject.getSubjectId().equals(redcapSubjectId)) {
+                    return updateSubject(subject, attributes, humanReadableId);
                 }
-                else Logger.info("Existing attributes match new attributes! Not updating.");
+                else {
+                    Logger.info("Subject already exists in MP and subject ids do not match! Integration failed.");
+                    subject.setOprationStatus(Subject.SubjectOperationStatus.FAILED);
+                    return subject;
+                }
             }
             else {
-                subject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId, attributes);
-                Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",
-                        subject.getSubjectId(), humanReadableId);
+                return createSubject(attributes, humanReadableId, redcapUrl, project, recordId);
             }
-            return subject;
         } catch (Exception e) {
             throw new IllegalStateException("Subject creation cannot be completed.", e);
         }
+    }
+
+    private Subject updateSubject(Subject subject, Map<String, String> attributes, String humanReadableId){
+        Logger.info("Subject, with Human readable identifier: {}, is already available, updating...", humanReadableId);
+        attributes.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
+        Map<String, String> existingAttributes = subject.getAttributes();
+        if (!existingAttributes.equals(attributes)) {
+            subject.setAttributes(attributes);
+            Subject updatedSubject = mpClient.updateSubject(subject);
+            updatedSubject.setOprationStatus(Subject.SubjectOperationStatus.UPDATED);
+            return updatedSubject;
+        } else {
+            subject.setOprationStatus(Subject.SubjectOperationStatus.OTHER);
+            Logger.info("Existing attributes match new attributes! Not updating.");
+            return subject;
+        }
+    }
+
+    private Subject createSubject(Map<String, String> attributes, String humanReadableId, URL redcapUrl, Project project, Integer recordId){
+        Subject subject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId, attributes);
+        Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",
+                subject.getSubjectId(), humanReadableId);
+        subject.setOprationStatus(Subject.SubjectOperationStatus.CREATED);
+        return subject;
     }
 
     private String createHumanReadableId(String a, String b, String c, String d){

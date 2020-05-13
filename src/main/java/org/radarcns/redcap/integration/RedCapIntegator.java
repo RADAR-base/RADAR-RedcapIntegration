@@ -31,6 +31,8 @@ import java.util.*;
  * @see RedCapClient
  */
 public class RedCapIntegator {
+    private static final String REDCAP_SUBJECT_ID_FIELD = "subject_id";
+
     private RedCapClient redCapClient;
 
     public RedCapIntegator(RedCapClient redCapClient) {
@@ -69,6 +71,13 @@ public class RedCapIntegator {
             for (Map.Entry<String, String> entry : fieldData.entrySet())
                 fetchedAttributes.put(entry.getKey(), parser.parseField(entry.getValue()));
             return fetchedAttributes;
+    }
+
+    public String pullRecordSubjectId(Integer recordId) {
+        List<String> fields = new ArrayList<>();
+        fields.add(REDCAP_SUBJECT_ID_FIELD);
+        Map<String, String> fieldData = redCapClient.fetchFormDataForId(fields, recordId);
+        return fieldData.get(REDCAP_SUBJECT_ID_FIELD);
     }
 
 }

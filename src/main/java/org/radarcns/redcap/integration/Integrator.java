@@ -18,7 +18,6 @@ package org.radarcns.redcap.integration;
 
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
@@ -58,9 +57,18 @@ public class Integrator {
         String integrationFrom = redCapInfo.getIntegrationForm();
         URL url = redCapInfo.getUrl();
         List<String> attributeKeys = redCapInfo.getAttributeFieldNames();
+
         Map<String, String> attributes = redCapIntegrator.pullRecordAttributes(attributeKeys, recordId);
-        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, attributes);
-        return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);
+        String redcapSubjectId = redCapIntegrator.pullRecordSubjectId(recordId);
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, attributes, redcapSubjectId);
+        Subject.SubjectOperationStatus result = subject.getOprationStatus();
+        if(result.equals(Subject.SubjectOperationStatus.CREATED) ){
+            return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);
+        }
+        else {
+            return (result.equals(Subject.SubjectOperationStatus.UPDATED) || result.equals(Subject.SubjectOperationStatus.OTHER))
+                    && !result.equals(Subject.SubjectOperationStatus.FAILED);
+        }
     }
 
 }
