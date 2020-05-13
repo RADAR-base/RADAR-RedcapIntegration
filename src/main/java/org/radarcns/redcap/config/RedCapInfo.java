@@ -19,10 +19,9 @@ package org.radarcns.redcap.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.jar.Attributes;
 import java.util.stream.Collectors;
 
 /**
@@ -140,9 +139,8 @@ public class RedCapInfo {
     public Set<Attribute> getAttributes() { return attributes; }
 
     public List<String> getAttributeFieldNames() {
-        List<String> fieldNames = new ArrayList<>();
         if(attributes == null || attributes.isEmpty())
-            return fieldNames;
+            return Collections.emptyList();
         return attributes.stream().map(a->a.getFieldName()).collect(Collectors.toList());
     }
 
