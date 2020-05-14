@@ -67,8 +67,10 @@ public class Integrator {
             return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);
         }
         else {
-            return (result.equals(Subject.SubjectOperationStatus.UPDATED) || result.equals(Subject.SubjectOperationStatus.OTHER))
-                    && !result.equals(Subject.SubjectOperationStatus.FAILED);
+            if (result.equals(Subject.SubjectOperationStatus.FAILED)) {
+                throw new IllegalStateException("Error integrating REDCap subject.");
+            }
+            return false;
         }
     }
 
