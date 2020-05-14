@@ -26,6 +26,7 @@ repositories {
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
+    jcenter()
 }
 
 sourceSets {
@@ -70,6 +71,7 @@ dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile "org.mockito:mockito-core:2.+"
 }
 
 //---------------------------------------------------------------------------//

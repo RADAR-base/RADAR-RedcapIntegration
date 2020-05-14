@@ -17,154 +17,61 @@ package org.radarcns.redcap.integration;
  */
 
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import okhttp3.FormBody.Builder;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import org.radarcns.redcap.config.RedCapInfo;
 import org.radarcns.redcap.config.RedCapManager;
 import org.radarcns.redcap.managementportal.MpClient;
-import org.radarcns.redcap.managementportal.Project;
 import org.radarcns.redcap.managementportal.Subject;
-import org.radarcns.redcap.util.RedCapInput;
+import org.radarcns.redcap.util.RedCapClient;
 import org.radarcns.redcap.util.RedCapTrigger;
-import org.radarcns.redcap.util.RedCapTrigger.InstrumentStatus;
-import org.radarcns.redcap.util.RedCapUpdater;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Handler for updating Integrator Redcap form parameters. The input parameters are
  *      described by {@link IntegrationData}.
- * @see RedCapUpdater
  */
-public class Integrator extends RedCapUpdater {
+public class Integrator {
+    private RedCapTrigger trigger;
 
-    private static final Logger Logger = LoggerFactory.getLogger(Integrator.class);
+    private RedCapInfo redCapInfo;
 
-    private static final String SEPARATOR = "-";
+    private MpIntegrator mpIntegrator;
 
-    private MpClient mpClient;
+    private RedCapIntegator redCapIntegrator;
 
     /**
      * Constructor.
      * @param trigger {@link RedCapTrigger} that has hit the service
      * @param mpClient {@link MpClient} used for making requests to Management Portal
      */
-    public Integrator(RedCapTrigger trigger, MpClient mpClient, OkHttpClient client) {
-        super(trigger, client);
-        this.mpClient = mpClient;
+    public Integrator(RedCapTrigger trigger, MpClient mpClient) {
+        this.trigger = trigger;
+        this.mpIntegrator = new MpIntegrator(mpClient);
+        this.redCapInfo = RedCapManager.getInfo(trigger);
+        this.redCapIntegrator = new RedCapIntegator(new RedCapClient(redCapInfo));
     }
 
-    /**
-     * Generates the {@link Set} of inputs that will be written in REDCap for finalising the
-     *      integration between REDCap project and Management Portal project. Using a
-     *      {@link MpClient}, the function retrieves the RADAR Subject Identifier and the Human
-     *      Readable Identifier. In the end, the function forces the REDCap integration
-     *      form /instrument status to {@link InstrumentStatus#COMPLETE}.
-     * @return {@link Set} of inputs that have to be written in REDCap.
-     */
-    @Override
-    public Set<RedCapInput> getInput() {
-        Subject subject = performSubjectUpdateOnMp(redCapInfo.getUrl(),
-                redCapInfo.getProjectId(), getRecordId());
+    public boolean handleDataEntryTrigger(){
+        Integer recordId = trigger.getRecord();
+        Integer projectId = redCapInfo.getProjectId();
+        String enrolmentEvent = redCapInfo.getEnrolmentEvent();
+        String integrationFrom = redCapInfo.getIntegrationForm();
+        URL url = redCapInfo.getUrl();
+        List<String> attributeKeys = redCapInfo.getAttributeFieldNames();
 
-        Set<RedCapInput> set = new HashSet<>();
-
-        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                IntegrationData.SUBJECT_ID_LABEL, subject.getSubjectId()));
-
-        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                IntegrationData.HUMAN_READABLE_ID_LABEL, subject.getHumanReadableIdentifier()));
-
-        set.add(new IntegrationData(getRecordId(), redCapInfo.getEnrolmentEvent(),
-                RedCapManager.getStatusField(redCapInfo.getIntegrationForm()),
-                Integer.toString(InstrumentStatus.COMPLETE.getStatus())));
-
-        return set;
-    }
-
-    /**
-     * Sets the HTML form parameters needed to update the REDCap integration form / instrument.
-     *      It sets just the metadata not the real input, that is set by {@link RedCapUpdater}
-     *      while generating the {@link Request}.
-     * @param builder {@link okhttp3.FormBody.Builder} that has to be populated
-     * @return {@link okhttp3.FormBody.Builder} required to finale the HTTP request.
-     */
-    @Override
-    protected Builder setParameter(Builder builder) {
-        return builder.add("content", "record")
-                .add("format", "json")
-                .add("type", "eav")
-                .add("overwriteBehavior", "overwrite")
-                .add("returnContent", "count")
-                .add("returnFormat", "json");
-    }
-
-
-    /**
-     * Performs update of the subject on Management portal from the information
-     * sent from Redcap trigger. If subject does not exist, it creates a new one,
-     * otherwise it just returns the subject.
-     * TODO update the subject in case it exists
-     * @see MpClient
-     * @param redcapUrl the Redcap URL
-     * @param projectId the Redcap Project ID
-     * @param recordId the Redcap Record ID
-     * @return {@link Subject} from the Management Portal
-     */
-    private Subject performSubjectUpdateOnMp(URL redcapUrl, Integer projectId,
-                                     Integer recordId) {
-        try {
-            Project project = mpClient.getProject(redcapUrl, projectId);
-
-            String radarWorkPackage = project.getWorkPackage().toUpperCase();
-            String location = project.getLocation().toUpperCase();
-
-            String humanReadableId = radarWorkPackage.concat(SEPARATOR).concat(
-                    project.getId().toString()).concat(SEPARATOR).concat(location).concat(
-                    SEPARATOR).concat(recordId.toString());
-
-            Subject subject = mpClient.getSubject(redcapUrl, projectId, recordId);
-
-            if (subject == null) {
-                Subject newSubject = mpClient.createSubject(redcapUrl, project, recordId, humanReadableId);
-
-                Logger.info("Created RADAR subject: {}. Human readable identifier is: {}",
-                        newSubject.getSubjectId(), humanReadableId);
-                return newSubject;
-            } else {
-                Logger.info("Subject for Record Id: {} at {} is already available.", recordId,
-                        redcapUrl);
-
-                if (!humanReadableId.equals(subject.getHumanReadableIdentifier())) {
-                    Logger.warn("Human Readable identifier for {} at {} does not reflect the "
-                                    + "value stored in the Management Portal. {} is different from {}.",
-                            recordId, redcapUrl.toString(), humanReadableId,
-                            subject.getHumanReadableIdentifier());
-
-                    throw new IllegalStateException("The Subject already exists but " +
-                            "the Human Readable identifier does not match the expected one.");
-
-                    //TODO
-                    // update Subject in case the Human Readable Identifier does not match the
-                    // expected one
-                } else {
-                    // Don't perform integration if subject already exists as this may compromise integrity.
-                    /** TODO Remove the external attributes from old subject if it exists and
-                     * create a new one with these attributes.
-                    **/
-                    Logger.warn("Found RADAR subject: {}. Human readable identifier is: {}.",
-                            subject.getSubjectId(), humanReadableId);
-                    throw new IllegalStateException("The Subject already exists.");
-                }
+        Map<String, String> data = redCapIntegrator.pullRecordSubjectIdAndAttributes(attributeKeys, recordId);
+        String redcapSubjectId = data.get(IntegrationData.SUBJECT_ID_LABEL);
+        data.remove(IntegrationData.SUBJECT_ID_LABEL);
+        Subject subject = mpIntegrator.performSubjectUpdateOnMp(url, projectId, recordId, data, redcapSubjectId);
+        Subject.SubjectOperationStatus result = subject.getOprationStatus();
+        if(result.equals(Subject.SubjectOperationStatus.CREATED) ){
+            return redCapIntegrator.updateRedCapIntegrationForm(subject, recordId, enrolmentEvent, integrationFrom);
+        }
+        else {
+            if (result.equals(Subject.SubjectOperationStatus.FAILED)) {
+                throw new IllegalStateException("Error integrating REDCap subject.");
             }
-        } catch (NullPointerException exc) {
-            Logger.error("Project or Project attributes (Work Package, etc) cannot be null", exc);
-            throw new IllegalStateException("Project or Project attributes (Work Package, etc) in MP cannot be null.", exc);
-        } catch (Exception exc) {
-            Logger.error(exc.getMessage(), exc);
-            throw new IllegalStateException("Subject creation cannot be completed.", exc);
+            return false;
         }
     }
+
 }

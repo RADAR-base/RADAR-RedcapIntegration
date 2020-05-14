@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /*
@@ -106,7 +107,6 @@ public class MpClient {
                 + " at " + redcapUrl + ". Please check values set for "
                 + Project.EXTERNAL_PROJECT_URL_KEY + " and " + Project.EXTERNAL_PROJECT_ID_KEY
                 + " for Project " + project.getId() + " at " + mp.toString();
-
         try {
             if (!project.getRedCapId().equals(projectId)
                     || project.getRedCapUrl().equals(redcapUrl)) {
@@ -117,35 +117,53 @@ public class MpClient {
         }
     }
 
-    public Subject createSubject(URL redcapUrl, Project project, Integer recordId,
-            String humanReadableId) {
-        //TODO check how to generate UUID
-        String radarSubjectId = UUID.randomUUID().toString();
-
-        Subject subject;
-        Request request;
+    public Subject updateSubject(Subject subject) {
         try {
-            subject = new Subject(radarSubjectId, recordId,
-                    RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
-                    project, humanReadableId);
-
-            request = getBuilder(Properties.getSubjectEndPoint())
+            Request request = getBuilder(Properties.getSubjectEndPoint())
                     .put(RequestBody.create(MediaType.parse(
                             javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
                     .build();
+            Response response = httpClient.newCall(request).execute();
+            if(response.isSuccessful()){
+                LOGGER.debug("Successfully updated subject: {}", subject.getJsonString());
+                return subject;
+            }
+            else{
+                throw new IllegalStateException("Subject cannot be updated. Response code: "
+                        + response.code() + " Message: " + response.message() + " Info: "
+                        + response.body().string());
+            }
         } catch (IOException exc) {
             throw new IllegalStateException("Subject cannot be created", exc);
         }
+    }
 
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IllegalStateException("Subject cannot be created. Response code: "
-                    + response.code() + " Message: " + response.message() + " Info: "
-                        + response.body().string());
-            } else {
+    public Subject createSubject(URL redcapUrl, Project project, Integer recordId,
+            String humanReadableId, Map<String, String> attributes) {
+        //TODO check how to generate UUID
+        try {
+            String radarSubjectId = UUID.randomUUID().toString();
+            Subject subject = new Subject(radarSubjectId, recordId,
+                    RedCapManager.getRecordUrl(redcapUrl, project.getRedCapId(), recordId),
+                    project, humanReadableId, attributes);
+
+            Request request = getBuilder(Properties.getSubjectEndPoint())
+                    .post(RequestBody.create(MediaType.parse(
+                            javax.ws.rs.core.MediaType.APPLICATION_JSON), subject.getJsonString()))
+                    .build();
+
+            Response response = httpClient.newCall(request).execute();
+
+            if(response.isSuccessful()){
                 LOGGER.debug("Successfully created subject: {}", subject.getJsonString());
                 return subject;
             }
+            else{
+                throw new IllegalStateException("Subject cannot be created. Response code: "
+                        + response.code() + " Message: " + response.message() + " Info: "
+                        + response.body().string());
+            }
+
         } catch (IOException exc) {
             throw new IllegalStateException("Subject cannot be created", exc);
         }

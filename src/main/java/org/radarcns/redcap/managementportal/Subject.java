@@ -28,12 +28,29 @@ import java.util.*;
 
 import okhttp3.Response;
 
-//TODO
 public class Subject {
+
+    public enum SubjectStatus {
+        DEACTIVATED,
+        ACTIVATED,
+        DISCONTINUED,
+        INVALID
+    }
+
+    public enum SubjectOperationStatus {
+        UPDATED,
+        CREATED,
+        FAILED,
+        OTHER,
+        NOOP
+    }
 
     @JsonIgnore
     public static final String HUMAN_READABLE_IDENTIFIER_KEY = "Human-readable-identifier";
 
+    @JsonProperty("id")
+    private final Long mpId;
+    
     @JsonProperty("login")
     private final String subjectId;
     private final Integer externalId;
@@ -44,6 +61,13 @@ public class Subject {
     private final Project project;
     private final Map<String,String> attributes;
 
+    @JsonProperty("status")
+    private final String status;
+
+    @JsonIgnore
+    private SubjectOperationStatus operationStatus = SubjectOperationStatus.NOOP;
+
+
     /**
      * Constructor.
      * @param subjectId {@link String} representing Management Portal Subject identifier
@@ -53,16 +77,19 @@ public class Subject {
      * @param attributes {@link Map} of key,value pairs
      */
     public Subject(
+            @JsonProperty("id") Long mpId,
             @JsonProperty("login") String subjectId,
             @JsonProperty("externalId") Integer externalId,
             @JsonProperty("externalLink") URL externalLink,
             @JsonProperty("project") Project project,
             @JsonProperty("attributes") Map<String,String> attributes) {
+        this.mpId = mpId;
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
         this.attributes = attributes;
+        this.status = SubjectStatus.ACTIVATED.toString();
 
         //TODO remove
         this.email = "admin@localhost";
@@ -79,18 +106,40 @@ public class Subject {
      */
     public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
             String humanReadableId) {
+        this.mpId = null;
         this.subjectId = subjectId;
         this.externalId = externalId;
         this.externalLink = externalLink;
         this.project = project;
+        this.status = SubjectStatus.ACTIVATED.toString();
 
         Map<String,String> att = new HashMap<>();
-        att.put(HUMAN_READABLE_IDENTIFIER_KEY,humanReadableId);
+        att.put(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId);
         this.attributes = att;
 
         //TODO remove
         this.email = "admin@localhost";
     }
+
+    public Subject(String subjectId, Integer externalId, URL externalLink, Project project,
+                   String humanReadableId, Map<String, String> attributes) {
+        this(subjectId, externalId, externalLink, project, humanReadableId);
+        this.setAttributes(attributes);
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes.putAll(attributes);
+    }
+
+    public void setOprationStatus(SubjectOperationStatus operationStatus) {
+        this.operationStatus = operationStatus;
+    }
+
+    public Long getMpId() { return mpId; }
+
+    public String getStatus() { return status; }
+
+    public SubjectOperationStatus getOprationStatus() { return operationStatus; }
 
     public String getSubjectId() {
         return subjectId;

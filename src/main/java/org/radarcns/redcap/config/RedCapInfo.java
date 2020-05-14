@@ -17,7 +17,12 @@ package org.radarcns.redcap.config;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Configuration file entry to define REDCap settings.
@@ -55,6 +60,12 @@ public class RedCapInfo {
     @JsonProperty("token")
     private String token;
 
+    /**
+     * Token String required to use REDCap APIs.
+     */
+    @JsonProperty("attributes")
+    private Set<Attribute> attributes;
+
     public RedCapInfo() {
         // for deserialization
     }
@@ -65,16 +76,24 @@ public class RedCapInfo {
         this.enrolmentEvent = null;
         this.integrationForm = null;
         this.token = null;
+        this.attributes = null;
     }
 
     protected RedCapInfo(URL url, Integer projectId,
-            String enrolmentEvent, String integrationForm,
-            String token) {
+                         String enrolmentEvent, String integrationForm,
+                         String token) {
         this.url = url;
         this.projectId = projectId;
         this.enrolmentEvent = enrolmentEvent;
         this.integrationForm = integrationForm;
         this.token = token;
+    }
+
+    protected RedCapInfo(URL url, Integer projectId,
+            String enrolmentEvent, String integrationForm,
+            String token, Set<Attribute> attributes) {
+        this(url, projectId, enrolmentEvent, integrationForm, token);
+        this.attributes = attributes;
     }
 
     /**
@@ -115,6 +134,15 @@ public class RedCapInfo {
      */
     public String getIntegrationForm() {
         return integrationForm;
+    }
+
+    public Set<Attribute> getAttributes() { return attributes; }
+
+    public List<String> getAttributeFieldNames() {
+        if (attributes == null || attributes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return attributes.stream().map(a->a.getFieldName()).collect(Collectors.toList());
     }
 
     @Override

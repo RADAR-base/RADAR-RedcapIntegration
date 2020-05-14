@@ -9,6 +9,8 @@ import org.radarcns.exception.TokenException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.radarcns.redcap.util.IntegrationUtils.*;
@@ -16,6 +18,7 @@ import static org.radarcns.redcap.util.IntegrationUtils.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MpClientTest {
     private Project project;
+    private Map<String, String> testAttributes = new HashMap<>();
 
     @Before
     public void init() throws IOException, TokenException {
@@ -33,7 +36,7 @@ public class MpClientTest {
         if(project == null){
             getProjectTest();
         }
-        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1, WORK_PACKAGE + REDCAP_RECORD_ID_1);
+        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1, WORK_PACKAGE + REDCAP_RECORD_ID_1, testAttributes);
         Subject subject = mpClient.getSubject(new URL(REDCAP_URL), REDCAP_PROJECT_ID, REDCAP_RECORD_ID_1);
 
         assertEquals(Integer.valueOf(REDCAP_RECORD_ID_1), subject.getExternalId());
@@ -46,6 +49,6 @@ public class MpClientTest {
             getProjectTest();
         }
         // This should throw exception since subject already exists
-        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1, WORK_PACKAGE + REDCAP_RECORD_ID_1);
+        mpClient.createSubject(new URL(REDCAP_URL), project, REDCAP_RECORD_ID_1, WORK_PACKAGE + REDCAP_RECORD_ID_1, testAttributes);
     }
 }
