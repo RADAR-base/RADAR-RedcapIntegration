@@ -139,8 +139,9 @@ public class RedCapInfo {
     public Set<Attribute> getAttributes() { return attributes; }
 
     public List<String> getAttributeFieldNames() {
-        if(attributes == null || attributes.isEmpty())
+        if (attributes == null || attributes.isEmpty()) {
             return Collections.emptyList();
+        }
         return attributes.stream().map(a->a.getFieldName()).collect(Collectors.toList());
     }
 
