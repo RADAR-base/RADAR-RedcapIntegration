@@ -7,6 +7,8 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.radarcns.exception.TokenException
 import org.radarcns.redcap.util.IntegrationUtils
+import org.radarcns.redcap.util.IntegrationUtils.mpClient
+import org.radarcns.redcap.webapp.exception.SubjectOperationException
 import java.io.IOException
 import java.net.URISyntaxException
 import java.net.URL
@@ -27,7 +29,7 @@ class MpClientTest {
     @Throws(IOException::class)
     @Test
     fun projectTest() {
-        project = IntegrationUtils.mpClient.getProject(
+        project = mpClient.getProject(
             URL(IntegrationUtils.REDCAP_URL),
             IntegrationUtils.REDCAP_PROJECT_ID
         )
@@ -40,12 +42,12 @@ class MpClientTest {
         if (project == null) {
             projectTest()
         }
-        IntegrationUtils.mpClient.createSubject(
+        mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
             IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
         )
         val subject =
-            IntegrationUtils.mpClient.getSubject(
+            mpClient.getSubject(
                 URL(IntegrationUtils.REDCAP_URL), IntegrationUtils.REDCAP_PROJECT_ID,
                 IntegrationUtils.REDCAP_RECORD_ID_1
             )
@@ -60,14 +62,14 @@ class MpClientTest {
         )
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test(expected = SubjectOperationException::class)
     @Throws(IOException::class)
     fun createSubjectTest2() {
         if (project == null) {
             projectTest()
         }
         // This should throw exception since subject already exists
-        IntegrationUtils.mpClient.createSubject(
+        mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
             IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
         )

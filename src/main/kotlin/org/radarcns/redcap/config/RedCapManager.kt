@@ -31,6 +31,7 @@ object RedCapManager {
     private const val RECORD_ID = "&id="
     private const val EVENT_ID = "&event_id="
     private const val PAGE_NAME = "&page="
+
     /**
      * Given a [RedCapTrigger], the function checks whether there is a valid configuration
      * for the couple REDCap URL instance and REDCap project identifier specified in the
@@ -52,7 +53,6 @@ object RedCapManager {
      * configuration, if available.
      * @param trigger [RedCapTrigger] that has hit the service
      * @return [RedCapTrigger] if available
-     * @throws IllegalArgumentException in case the there is no valid configuration related the
      * given [RedCapInfo]
      */
     fun getInfo(trigger: RedCapTrigger): RedCapInfo {

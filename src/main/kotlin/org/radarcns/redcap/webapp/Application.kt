@@ -19,7 +19,8 @@ internal class Application : ResourceConfig() {
     init {
         packages(
             "org.radarcns.redcap.webapp.resource",
-            "org.radarcns.redcap.managementportal"
+            "org.radarcns.redcap.managementportal",
+            "org.radarcns.redcap.webapp.exception"
         )
         register(object : AbstractBinder() {
             override fun configure() {
@@ -32,7 +33,7 @@ internal class Application : ResourceConfig() {
             }
         })
         register(CorsFilter::class.java)
-        register(ContextResolver<ObjectMapper> {
+        register(ContextResolver {
             ObjectMapper().registerModule(KotlinModule())
         })
     }

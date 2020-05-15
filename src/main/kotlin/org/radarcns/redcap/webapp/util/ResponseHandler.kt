@@ -35,19 +35,4 @@ object ResponseHandler {
         LOGGER.info("[{}] {}", status.statusCode, uri)
         return Response.status(status.statusCode).entity("").build()
     }
-
-    /**
-     * Response generator in case of error.
-     * @param uri [URI] that has generated the computation
-     * @return [Response] sent back to the API consumer
-     */
-    fun errorResponse(uri: URI, logMessage: String? = null): Response {
-        LOGGER.error(
-            "[{}] {}: {}",
-            Response.Status.INTERNAL_SERVER_ERROR.statusCode,
-            uri,
-            logMessage
-        )
-        return Response.serverError().build()
-    }
 }

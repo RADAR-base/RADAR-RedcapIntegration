@@ -3,6 +3,7 @@ package org.radarcns.redcap.integration
 import org.radarcns.redcap.managementportal.MpClient
 import org.radarcns.redcap.managementportal.Project
 import org.radarcns.redcap.managementportal.Subject
+import org.radarcns.redcap.webapp.exception.SubjectOperationException
 import org.slf4j.LoggerFactory
 import java.net.URL
 
@@ -50,11 +51,11 @@ class MpIntegrator(private val mpClient: MpClient) {
             val workPackage = project.workPackage
             if (workPackage.isNullOrBlank()) {
                 Logger.error("Work package in Management portal is null or empty")
-                throw IllegalStateException("Work Package in MP cannot be null or empty.")
+                throw SubjectOperationException("Work Package in MP cannot be null or empty.")
             }
             if (project.location.isEmpty()) {
                 Logger.error("Location is empty in management portal Project.")
-                throw IllegalStateException("Location for the project cannot be empty.")
+                throw SubjectOperationException("Location for the project cannot be empty.")
             }
 
             val humanReadableId = createHumanReadableId(
@@ -74,7 +75,7 @@ class MpIntegrator(private val mpClient: MpClient) {
                 redcapSubjectId
             )
         } catch (exc: Exception) {
-            throw IllegalStateException("Subject creation cannot be completed.", exc)
+            throw SubjectOperationException("Subject creation cannot be completed.", exc)
         }
     }
 
@@ -105,7 +106,7 @@ class MpIntegrator(private val mpClient: MpClient) {
             }
             createSubject(attributes, humanReadableId, redcapUrl, project, recordId)
         } catch (e: Exception) {
-            throw IllegalStateException("Subject creation cannot be completed.", e)
+            throw SubjectOperationException("Subject creation cannot be completed.", e)
         }
     }
 
