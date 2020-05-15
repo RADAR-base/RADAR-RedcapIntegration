@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'org.radarcns'
-version '0.1.0'
+version '0.1.1-SNAPSHOT'
 
 mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
@@ -26,6 +26,7 @@ repositories {
     mavenCentral()
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
+    jcenter()
 }
 
 sourceSets {
@@ -81,6 +82,7 @@ dependencies {
     compile "org.json:json:20170516"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 
 //---------------------------------------------------------------------------//
@@ -154,7 +156,7 @@ task downloadApplicationDependencies {
     configurations.runtimeClasspath.files
 }
 
-task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
+task integrationTest(type: Test, dependsOn: ['copyConf']) { //['installMP', 'copyConf']) {
     description = "Run integration tests (located in src/integrationTest/...)."
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -170,7 +172,7 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     }
 }
 
-integrationTest.finalizedBy 'removeLock'
+//integrationTest.finalizedBy 'removeLock'
 
 ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
 ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
@@ -214,6 +216,7 @@ task copyConf(type: Copy) {
                 "management_portal_url: http://localhost:8090/")
     }
 }
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "11"

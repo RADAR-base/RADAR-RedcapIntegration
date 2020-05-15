@@ -11,6 +11,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.net.URL
 
+
 /*
  * Copyright 2017 King's College London
  *
@@ -47,6 +48,14 @@ data class Subject(
     enum class SubjectStatus {
         DEACTIVATED, ACTIVATED, DISCONTINUED, INVALID
     }
+
+    enum class SubjectOperationStatus {
+        UPDATED, CREATED, FAILED, NOOP, OTHER
+    }
+
+    @JsonIgnore
+    var operationStatus: SubjectOperationStatus = SubjectOperationStatus.NOOP
+
 
     /**
      * Constructor.

@@ -2,9 +2,11 @@ package org.radarcns.redcap.integration
 
 import org.radarcns.redcap.config.RedCapManager
 import org.radarcns.redcap.managementportal.Subject
+import org.radarcns.redcap.util.AttributeFieldParser
 import org.radarcns.redcap.util.RedCapClient
 import org.radarcns.redcap.util.RedCapInput
 import org.radarcns.redcap.util.RedCapTrigger
+
 
 /*
  * Copyright 2017 King's College London
@@ -71,7 +73,14 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
     }
 
-    fun pullRecordAttributes(attributes: List<String>, recordId: Int) =
-        redCapClient.fetchFormDataForId(attributes, recordId)
+    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int): MutableMap<String, String> =
+        redCapClient.fetchFormDataForId(fields, recordId)
+            .filter { parser.canBeParsed(it.value) }
+            .mapValues { parser.parseField(it.value) }
+            .toMutableMap()
 
+
+    companion object {
+        val parser = AttributeFieldParser()
+    }
 }

@@ -3,8 +3,11 @@ package org.radarcns.redcap.integration
 import org.radarcns.redcap.config.RedCapInfo
 import org.radarcns.redcap.config.RedCapManager
 import org.radarcns.redcap.managementportal.MpClient
+import org.radarcns.redcap.managementportal.Subject.SubjectOperationStatus.CREATED
+import org.radarcns.redcap.managementportal.Subject.SubjectOperationStatus.FAILED
 import org.radarcns.redcap.util.RedCapClient
 import org.radarcns.redcap.util.RedCapTrigger
+import org.slf4j.LoggerFactory
 
 /*
  * Copyright 2017 King's College London
@@ -35,29 +38,41 @@ class Integrator(
         val recordId = trigger.record
         val enrolmentEvent = redCapInfo.enrolmentEvent
         val integrationFrom = redCapInfo.integrationForm
-        val attributeKeys = redCapInfo.attributes?.map { a -> a.fieldName }
+        val keys = redCapInfo.attributes
+            ?.map { a -> a.fieldName }
+            ?.toMutableList()
+            ?: mutableListOf()
 
-        checkNotNull(recordId) { "Record ID cannot be null." }
-        checkNotNull(enrolmentEvent) { "Enrolment event cannot be null" }
-        checkNotNull(integrationFrom) { "Integration Form cannot be null" }
+        requireNotNull(recordId)
+        requireNotNull(enrolmentEvent)
+        requireNotNull(integrationFrom)
 
-        val attributes = if (attributeKeys == null) {
-            mutableMapOf()
-        } else {
-            redCapIntegrator.pullRecordAttributes(attributeKeys, recordId)
-        }
+        keys.add(IntegrationData.SUBJECT_ID_LABEL)
+        logger.info("Attribute Keys: {}", keys.toTypedArray())
+        val result = redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
+        
         val subject =
             mpIntegrator.performSubjectUpdateOnMp(
                 redCapInfo.url,
                 redCapInfo.projectId,
                 recordId,
-                attributes
+                result,
+                result.remove(IntegrationData.SUBJECT_ID_LABEL)
             )
-        return redCapIntegrator.updateRedCapIntegrationForm(
-            subject,
-            recordId,
-            enrolmentEvent,
-            integrationFrom
-        )
+        return when (subject.operationStatus) {
+            CREATED -> redCapIntegrator.updateRedCapIntegrationForm(
+                subject,
+                recordId,
+                enrolmentEvent,
+                integrationFrom
+            )
+
+            FAILED -> throw IllegalStateException("Operation on Subject in MP failed.")
+            else -> false
+        }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(Integrator::class.java)
     }
 }

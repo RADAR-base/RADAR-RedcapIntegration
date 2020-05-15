@@ -33,12 +33,16 @@ object Properties {
     /** Logger.  */
     private val LOGGER = LoggerFactory.getLogger(Properties::class.java)
     private const val HTTPS = "https"
+
     /** Path to the configuration file.  */
     private const val PATH_FILE = "/usr/local/etc/radar-redcap-int/"
+
     /** Placeholder alternative path for the config folder.  */
     private const val CONFIG_FOLDER = "REDCAP_INTEGRATION_CONFIG_FOLDER"
+
     /** API Config file name.  */
     private const val NAME_CONFIG_FILE = "radar.yml"
+
     /** Path where the config file is located.  */
     val CONFIG: Configuration by lazy {
         try {
@@ -179,7 +183,7 @@ object Properties {
      */
     @Throws(MalformedURLException::class)
     fun getProjectEndPoint(mpInfo: ManagementPortalInfo): URL = URL(
-        validateMpUrl(), CONFIG.projectEndpoint + mpInfo.projectName
+        projectEndPoint, mpInfo.projectName
     )
 
     /**

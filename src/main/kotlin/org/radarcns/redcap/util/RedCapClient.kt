@@ -9,6 +9,7 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
+import org.json.JSONException
 import org.radarcns.redcap.config.RedCapInfo
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -47,10 +48,10 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         get() = URL(redCapInfo.url.protocol, redCapInfo.url.host, redCapInfo.url.port, API_ROOT)
 
     @Throws(IOException::class)
-    fun createRequest(params: Map<String, String>): Request {
+    fun createRequest(params: Map<String, String>, token: String): Request {
         val body = FormBody.Builder().apply {
             params.forEach { entry -> add(entry.key, entry.value) }
-            add(TOKEN_LABEL, redCapInfo.token!!)
+            add(TOKEN_LABEL, token)
         }.build()
 
         return Request.Builder()
@@ -59,10 +60,10 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             .build()
     }
 
-    fun updateForm(formData: Set<RedCapInput>, recordId: Int): Boolean {
+    open fun updateForm(formData: Set<RedCapInput>, recordId: Int): Boolean {
         val parameters = getFormUpdateParameters(formData)
         return try {
-            val request = createRequest(parameters)
+            val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful update for record {}", recordId)
@@ -92,24 +93,32 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         }
 
 
-    fun fetchFormDataForId(
+    open fun fetchFormDataForId(
         fields: List<String>,
         recordId: Int
     ): MutableMap<String, String> {
         val records = listOf(recordId.toString())
         val parameters = getFormFetchParameters(fields, records)
         return try {
-            val request = createRequest(parameters)
+            val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
+                    val result = response.body()!!.string()
+                    val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
+                    mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
+                } else {
+                    val msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
+                            "Info: ${response.message()}"
+                    LOGGER.warn(msg)
+                    mutableMapOf()
                 }
-                val result = response.body()!!.string()
-                val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
-                mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
             }
         } catch (exc: IOException) {
             throw IllegalStateException("Error fetching RedCap form", exc)
+        } catch (exc: JSONException) {
+            LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
+            mutableMapOf()
         }
     }
 

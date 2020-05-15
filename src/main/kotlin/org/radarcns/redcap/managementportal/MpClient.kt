@@ -144,9 +144,9 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             },
             onError = { response ->
                 throw IllegalStateException(
-                    errorMessage + " Response code: "
-                            + response.code() + " Message: " + response.message() + " Info: "
-                            + response.body()!!.string()
+                    errorMessage + " Response code: " + response.code() +
+                            ", Message: " + response.message() +
+                            ", Info: " + response.body()!!.string()
                 )
             },
             errorMessage = errorMessage
@@ -237,8 +237,10 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             } else {
                 newQuery += parameters
             }
+
+            val path = if (oldUri.path.endsWith('/')) oldUri.path.dropLast(1) else oldUri.path
             val newUri = URI(
-                oldUri.scheme, oldUri.authority, oldUri.path, newQuery, oldUri.fragment
+                oldUri.scheme, oldUri.authority, path, newQuery, oldUri.fragment
             )
             LOGGER.info("URI = $newUri")
             return newUri.toURL()
