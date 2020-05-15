@@ -156,7 +156,7 @@ task downloadApplicationDependencies {
     configurations.runtimeClasspath.files
 }
 
-task integrationTest(type: Test, dependsOn: ['copyConf']) { //['installMP', 'copyConf']) {
+task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     description = "Run integration tests (located in src/integrationTest/...)."
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -172,7 +172,7 @@ task integrationTest(type: Test, dependsOn: ['copyConf']) { //['installMP', 'cop
     }
 }
 
-//integrationTest.finalizedBy 'removeLock'
+integrationTest.finalizedBy 'removeLock'
 
 ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? ['sudo'] : []
 ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
