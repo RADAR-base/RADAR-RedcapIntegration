@@ -34,12 +34,12 @@ class ConfigurationTest {
 
         val configuration =
             Properties.loadConfig(File(filePath!!))
-        Assert.assertEquals("todo", configuration.oauthClientId)
-        Assert.assertEquals("todo", configuration.oauthClientSecret)
-        Assert.assertEquals(URL("https://localhost"), configuration.managementPortalUrl)
-        Assert.assertEquals("/token", configuration.tokenEndpoint)
-        Assert.assertEquals("/project", configuration.projectEndpoint)
-        Assert.assertEquals("/subject", configuration.subjectEndpoint)
+        Assert.assertEquals("todo", configuration.mpConfig.oauthClientId)
+        Assert.assertEquals("todo", configuration.mpConfig.oauthClientSecret)
+        Assert.assertEquals(URL("https://localhost"), configuration.mpConfig.managementPortalUrl)
+        Assert.assertEquals("/token", configuration.mpConfig.tokenEndpoint)
+        Assert.assertEquals("/project", configuration.mpConfig.projectEndpoint)
+        Assert.assertEquals("/subject", configuration.mpConfig.subjectEndpoint)
         Assert.assertEquals(
             listOf("abc", "xyz"), configuration.projects.first().redCapInfo.attributes?.map { a ->
                 a.fieldName

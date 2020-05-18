@@ -2,7 +2,6 @@ package org.radarbase.redcap.config
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.net.URL
 
 /*
  * Copyright 2017 King's College London
@@ -21,11 +20,11 @@ import java.net.URL
  */
 /**
  *
- * Java class that defines the configuration required by the web app to handle authentication and
+ * Defines the configuration required by the web app to handle authentication and
  * authorisation against Management Portal and REDCap instances.
  *
  * Current implementation support a single Management Portal instance since the current
- * RADAR-CNS Platform Architecture is designed with a centralised Management Portal. In order
+ * RADAR-Base Platform Architecture is designed with a centralised Management Portal. In order
  * to support multiple Management Portal instances, the following variables
  *  * `oauthClientId`
  *  * `oauthClientSecret`
@@ -39,38 +38,11 @@ import java.net.URL
 data class Configuration
 /**
  * Constructor.
- * @param oauthClientId [String] representing OAuth2 client identifier
- * @param oauthClientSecret [String] representing OAuth2 client identifier
- * @param managementPortalUrl [URL] pointing a Management Portal instane
- * @param tokenEndpoint [String] representing Management Portal web root to renew tokens
- * @param projectEndpoint [String] representing Management Portal web root to access
- * project data
- * @param subjectEndpoint [String] representing Management Portal web root to manage
- * subject
+ * @param mpConfig the [ManagementPortalConfig]
  * @param projects [Set] of [ProjectInfo] providing information about REDCap and
  * Management Portal instances
- */ @JsonCreator constructor(
-    /** OAuth2 client identifier.  */
-    @JsonProperty("oauth_client_id") val oauthClientId: String,
-    /** OAuth2 client secret.  */
-    @JsonProperty("oauth_client_secret") val oauthClientSecret: String,
-    /** URL pointing a Management Portal instance.  */
-    @JsonProperty("management_portal_url") val managementPortalUrl: URL,
-    /** Web root of Management Portal token end point. It is required to refresh Access Token.  */
-    @JsonProperty("token_endpoint") val tokenEndpoint: String = "oauth/token",
-    /**
-     * Web root of Management Portal project end point. It is required to get a Management Portal
-     * Project.
-     */
-    @JsonProperty("project_endpoint") val projectEndpoint: String = "api/projects/",
-    /**
-     * Web root of Management Portal subject end point. It is required to create and get Managemen
-     * Portal Subjects.
-     */
-    @JsonProperty("subject_endpoint") val subjectEndpoint: String = "api/subjects/",
-    /**
-     * Set of supported projects. For each project REDCap and Management Portal configurations
-     * are set.
-     */
+ */
+@JsonCreator constructor(
+    @JsonProperty("management_portal") val mpConfig: ManagementPortalConfig,
     @JsonProperty("projects") val projects: Set<ProjectInfo>
 )

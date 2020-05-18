@@ -44,7 +44,6 @@ object Properties {
     /** API Config file name.  */
     private const val NAME_CONFIG_FILE = "radar.yml"
 
-    /** Path where the config file is located.  */
     val CONFIG: Configuration by lazy {
         try {
             loadApiConfig()
@@ -70,7 +69,8 @@ object Properties {
      */
     @Throws(IOException::class)
     private fun loadApiConfig(): Configuration {
-        val paths = arrayOf(System.getenv(CONFIG_FOLDER) ?: ".",
+        val paths = arrayOf(
+            System.getenv(CONFIG_FOLDER) ?: ".",
             PATH_FILE
         )
         for (path in paths) {
@@ -165,14 +165,14 @@ object Properties {
      * @return the client id
      */
     val oauthClientId: String
-        get() = CONFIG.oauthClientId
+        get() = CONFIG.mpConfig.oauthClientId
 
     /**
      * Get the OAuth2 client secret to access ManagementPortal.
      * @return the client secret
      */
     val oauthClientSecret: String
-        get() = CONFIG.oauthClientSecret
+        get() = CONFIG.mpConfig.oauthClientSecret
 
     /**
      * Generates the token end point [URL] needed to refresh tokens against Management Portal.
@@ -181,7 +181,7 @@ object Properties {
      */
     @get:Throws(MalformedURLException::class)
     val tokenEndPoint: URL
-        get() = URL(validateMpUrl(), CONFIG.tokenEndpoint)
+        get() = URL(validateMpUrl(), CONFIG.mpConfig.tokenEndpoint)
 
     /**
      * Generates the token end point [URL] needed to manage subjects on Management Portal.
@@ -190,7 +190,7 @@ object Properties {
      */
     @get:Throws(MalformedURLException::class)
     val subjectEndPoint: URL
-        get() = URL(validateMpUrl(), CONFIG.subjectEndpoint)
+        get() = URL(validateMpUrl(), CONFIG.mpConfig.subjectEndpoint)
 
     /**
      * Generates the Project end point [URL] needed to read projects on Management Portal.
@@ -212,7 +212,7 @@ object Properties {
      */
     @get:Throws(MalformedURLException::class)
     val projectEndPoint: URL
-        get() = URL(validateMpUrl(), CONFIG.projectEndpoint)
+        get() = URL(validateMpUrl(), CONFIG.mpConfig.projectEndpoint)
 
     /**
      * Checks if the provided [URL] is using a secure connection or not.
@@ -228,7 +228,7 @@ object Properties {
      */
     fun validateMpUrl(): URL {
         if (!isSecureConnection(
-                CONFIG.managementPortalUrl
+                CONFIG.mpConfig.managementPortalUrl
             )
         ) {
             LOGGER.warn(
@@ -236,7 +236,7 @@ object Properties {
                         + " connection."
             )
         }
-        return CONFIG.managementPortalUrl
+        return CONFIG.mpConfig.managementPortalUrl
     }
 
     /**

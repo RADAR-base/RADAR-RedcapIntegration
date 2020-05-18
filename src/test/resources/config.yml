@@ -1,10 +1,11 @@
 # ManagementPortal configuration
-oauth_client_id: todo
-oauth_client_secret:  todo
-management_portal_url: https://localhost
-token_endpoint: /token
-project_endpoint: /project
-subject_endpoint: /subject
+management_portal:
+  oauth_client_id: todo
+  oauth_client_secret:  todo
+  base_url: https://localhost
+  token_endpoint: /token
+  project_endpoint: /project
+  subject_endpoint: /subject
 
 # List of supported projects
 projects:

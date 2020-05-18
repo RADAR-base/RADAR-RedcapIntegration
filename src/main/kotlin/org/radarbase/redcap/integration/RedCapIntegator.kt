@@ -42,9 +42,8 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
      * Generates the [Set] of inputs that will be written in REDCap for finalising the
      * integration between REDCap project and Management Portal project. Using a
      * [org.radarbase.redcap.managementportal.MpClient], the function retrieves the RADAR Subject
-     * Identifier and the Human
-     * Readable Identifier. In the end, the function forces the REDCap integration
-     * form /instrument status to [RedCapTrigger.InstrumentStatus.COMPLETE].
+     * Identifier and the Human Readable Identifier. In the end, the function forces the REDCap
+     * integration form /instrument status to [RedCapTrigger.InstrumentStatus.COMPLETE].
      * @return [Set] of inputs that have to be written in REDCap.
      */
     fun getFormDataToUpdate(

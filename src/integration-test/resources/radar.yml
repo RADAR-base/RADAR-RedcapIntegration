@@ -1,7 +1,8 @@
 # ManagementPortal configuration
-oauth_client_id: radar_redcap_integrator
-oauth_client_secret:  secret
-management_portal_url: http://managementportal-app:8090/
+management_portal:
+  oauth_client_id: radar_redcap_integrator
+  oauth_client_secret:  secret
+  base_url: http://managementportal-app:8090/
 
 # List of supported projects
 projects:
