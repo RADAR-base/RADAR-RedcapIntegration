@@ -62,7 +62,7 @@ class MpClientTest {
         )
     }
 
-    @Test(expected = SubjectOperationException::class)
+    @Test(expected = IOException::class)
     @Throws(IOException::class)
     fun createSubjectTest2() {
         if (project == null) {

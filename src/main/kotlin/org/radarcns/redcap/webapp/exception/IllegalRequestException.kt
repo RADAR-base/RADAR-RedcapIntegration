@@ -5,7 +5,10 @@ import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider
 
 @Provider
-class IllegalRequestException(private val msg: String, private val throwable: Throwable? = null) :
+class IllegalRequestException @JvmOverloads constructor(
+    private val msg: String = "",
+    private val throwable: Throwable? = null
+) :
     IllegalStateException(msg, throwable), ExceptionMapper<IllegalRequestException> {
 
     override fun toResponse(exception: IllegalRequestException?): Response =

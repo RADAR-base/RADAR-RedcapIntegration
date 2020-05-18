@@ -27,18 +27,20 @@ class EntryPointTest {
         )
         Assert.assertNotNull(response)
         // This is because the the app fails to update redcap form as there is no actual redcap instance.
-        Assert.assertEquals(500, response!!.code().toLong())
+        // So the request times out with an exception
+        Assert.assertEquals(500, response.code().toLong())
+        response.message()?.let { message ->
+            Assert.assertTrue(message.contains("timeout", ignoreCase = true))
+        }
+
         // But we can verify if the corresponding subject creation in MP works fine.
         val subject: Subject? =
             mpClient.getSubject(URL(REDCAP_URL), REDCAP_PROJECT_ID, REDCAP_RECORD_ID_2)
         Assert.assertNotNull(subject)
+        Assert.assertEquals(Integer.valueOf(REDCAP_RECORD_ID_2), subject?.externalId)
         Assert.assertEquals(
-            Integer.valueOf(REDCAP_RECORD_ID_2),
-            subject?.externalId
-        )
-        Assert.assertEquals(
-            "$WORK_PACKAGE-$MP_PROJECT_ID-$MP_PROJECT_LOCATION-$REDCAP_RECORD_ID_2"
-            , subject?.humanReadableIdentifier
+            "$WORK_PACKAGE-$MP_PROJECT_ID-$MP_PROJECT_LOCATION-$REDCAP_RECORD_ID_2",
+            subject?.humanReadableIdentifier
         )
         Assert.assertEquals("radar", subject?.project?.projectName)
     }

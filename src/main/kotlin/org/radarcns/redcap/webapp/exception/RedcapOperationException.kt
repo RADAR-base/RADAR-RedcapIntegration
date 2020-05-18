@@ -6,7 +6,10 @@ import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider
 
 @Provider
-class RedcapOperationException(private val msg: String, private val throwable: Throwable? = null) :
+class RedcapOperationException @JvmOverloads constructor(
+    private val msg: String = "",
+    private val throwable: Throwable? = null
+) :
     IOException(msg, throwable), ExceptionMapper<RedcapOperationException> {
 
     override fun toResponse(exception: RedcapOperationException?): Response =

@@ -6,7 +6,10 @@ import javax.ws.rs.ext.ExceptionMapper
 import javax.ws.rs.ext.Provider
 
 @Provider
-class SubjectOperationException(private val msg: String, private val throwable: Throwable? = null) :
+class SubjectOperationException @JvmOverloads constructor(
+    private val msg: String = "",
+    private val throwable: Throwable? = null
+) :
     IOException(msg, throwable), ExceptionMapper<SubjectOperationException> {
 
     override fun toResponse(exception: SubjectOperationException?): Response =
