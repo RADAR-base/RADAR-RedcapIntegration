@@ -17,5 +17,8 @@ projects:
       enrolment_event: enrolment_arm_1
       integration_form: radar_enrolment
       token: 1234567890
+      attributes:
+        - field_name: treatment_arm
+        - field_name: another_attribute
     mp_info:
       project_name: radar
