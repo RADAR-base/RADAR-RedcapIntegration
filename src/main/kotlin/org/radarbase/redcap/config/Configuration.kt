@@ -39,8 +39,6 @@ import java.net.URL
 data class Configuration
 /**
  * Constructor.
- * @param version [String] reporting the web app current version
- * @param released [String] reporting the web app released date
  * @param oauthClientId [String] representing OAuth2 client identifier
  * @param oauthClientSecret [String] representing OAuth2 client identifier
  * @param managementPortalUrl [URL] pointing a Management Portal instane
@@ -52,10 +50,6 @@ data class Configuration
  * @param projects [Set] of [ProjectInfo] providing information about REDCap and
  * Management Portal instances
  */ @JsonCreator constructor(
-    /** Service version.  */
-    @JsonProperty("version") val version: String,
-    /** Release date.  */
-    @JsonProperty("released") val released: String,
     /** OAuth2 client identifier.  */
     @JsonProperty("oauth_client_id") val oauthClientId: String,
     /** OAuth2 client secret.  */
@@ -63,17 +57,17 @@ data class Configuration
     /** URL pointing a Management Portal instance.  */
     @JsonProperty("management_portal_url") val managementPortalUrl: URL,
     /** Web root of Management Portal token end point. It is required to refresh Access Token.  */
-    @JsonProperty("token_endpoint") val tokenEndpoint: String,
+    @JsonProperty("token_endpoint") val tokenEndpoint: String = "oauth/token",
     /**
      * Web root of Management Portal project end point. It is required to get a Management Portal
      * Project.
      */
-    @JsonProperty("project_endpoint") val projectEndpoint: String,
+    @JsonProperty("project_endpoint") val projectEndpoint: String = "api/projects/",
     /**
      * Web root of Management Portal subject end point. It is required to create and get Managemen
      * Portal Subjects.
      */
-    @JsonProperty("subject_endpoint") val subjectEndpoint: String,
+    @JsonProperty("subject_endpoint") val subjectEndpoint: String = "api/subjects/",
     /**
      * Set of supported projects. For each project REDCap and Management Portal configurations
      * are set.

@@ -34,8 +34,6 @@ class ConfigurationTest {
 
         val configuration =
             Properties.loadConfig(File(filePath!!))
-        Assert.assertEquals("1.0", configuration.version)
-        Assert.assertEquals("2017-08-29", configuration.released)
         Assert.assertEquals("todo", configuration.oauthClientId)
         Assert.assertEquals("todo", configuration.oauthClientSecret)
         Assert.assertEquals(URL("https://localhost"), configuration.managementPortalUrl)
@@ -54,11 +52,13 @@ class ConfigurationTest {
         )
         val mpInfo =
             ManagementPortalInfo("project-0")
-        Assert.assertEquals(setOf(
-            ProjectInfo(
-                redCapInfo,
-                mpInfo
-            )
-        ), configuration.projects)
+        Assert.assertEquals(
+            setOf(
+                ProjectInfo(
+                    redCapInfo,
+                    mpInfo
+                )
+            ), configuration.projects
+        )
     }
 }
