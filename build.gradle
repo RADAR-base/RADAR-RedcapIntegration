@@ -5,6 +5,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
 }
 
 group 'org.radarcns'
@@ -12,8 +13,8 @@ version '0.1.1-SNAPSHOT'
 
 mainClassName = 'org.radarcns.redcap.webapp.GrizzlyServer'
 
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+targetCompatibility = '11'
+sourceCompatibility = '11'
 
 configurations {
     codacy
@@ -23,18 +24,23 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot/' }
     maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
     jcenter()
 }
 
 sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.java.srcDirs += 'src/main/kotlin'
+
+    test.kotlin.srcDirs += 'src/test/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+
     integrationTest {
         java {
             compileClasspath += main.output + test.output + test.compileClasspath
             runtimeClasspath += main.output + test.output + test.compileClasspath + test.runtimeClasspath + main.runtimeClasspath
-            srcDir file('src/integration-test/java')
+            srcDir file('src/integration-test/kotlin')
         }
         resources.srcDir file('src/integration-test/resources')
     }
@@ -43,17 +49,17 @@ sourceSets {
 
 ext.apacheCommonsIoVersion = '2.5'
 ext.apacheCommonsLangVersion = '3.6'
-ext.jerseyVersion = '2.27'
-ext.jerseymediaVersion = '2.27'
+ext.jerseyVersion = '2.30.1'
+ext.jerseymediaVersion = '2.30.1'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
-ext.radarCommonsVersion = '0.9.0'
-ext.radarOauthClientVersion = '0.4.0'
-ext.grizzlyVersion = '2.3.19'
+ext.radarOauthClientVersion = '0.5.8'
+ext.grizzlyVersion = '2.4.4'
+ext.jacksonVersion = '2.11.+'
 
 dependencies {
-    runtimeOnly group: 'ch.qos.logback', name:'logback-classic', version: logbackVersion
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
@@ -62,7 +68,6 @@ dependencies {
     compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
 
-    compile group: 'org.radarcns', name: 'radar-commons-server', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
     compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
@@ -70,8 +75,14 @@ dependencies {
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+    compile "org.json:json:20170516"
+
     testCompile group: 'junit', name: 'junit', version: junitVersion
-    testCompile "org.mockito:mockito-core:2.+"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 
 //---------------------------------------------------------------------------//
@@ -88,7 +99,7 @@ checkstyle {
 
 pmd {
     // pmd version
-    toolVersion = '5.5.2'
+    toolVersion = '6.0.0'
     ignoreFailures = false
 
     sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
@@ -119,13 +130,13 @@ gradle.projectsEvaluated {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
+wrapper {
+    gradleVersion = '6.4'
 }
 
-tasks.withType(Tar){
+tasks.withType(Tar) {
     compression = Compression.GZIP
-    extension = 'tar'
+    extension("tar")
 }
 
 //---------------------------------------------------------------------------//
@@ -145,7 +156,6 @@ task downloadApplicationDependencies {
     configurations.runtimeClasspath.files
 }
 
-
 task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     description = "Run integration tests (located in src/integrationTest/...)."
 
@@ -158,7 +168,7 @@ task integrationTest(type: Test, dependsOn: ['installMP', 'copyConf']) {
     exclude '**/*EntryPointTest*'
     // This is not needed, but I like to see which tests have run
     testLogging {
-        events "skipped", "failed", "passed"
+        events "skipped", "failed", "passed", "STANDARD_OUT", "STANDARD_ERROR"
     }
 }
 
@@ -168,7 +178,7 @@ ext.sudoLinux = System.properties['os.name'].toLowerCase().contains('linux') ? [
 ext.lock = 'src/integration-test/.RUNNING_INSTANCE_LOCK'
 
 task installMP(type: Exec) {
-    doFirst{
+    doFirst {
         def lockFile = new File(lock)
         if (lockFile.exists()) {
             throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
@@ -192,7 +202,7 @@ task removeLock(type: Exec) {
     workingDir 'src/integration-test/'
     commandLine sudoLinux + ['docker-compose', 'down']
 
-    doLast{
+    doLast {
         new File(lock).delete()
     }
 }
@@ -204,5 +214,16 @@ task copyConf(type: Copy) {
     filter { String line ->
         line.replace("management_portal_url: http://managementportal-app:8090/",
                 "management_portal_url: http://localhost:8090/")
+    }
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
