@@ -212,8 +212,8 @@ task copyConf(type: Copy) {
     into "/usr/local/etc/radar-redcap-int/"
 
     filter { String line ->
-        line.replace("management_portal_url: http://managementportal-app:8090/",
-                "management_portal_url: http://localhost:8090/")
+        line.replace("  base_url: http://managementportal-app:8090/",
+                "  base_url: http://localhost:8090/")
     }
 }
 
