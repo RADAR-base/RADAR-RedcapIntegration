@@ -4,10 +4,12 @@ import org.radarcns.redcap.config.RedCapManager
 import org.radarcns.redcap.integration.Integrator
 import org.radarcns.redcap.managementportal.MpClient
 import org.radarcns.redcap.util.RedCapTrigger
+import org.radarcns.redcap.webapp.exception.IllegalRequestException
+import org.radarcns.redcap.webapp.exception.RedcapOperationException
 import org.radarcns.redcap.webapp.util.PathLabels
-import org.radarcns.redcap.webapp.util.ResponseHandler.errorResponse
 import org.radarcns.redcap.webapp.util.ResponseHandler.response
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import javax.inject.Inject
 import javax.ws.rs.POST
 import javax.ws.rs.Path
@@ -56,13 +58,14 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
     fun handlerPostRequest(@Context ui: UriInfo, body: String?): Response {
         return try {
             if (body == null || body.isEmpty()) {
-                LOGGER.error("The body in the POST request cannot be empty or null.")
-                return Response.status(Response.Status.BAD_REQUEST).build()
+                throw IllegalRequestException(
+                    "The body in the POST request " +
+                            "cannot be empty or null."
+                )
             }
             val trigger = RedCapTrigger(body)
             if (!RedCapManager.isSupportedInstance(trigger)) {
-                return errorResponse(
-                    ui.requestUri,
+                throw IllegalRequestException(
                     "Requests coming from ${trigger.redcapUrl} for " +
                             "project Id ${trigger.projectId} cannot be managed."
                 )
@@ -72,7 +75,7 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
                 return if (enrolment.handleDataEntryTrigger()) {
                     response(ui.requestUri)
                 } else {
-                    errorResponse(ui.requestUri, "Redcap From update was not successful.")
+                    throw RedcapOperationException("Redcap From update was not successful.")
                 }
             } else {
                 LOGGER.info(
@@ -83,7 +86,7 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
                 response(ui.requestUri)
             }
         } catch (exc: Exception) {
-            errorResponse(ui.requestUri, "${exc.message}: ${exc.stackTrace}")
+            throw IOException("URI ${ui.requestUri} request failed.", exc)
         }
     }
 

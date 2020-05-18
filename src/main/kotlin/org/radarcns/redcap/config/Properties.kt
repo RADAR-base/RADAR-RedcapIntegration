@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.radarcns.redcap.webapp.exception.IllegalRequestException
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
@@ -133,13 +134,13 @@ object Properties {
     fun getRedCapInfo(url: URL, projectId: Int): RedCapInfo {
         val identifier = RedCapInfo(url, projectId)
         return CONFIG.projects.find { it.redCapInfo == identifier }?.redCapInfo
-            ?: throw IllegalArgumentException("No project $projectId for instance $url")
+            ?: throw IllegalRequestException("No project $projectId for instance $url")
     }
 
     fun getMpInfo(url: URL, projectId: Int): ManagementPortalInfo {
         val identifier = RedCapInfo(url, projectId)
         return CONFIG.projects.find { it.redCapInfo == identifier }?.mpInfo
-            ?: throw IllegalArgumentException("No project $projectId for instance $url")
+            ?: throw IllegalRequestException("No project $projectId for instance $url")
     }
 
     /**

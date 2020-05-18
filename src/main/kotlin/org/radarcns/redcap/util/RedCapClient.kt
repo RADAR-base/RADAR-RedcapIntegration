@@ -11,6 +11,7 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONException
 import org.radarcns.redcap.config.RedCapInfo
+import org.radarcns.redcap.webapp.exception.RedcapOperationException
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.MalformedURLException
@@ -70,8 +71,8 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                 }
                 response.isSuccessful
             }
-        } catch (exc: IOException) {
-            throw IllegalStateException("Error updating RedCap form", exc)
+        } catch (exc: Exception) {
+            throw RedcapOperationException("Error updating RedCap form", exc)
         }
     }
 
@@ -89,7 +90,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         try {
             mapper.writeValueAsString(data)
         } catch (exc: JsonProcessingException) {
-            throw IOException("Error while serializing RedCapInput", exc)
+            throw RedcapOperationException("Error while serializing RedCapInput", exc)
         }
 
 
@@ -115,7 +116,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                 }
             }
         } catch (exc: IOException) {
-            throw IllegalStateException("Error fetching RedCap form", exc)
+            throw RedcapOperationException("Error fetching RedCap form", exc)
         } catch (exc: JSONException) {
             LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
             mutableMapOf()

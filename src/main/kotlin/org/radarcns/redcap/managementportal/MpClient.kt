@@ -9,6 +9,8 @@ import org.radarcns.exception.TokenException
 import org.radarcns.oauth.OAuth2Client
 import org.radarcns.redcap.config.Properties
 import org.radarcns.redcap.config.RedCapManager
+import org.radarcns.redcap.webapp.exception.IllegalRequestException
+import org.radarcns.redcap.webapp.exception.SubjectOperationException
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.MalformedURLException
@@ -47,13 +49,9 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             .httpClient(httpClient).build()
     }
 
-    @get:Throws(IOException::class)
+    @get:Throws(TokenException::class)
     private val token: String
-        get() = try {
-            oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
-        } catch (ex: TokenException) {
-            throw IOException(ex)
-        }
+        get() = oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
 
     @Throws(IOException::class)
     fun getProject(redcapUrl: URL, projectId: Int): Project {
@@ -72,7 +70,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 project
             },
             onError = { response ->
-                throw IOException(
+                throw SubjectOperationException(
                     errorMessage +
                             " Response code: ${response.code()} Message: ${response.message()}"
                 )
@@ -97,7 +95,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 subject
             },
             onError = { response ->
-                throw IllegalStateException(
+                throw SubjectOperationException(
                     errorMessage + "Response code: " + response.code() +
                             " Message: " + response.message() +
                             " Info: " + response.body()!!.string()
@@ -143,7 +141,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 subject
             },
             onError = { response ->
-                throw IllegalStateException(
+                throw SubjectOperationException(
                     errorMessage + " Response code: " + response.code() +
                             ", Message: " + response.message() +
                             ", Info: " + response.body()!!.string()
@@ -223,7 +221,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                     message
                 }
             } catch (exc: MalformedURLException) {
-                throw IllegalArgumentException(message + " " + exc.message)
+                throw IllegalRequestException(message + " " + exc.message)
             }
         }
 

@@ -41,6 +41,11 @@ class ConfigurationTest {
         Assert.assertEquals("/token", configuration.tokenEndpoint)
         Assert.assertEquals("/project", configuration.projectEndpoint)
         Assert.assertEquals("/subject", configuration.subjectEndpoint)
+        Assert.assertEquals(
+            listOf("abc", "xyz"), configuration.projects.first().redCapInfo.attributes?.map { a ->
+                a.fieldName
+            }
+        )
         val redCapInfo = RedCapInfo(
             URL("https://localhost/"),
             0, "enrolment", "radar_enrolment",

@@ -33,7 +33,7 @@ object IntegrationUtils {
     const val WORK_PACKAGE = "INTEG_TEST"
     const val MP_PROJECT_LOCATION = "LONDON"
     const val MP_PROJECT_ID = 1
-    const val TRIGGER_BODY = ("redcap_url=https%3A%2F%2Fredcap.com%2Fredcap_v6.10.1%2F&"
+    const val TRIGGER_BODY = ("redcap_url=http://redcap.com/redcap_v6.10.1/&"
             + "project_url=http://redcap.com/redcap_v6.10.1/index.php?pid=33&"
             + "project_id=" + REDCAP_PROJECT_ID + "&"
             + "username=test&"

@@ -52,7 +52,7 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         recordId: Int,
         enrolmentEvent: String,
         integrationForm: String
-    ): Set<RedCapInput> = HashSet<RedCapInput>().apply {
+    ): Set<RedCapInput> = mutableSetOf<RedCapInput>().apply {
         add(
             IntegrationData(
                 recordId, enrolmentEvent,
@@ -73,12 +73,11 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
     }
 
-    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int): MutableMap<String, String> =
+    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int) =
         redCapClient.fetchFormDataForId(fields, recordId)
             .filter { parser.canBeParsed(it.value) }
             .mapValues { parser.parseField(it.value) }
             .toMutableMap()
-
 
     companion object {
         val parser = AttributeFieldParser()

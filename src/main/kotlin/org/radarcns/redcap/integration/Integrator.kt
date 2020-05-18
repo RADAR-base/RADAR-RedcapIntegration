@@ -7,6 +7,9 @@ import org.radarcns.redcap.managementportal.Subject.SubjectOperationStatus.CREAT
 import org.radarcns.redcap.managementportal.Subject.SubjectOperationStatus.FAILED
 import org.radarcns.redcap.util.RedCapClient
 import org.radarcns.redcap.util.RedCapTrigger
+import org.radarcns.redcap.webapp.exception.IllegalRequestException
+import org.radarcns.redcap.webapp.exception.RedcapOperationException
+import org.radarcns.redcap.webapp.exception.SubjectOperationException
 import org.slf4j.LoggerFactory
 
 /*
@@ -43,22 +46,33 @@ class Integrator(
             ?.toMutableList()
             ?: mutableListOf()
 
-        requireNotNull(recordId)
-        requireNotNull(enrolmentEvent)
-        requireNotNull(integrationFrom)
+        try {
+            requireNotNull(recordId)
+            requireNotNull(enrolmentEvent)
+            requireNotNull(integrationFrom)
+        } catch (exc: IllegalArgumentException) {
+            throw IllegalRequestException("Some of the required values were missing.")
+        }
 
         keys.add(IntegrationData.SUBJECT_ID_LABEL)
         logger.info("Attribute Keys: {}", keys.toTypedArray())
-        val result = redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
-        
-        val subject =
-            mpIntegrator.performSubjectUpdateOnMp(
-                redCapInfo.url,
-                redCapInfo.projectId,
-                recordId,
-                result,
-                result.remove(IntegrationData.SUBJECT_ID_LABEL)
-            )
+        val result: MutableMap<String, String> = try {
+            redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
+        } catch (exc: RedcapOperationException) {
+            logger.warn("Error getting fields from Redcap. Using null as redcap subject Id", exc)
+            mutableMapOf()
+        }
+
+        val redcapSubjectId = result.remove(IntegrationData.SUBJECT_ID_LABEL)
+
+        val subject = mpIntegrator.performSubjectUpdateOnMp(
+            redCapInfo.url,
+            redCapInfo.projectId,
+            recordId,
+            result,
+            redcapSubjectId
+        )
+
         return when (subject.operationStatus) {
             CREATED -> redCapIntegrator.updateRedCapIntegrationForm(
                 subject,
@@ -67,7 +81,7 @@ class Integrator(
                 integrationFrom
             )
 
-            FAILED -> throw IllegalStateException("Operation on Subject in MP failed.")
+            FAILED -> throw SubjectOperationException("Operation on Subject in MP failed.")
             else -> false
         }
     }

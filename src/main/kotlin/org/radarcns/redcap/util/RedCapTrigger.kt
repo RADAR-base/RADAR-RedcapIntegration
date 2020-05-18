@@ -1,6 +1,7 @@
 package org.radarcns.redcap.util
 
 import org.radarcns.redcap.config.RedCapManager
+import org.radarcns.redcap.webapp.exception.IllegalRequestException
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.MalformedURLException
@@ -103,7 +104,7 @@ class RedCapTrigger(value: String) {
             val input = bytes.toString(StandardCharsets.UTF_8)
             parser(input.split("&").toTypedArray())
         } catch (exc: IOException) {
-            throw IllegalArgumentException(exc)
+            throw IllegalRequestException("The trigger body could not be parsed", exc)
         }
     }
 
@@ -158,9 +159,11 @@ class RedCapTrigger(value: String) {
     }
 
     private fun convertParameter(value: String, markerIndex: Int): TriggerParameter {
-        require(markerIndex > 0) {
-            "No value found for the parameter. Please check that " +
-                    "the request query parameters are correct."
+        if (markerIndex <= 0) {
+            throw IllegalRequestException(
+                "No value found for the parameter. Please check that " +
+                        "the request query parameters are correct."
+            )
         }
 
         val name = value.substring(0, markerIndex).trim { it <= ' ' }
@@ -172,7 +175,7 @@ class RedCapTrigger(value: String) {
         if (value.startsWith(TriggerParameter.instrumentStatus(instrument))) {
             return TriggerParameter.INSTRUMENT_STATUS
         }
-        throw IllegalArgumentException(" No enum constant for $name")
+        throw IllegalRequestException(" No enum constant for $name")
     }
 
     /**
@@ -205,7 +208,7 @@ class RedCapTrigger(value: String) {
                 0 -> InstrumentStatus.INCOMPLETE
                 1 -> InstrumentStatus.UNVERIFIED
                 2 -> InstrumentStatus.COMPLETE
-                else -> throw IllegalArgumentException(
+                else -> throw IllegalRequestException(
                     value.toString() + " cannot be converted in "
                             + InstrumentStatus::class.java.name
                 )
