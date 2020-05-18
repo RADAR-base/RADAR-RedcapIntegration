@@ -1,13 +1,8 @@
-version: 0.1-alpha
-released: 2017-08-29
-
 # ManagementPortal configuration
-oauth_client_id: #OAuth2 clientId used by the webApp for making requests
-oauth_client_secret:  #OAuth2 client secrete
-management_portal_url: #URL pointing Management Portal
-token_endpoint: #URL managing tokens
-project_endpoint: #URL managing project function
-subject_endpoint: #URL managing subject functions
+management_portal:
+  oauth_client_id: #OAuth2 clientId used by the webApp for making requests
+  oauth_client_secret:  #OAuth2 client secrete
+  base_url: #URL pointing Management Portal
 
 # Set of supported projects
 projects:

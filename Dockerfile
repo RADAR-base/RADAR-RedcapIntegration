@@ -34,7 +34,7 @@ RUN ./gradlew distTar \
 
 FROM openjdk:14
 
-MAINTAINER @yatharthranjan, @blootsvoets
+MAINTAINER @yatharthranjan, @mpgxvii
 
 LABEL description="RADAR-CNS Redcap Integration docker container"
 
