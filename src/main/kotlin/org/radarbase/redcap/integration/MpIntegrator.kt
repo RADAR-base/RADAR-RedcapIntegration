@@ -23,8 +23,8 @@ import java.net.URL
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Handler for updating Integrator Redcap form parameters. The input parameters are
- * described by [IntegrationData].
+/** Handler for updating Management Portal subject. If the subject does not exists, it creates a
+ * new subject, otherwise it updates the subject.
  * @see MpClient
  */
 class MpIntegrator(private val mpClient: MpClient) {
@@ -169,9 +169,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         c: String,
         d: String
     ): String {
-        return a + SEPARATOR +
-                b + SEPARATOR + c +
-                SEPARATOR + d
+        return a + SEPARATOR + b + SEPARATOR + c + SEPARATOR + d
     }
 
 }
