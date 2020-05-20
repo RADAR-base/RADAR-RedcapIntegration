@@ -13,3 +13,7 @@
 
 # IntelliJ
 build
+/src/integration-test/.RUNNING_INSTANCE_LOCK
+
+
+.DS_Store

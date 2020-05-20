@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8-alpine as builder
+FROM openjdk:14 as builder
 
 RUN mkdir /code
 WORKDIR /code
@@ -32,9 +32,9 @@ RUN ./gradlew distTar \
     && tar xf *.tar \
     && rm *.tar redcap-*/lib/redcap-*.jar
 
-FROM openjdk:8-jre-alpine
+FROM openjdk:14
 
-MAINTAINER @yatharthranjan, @blootsvoets
+MAINTAINER @yatharthranjan, @mpgxvii
 
 LABEL description="RADAR-CNS Redcap Integration docker container"
 

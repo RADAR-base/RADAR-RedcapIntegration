@@ -1,4 +1,4 @@
-# RADAR-CNS REDCap Integration
+# RADAR-Base REDCap Integration
 
 [![Build Status](https://api.travis-ci.org/RADAR-base/RADAR-RedcapIntegration.svg?branch=master)](https://travis-ci.org/RADAR-base/RADAR-RedcapIntegration/)
 
@@ -39,14 +39,14 @@ It is highly recommended to use an encrypted connection (i.e. SSL/HTTPS) for acc
 ## How does it works
 Upon receiving a request, the service verifies whether the trigger is related to the REDCap
 enrolment event. If so, it triggers a Subject creation in the
-[RADAR-CNS Management Portal](https://github.com/RADAR-base/ManagementPortal). After creating a new
+[RADAR-Base Management Portal](https://github.com/RADAR-base/ManagementPortal). After creating a new
 subject, the serivce update the RADAR REDCap `RADAR Enrolment` form adding:
-- `RADAR-CNS Subject Identifier`: unique identifier within the a RADAR-CNS Platform instance
+- `RADAR-Base Subject Identifier`: unique identifier within the a RADAR-Base Platform instance
 - `Human Readable Identifier`: unique identifier used for visualising data
 At the end of the process, the `RADAR Enrolment` will become `COMPLETED`.
 
 The `RADAR Enrolment` establish a relation between data stored in REDCap and data stored in the
-RADAR-CNS Platform.
+RADAR-Base Platform.
 
 ## Configuration
 This service requires a configuration file named `radar.yml` that can be stored at:
@@ -62,6 +62,8 @@ redcap_info:
   enrolment_event: #Unique identifier for the enrolment event
   integration_form: #Name of integration REDCap form
   token: #REDCap API Token used to identify the REDCap user against the REDCap instance
+  attributes:
+    - field_name: #Field name of the attribute specified in REDCap. Multiple field_names are supported.
 mp_info:
   project_name: #Management Portal project identifier
 ``` 
@@ -106,6 +108,15 @@ If running this along with other components on docker using docker-compose, you 
 ```
 
 Please check the RADAR-base platform [docker-compose.yml file](https://github.com/RADAR-base/RADAR-Docker/blob/master/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml) for more information.
+
+## Scripts
+Under the scripts folder there is a python script which will download non-identifiable data from a RedCAP project and upload it to a specified FTP server. It is run as a cron job for RADAR-Base projects to provide RedCAP data to data analysts. FTP authentication details can be provided through a .netrc file or as arguments to the script. It requires the [requests library]('https://pypi.org/project/requests/').
+
+Usage:
+```
+python3 scripts/redcap-extract.py --help
+python3 scripts/redcap-extract.py PROJECT_NAME REDCAP_TOKEN --redcap-url URL --ftp-ip IP 
+```
 
 ## Credits
 Part of this document has been extracted from the [REDCap](https://projectredcap.org/) documentation.

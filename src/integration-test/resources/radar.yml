@@ -1,13 +1,8 @@
-version: 1.0
-released: 2017-08-29
-
 # ManagementPortal configuration
-oauth_client_id: radar_redcap_integrator
-oauth_client_secret:  secret
-management_portal_url: http://managementportal-app:8090/
-token_endpoint: oauth/token
-project_endpoint: api/projects/
-subject_endpoint: api/subjects/
+management_portal:
+  oauth_client_id: radar_redcap_integrator
+  oauth_client_secret:  secret
+  base_url: http://managementportal-app:8090/
 
 # List of supported projects
 projects:
@@ -17,5 +12,8 @@ projects:
       enrolment_event: enrolment_arm_1
       integration_form: radar_enrolment
       token: 1234567890
+      attributes:
+        - field_name: treatment_arm
+        - field_name: another_attribute
     mp_info:
       project_name: radar
