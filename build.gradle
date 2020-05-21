@@ -79,7 +79,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
-    compile "org.json:json:20170516"
+    compile "org.json:json:20190722"
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
