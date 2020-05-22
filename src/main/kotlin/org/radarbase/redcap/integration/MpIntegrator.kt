@@ -113,10 +113,7 @@ class MpIntegrator(private val mpClient: MpClient) {
             }
             createSubject(attributes, humanReadableId, redcapUrl, project, recordId)
         } catch (e: Exception) {
-            throw SubjectOperationException(
-                "Subject creation cannot be completed.",
-                e
-            )
+            throw SubjectOperationException("Subject creation cannot be completed.", e)
         }
     }
 

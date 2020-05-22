@@ -5,12 +5,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
-import org.radarcns.exception.TokenException
-import org.radarcns.oauth.OAuth2Client
 import org.radarbase.redcap.config.Properties
 import org.radarbase.redcap.config.RedCapManager
 import org.radarbase.redcap.webapp.exception.IllegalRequestException
 import org.radarbase.redcap.webapp.exception.SubjectOperationException
+import org.radarcns.exception.TokenException
+import org.radarcns.oauth.OAuth2Client
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.MalformedURLException
@@ -51,7 +51,10 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
 
     @get:Throws(TokenException::class)
     private val token: String
-        get() = oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
+        get() {
+            LOGGER.info("Trying to get token from {}", oauthClient.tokenEndpoint.toString())
+            return oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
+        }
 
     @Throws(IOException::class)
     fun getProject(redcapUrl: URL, projectId: Int): Project {
