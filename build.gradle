@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'org.radarbase'
-version '1.0.0-SNAPSHOT'
+version '1.0.2-SNAPSHOT'
 
 mainClassName = 'org.radarbase.redcap.webapp.GrizzlyServer'
 
@@ -81,7 +81,7 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
     implementation "org.json:json:20170516"
 
-    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testImplementation group: 'junit', name: 'junit', version: junitVersion
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 
@@ -181,8 +181,7 @@ task installMP(type: Exec) {
     doFirst {
         def lockFile = new File(lock)
         if (lockFile.exists()) {
-            throw new GradleException("A previous instance of the management portal is " +
-                    "still running. Please stop it first and then try again.")
+            throw new GradleException("A previous instance of the management portal is still running. Please stop it first and then try again.")
         } else {
             lockFile.createNewFile()
         }

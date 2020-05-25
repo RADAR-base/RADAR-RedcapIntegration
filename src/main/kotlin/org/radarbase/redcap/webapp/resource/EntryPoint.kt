@@ -5,7 +5,6 @@ import org.radarbase.redcap.integration.Integrator
 import org.radarbase.redcap.managementportal.MpClient
 import org.radarbase.redcap.util.RedCapTrigger
 import org.radarbase.redcap.webapp.exception.IllegalRequestException
-import org.radarbase.redcap.webapp.exception.RedcapOperationException
 import org.radarbase.redcap.webapp.util.PathLabels
 import org.radarbase.redcap.webapp.util.ResponseHandler.response
 import org.slf4j.LoggerFactory
@@ -56,42 +55,38 @@ class EntryPoint @Inject constructor(private val mpClient: MpClient) {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     fun handlerPostRequest(@Context ui: UriInfo, body: String?): Response {
-        return try {
-            if (body == null || body.isEmpty()) {
-                throw IllegalRequestException(
-                    "The body in the POST request " +
-                            "cannot be empty or null."
-                )
-            }
-            val trigger = RedCapTrigger(body)
-            if (!RedCapManager.isSupportedInstance(trigger)) {
-                throw IllegalRequestException(
-                    "Requests coming from ${trigger.redcapUrl} for " +
-                            "project Id ${trigger.projectId} cannot be managed."
-                )
-            }
-            if (trigger.isEnrolment) {
-                val enrolment = Integrator(
-                    trigger,
-                    mpClient
-                )
-                return if (enrolment.handleDataEntryTrigger()) {
-                    response(ui.requestUri)
-                } else {
-                    throw RedcapOperationException(
-                        "Redcap From update was not successful."
-                    )
-                }
-            } else {
-                LOGGER.info(
-                    "[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
-                    trigger.projectId, trigger.redcapUrl, trigger.instrument,
-                    trigger.redcapEventName
-                )
+        if (body == null || body.isEmpty()) {
+            throw IllegalRequestException(
+                "The body in the POST request " +
+                        "cannot be empty or null."
+            )
+        }
+        val trigger = RedCapTrigger(body)
+        if (!RedCapManager.isSupportedInstance(trigger)) {
+            throw IllegalRequestException(
+                "Requests coming from ${trigger.redcapUrl} for " +
+                        "project Id ${trigger.projectId} cannot be managed."
+            )
+        }
+        return if (trigger.isEnrolment) {
+            val enrolment = Integrator(
+                trigger,
+                mpClient
+            )
+            if (enrolment.handleDataEntryTrigger()) {
                 response(ui.requestUri)
+            } else {
+                throw IOException(
+                    "Redcap and RADAR integration was not successful."
+                )
             }
-        } catch (exc: Exception) {
-            throw IOException("URI ${ui.requestUri} request failed.", exc)
+        } else {
+            LOGGER.info(
+                "[{}] Skip trigger from {} instrument \"{}\" upon event \"{}\".",
+                trigger.projectId, trigger.redcapUrl, trigger.instrument,
+                trigger.redcapEventName
+            )
+            response(ui.requestUri)
         }
     }
 
