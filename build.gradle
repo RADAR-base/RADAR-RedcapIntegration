@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'org.radarbase'
-version '1.0.0'
+version '1.0.1'
 
 mainClassName = 'org.radarbase.redcap.webapp.GrizzlyServer'
 
@@ -59,29 +59,29 @@ ext.grizzlyVersion = '2.4.4'
 ext.jacksonVersion = '2.11.+'
 
 dependencies {
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     runtimeOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: jerseymediaVersion
 
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
-    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jerseyVersion
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: jerseyVersion
+    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: jerseyVersion
 
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
+    implementation group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
+    implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
 
-    compile group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
+    implementation group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
 
-    compile group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
+    implementation group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
 
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttp3Version
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
-    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
-    compile "org.json:json:20170516"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+    implementation "org.json:json:20170516"
 
-    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testImplementation group: 'junit', name: 'junit', version: junitVersion
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 

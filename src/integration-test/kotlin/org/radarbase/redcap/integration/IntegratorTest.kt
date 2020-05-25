@@ -3,9 +3,7 @@ package org.radarbase.redcap.integration
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -101,12 +99,10 @@ class IntegratorTest {
             mpIntegrator = mpIntegrator
         )
 
-        // The result will be false since there is no actual redcap instance and hence the form
-        // cannot be updated. But even then, no exception should be thrown.
         val result = integrator.handleDataEntryTrigger()
-        assertFalse(result)
+        assertTrue(result)
 
-        Assert.assertNotNull(subject)
+        assertNotNull(subject)
         assertEquals(
             Integer.valueOf(REDCAP_RECORD_ID_2),
             subject?.externalId
@@ -136,7 +132,8 @@ class IntegratorTest {
             existingSubjectId
         )
         assertEquals(subject.attributes, attributes)
-        assertEquals(subject.humanReadableIdentifier,
+        assertEquals(
+            subject.humanReadableIdentifier,
             HUMAN_READABLE_ID
         )
     }
@@ -163,10 +160,12 @@ class IntegratorTest {
             existingSubjectId
         )
         assertEquals(subject.attributes, attributes)
-        assertEquals(subject.attributes[REDCAP_ATTRIBUTE_1],
+        assertEquals(
+            subject.attributes[REDCAP_ATTRIBUTE_1],
             REDCAP_ATTRIBUTE_1_VAL_2
         )
-        assertEquals(subject.humanReadableIdentifier,
+        assertEquals(
+            subject.humanReadableIdentifier,
             HUMAN_READABLE_ID
         )
     }

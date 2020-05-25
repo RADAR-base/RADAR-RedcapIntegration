@@ -3,8 +3,7 @@ package org.radarbase.redcap.integration
 import org.radarbase.redcap.config.RedCapInfo
 import org.radarbase.redcap.config.RedCapManager
 import org.radarbase.redcap.managementportal.MpClient
-import org.radarbase.redcap.managementportal.Subject.SubjectOperationStatus.CREATED
-import org.radarbase.redcap.managementportal.Subject.SubjectOperationStatus.FAILED
+import org.radarbase.redcap.managementportal.Subject.SubjectOperationStatus.*
 import org.radarbase.redcap.util.RedCapClient
 import org.radarbase.redcap.util.RedCapTrigger
 import org.radarbase.redcap.webapp.exception.IllegalRequestException
@@ -85,9 +84,13 @@ class Integrator(
                 integrationFrom
             )
 
-            FAILED -> throw SubjectOperationException(
-                "Operation on Subject in MP failed."
-            )
+            // We send true here too since the integration was successful even though we did not
+            // update the redcap form as it wasn't required. Later, we may update a field in
+            // redcap with attributes from MP in the UPDATED status
+            UPDATED, NOOP -> true
+
+            FAILED -> throw SubjectOperationException("Operation on Subject in MP failed.")
+
             else -> false
         }
     }

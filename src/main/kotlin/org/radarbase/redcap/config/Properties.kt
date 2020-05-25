@@ -227,10 +227,7 @@ object Properties {
      * @return [URL] pointing the Management Portal instance specified on the config file
      */
     fun validateMpUrl(): URL {
-        if (!isSecureConnection(
-                CONFIG.mpConfig.managementPortalUrl
-            )
-        ) {
+        if (!isSecureConnection(CONFIG.mpConfig.managementPortalUrl)) {
             LOGGER.warn(
                 "The provided Management Portal instance is not using an encrypted"
                         + " connection."
