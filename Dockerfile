@@ -42,9 +42,8 @@ COPY --from=builder /code/build/distributions/redcap-*/bin/* /usr/bin/
 COPY --from=builder /code/build/distributions/redcap-*/lib/* /usr/lib/
 COPY --from=builder /code/build/libs/redcap-*.jar /usr/lib/
 
-RUN  apt-get update \
-  && apt-get install -y wget \
-  && rm -rf /var/lib/apt/lists/*
+RUN yum install -y wget \
+  && rm -rf /var/cache/yum
 
 EXPOSE 8080
 
