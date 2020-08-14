@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONException
 import org.radarbase.redcap.config.RedCapInfo
@@ -70,6 +71,8 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful update for record {}", recordId)
+                } else {
+                    LOGGER.warn(getErrorMsg(response))
                 }
                 response.isSuccessful
             }
@@ -117,9 +120,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                     val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
                     mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
                 } else {
-                    val msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
-                            "Info: ${response.message()}"
-                    LOGGER.warn(msg)
+                    LOGGER.warn(getErrorMsg(response))
                     mutableMapOf()
                 }
             }
@@ -134,6 +135,16 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         }
     }
 
+    private fun getErrorMsg(response: Response): String {
+        var msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
+                "Msg: ${response.message()}"
+        val body = response.body();
+        if(body != null) {
+            msg += ", Reason: ${body.string()}"
+        }
+        return msg
+    }
+
     private fun getFormFetchParameters(
         fields: List<String>,
         records: List<String>
@@ -143,12 +154,8 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         parameters["format"] = "json"
         parameters["type"] = "flat"
         parameters["rawOrLabel"] = "label"
-        parameters.putAll(encodeListParams(fields,
-            FIELDS_LABEL
-        ))
-        parameters.putAll(encodeListParams(records,
-            RECORDS_LABEL
-        ))
+        parameters.putAll(encodeListParams(fields, FIELDS_LABEL))
+        parameters.putAll(encodeListParams(records, RECORDS_LABEL))
         return parameters
     }
 
