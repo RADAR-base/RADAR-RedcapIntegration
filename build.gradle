@@ -56,7 +56,7 @@ ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
 ext.radarOauthClientVersion = '0.5.8'
 ext.grizzlyVersion = '2.4.4'
-ext.jacksonVersion = '2.11.+'
+ext.jacksonVersion = '2.12.+'
 
 dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
