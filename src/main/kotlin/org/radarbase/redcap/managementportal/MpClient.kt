@@ -9,8 +9,8 @@ import org.radarbase.redcap.config.Properties
 import org.radarbase.redcap.config.RedCapManager
 import org.radarbase.redcap.webapp.exception.IllegalRequestException
 import org.radarbase.redcap.webapp.exception.SubjectOperationException
-import org.radarcns.exception.TokenException
-import org.radarcns.oauth.OAuth2Client
+import org.radarbase.exception.TokenException
+import org.radarbase.oauth.OAuth2Client
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.MalformedURLException

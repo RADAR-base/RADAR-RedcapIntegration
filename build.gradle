@@ -54,7 +54,7 @@ ext.jerseymediaVersion = '2.30.1'
 ext.junitVersion = '4.12'
 ext.logbackVersion = '1.2.3'
 ext.okhttp3Version = '3.8.1'
-ext.radarOauthClientVersion = '0.5.8'
+ext.radarOauthClientVersion = '0.8.0'
 ext.grizzlyVersion = '2.4.4'
 ext.jacksonVersion = '2.11.+'
 
@@ -68,7 +68,7 @@ dependencies {
     implementation group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: grizzlyVersion
     implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: jerseyVersion
 
-    implementation group: 'org.radarcns', name: 'oauth-client-util', version: radarOauthClientVersion
+    implementation group: 'org.radarbase', name: 'oauth-client-util', version: radarOauthClientVersion
 
     implementation group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: apacheCommonsLangVersion
