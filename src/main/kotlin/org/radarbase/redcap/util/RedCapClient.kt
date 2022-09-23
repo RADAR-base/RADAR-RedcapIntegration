@@ -138,7 +138,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
     private fun getErrorMsg(response: Response): String {
         var msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
                 "Msg: ${response.message()}"
-        val body = response.body();
+        val body = response.body()
         if(body != null) {
             msg += ", Reason: ${body.string()}"
         }
