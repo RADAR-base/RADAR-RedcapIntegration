@@ -46,9 +46,12 @@ class ConfigurationTest {
             }
         )
         val redCapInfo = RedCapInfo(
-            URL("https://localhost/"),
-            0, "enrolment", "radar_enrolment",
-            "1234567890", emptySet()
+            url = URL("https://localhost/"),
+            projectId = 0,
+            enrolmentEvent = "enrolment",
+            integrationForm = "radar_enrolment",
+            token = "1234567890",
+            attributes = emptySet()
         )
         val mpInfo =
             ManagementPortalInfo("project-0")
