@@ -3,8 +3,8 @@ package org.radarbase.redcap.util
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import org.radarcns.exception.TokenException
-import org.radarcns.oauth.OAuth2Client
+import org.radarbase.exception.TokenException
+import org.radarbase.oauth.OAuth2Client
 import org.radarbase.redcap.config.Properties.CONFIG
 import org.radarbase.redcap.config.Properties.oauthClientId
 import org.radarbase.redcap.config.Properties.oauthClientSecret

@@ -27,6 +27,7 @@ import java.net.URL
 data class RedCapInfo(
     @JsonProperty("url") var url: URL,
     @JsonProperty("project_id") val projectId: Int,
+    @JsonProperty("api_path") val apiPath: String = "/api/",
     @JsonProperty("enrolment_event") val enrolmentEvent: String? = null,
     @JsonProperty("integration_form") val integrationForm: String? = null,
     @JsonProperty("token") val token: String? = null,

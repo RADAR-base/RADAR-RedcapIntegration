@@ -32,7 +32,7 @@ RUN ./gradlew distTar \
     && tar xf *.tar \
     && rm *.tar redcap-*/lib/redcap-*.jar
 
-FROM openjdk:14
+FROM eclipse-temurin:17-jre
 
 MAINTAINER @yatharthranjan, @mpgxvii
 
@@ -42,8 +42,9 @@ COPY --from=builder /code/build/distributions/redcap-*/bin/* /usr/bin/
 COPY --from=builder /code/build/distributions/redcap-*/lib/* /usr/lib/
 COPY --from=builder /code/build/libs/redcap-*.jar /usr/lib/
 
-RUN yum install -y wget \
-  && rm -rf /var/cache/yum
+RUN apt-get install -y \
+  curl wget \
+  && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080
 
