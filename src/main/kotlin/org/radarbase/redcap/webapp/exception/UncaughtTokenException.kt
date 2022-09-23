@@ -1,6 +1,6 @@
 package org.radarbase.redcap.webapp.exception
 
-import org.radarcns.exception.TokenException
+import org.radarbase.exception.TokenException
 import org.slf4j.LoggerFactory
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper
