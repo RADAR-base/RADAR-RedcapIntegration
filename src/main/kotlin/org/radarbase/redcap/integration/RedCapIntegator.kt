@@ -80,8 +80,8 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
     }
 
-    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int) =
-        redCapClient.fetchFormDataForId(fields, recordId)
+    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int, event: String? = null) =
+        redCapClient.fetchFormDataForId(fields, recordId, event)
             .filter { parser.canBeParsed(it.value) }
             .mapValues { parser.parseField(it.value) }
             .toMutableMap()

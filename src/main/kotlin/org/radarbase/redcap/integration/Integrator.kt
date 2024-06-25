@@ -30,24 +30,25 @@ import org.slf4j.LoggerFactory
  * described by [IntegrationData].
  */
 class Integrator(
-    private val trigger: RedCapTrigger, private val mpClient: MpClient,
+    private val trigger: RedCapTrigger,
+    private val mpClient: MpClient,
     private val redCapInfo: RedCapInfo = RedCapManager.getInfo(trigger),
-    private val mpIntegrator: MpIntegrator = MpIntegrator(
-        mpClient
-    ),
-    private val redCapIntegrator: RedCapIntegator = RedCapIntegator(
-        RedCapClient(redCapInfo)
-    )
+    private val mpIntegrator: MpIntegrator =
+        MpIntegrator(
+            mpClient,
+        ),
+    private val redCapIntegrator: RedCapIntegator =
+        RedCapIntegator(
+            RedCapClient(redCapInfo),
+        ),
 ) {
-
     fun handleDataEntryTrigger(): Boolean {
         val recordId = trigger.record
         val enrolmentEvent = redCapInfo.enrolmentEvent
         val integrationFrom = redCapInfo.integrationForm
-        val keys = redCapInfo.attributes
-            ?.map { a -> a.fieldName }
-            ?.toMutableList()
-            ?: mutableListOf()
+        val keys = redCapInfo.attributes?.map { a -> a.fieldName } ?: emptyList()
+        var attributes = emptyMap<String, String>()
+        var redcapSubjectId = ""
 
         try {
             requireNotNull(recordId)
@@ -57,32 +58,31 @@ class Integrator(
             throw IllegalRequestException("Some of the required values were missing.")
         }
 
-        keys.add(IntegrationData.SUBJECT_ID_LABEL)
         logger.info("Attribute Keys: {}", keys.toTypedArray())
-        val result: MutableMap<String, String> = try {
-            redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
+        try {
+            attributes = redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
+            redcapSubjectId = redCapIntegrator.pullFieldsFromRedcap(listOf(SUJBECT_ID_KEY), recordId, enrolmentEvent).getOrDefault(SUJBECT_ID_KEY, "")
         } catch (exc: RedcapOperationException) {
-            logger.warn("Error getting fields from Redcap. Using null as redcap subject Id", exc)
-            mutableMapOf()
+            logger.warn("Error getting fields from Redcap. Using null as result..", exc)
         }
 
-        val redcapSubjectId = result.remove(IntegrationData.SUBJECT_ID_LABEL)
-
-        val subject = mpIntegrator.performSubjectUpdateOnMp(
-            redCapInfo.url,
-            redCapInfo.projectId,
-            recordId,
-            result,
-            redcapSubjectId
-        )
+        val subject =
+            mpIntegrator.performSubjectUpdateOnMp(
+                redCapInfo.url,
+                redCapInfo.projectId,
+                recordId,
+                attributes,
+                redcapSubjectId,
+            )
 
         return when (subject.operationStatus) {
-            CREATED -> redCapIntegrator.updateRedCapIntegrationForm(
-                subject,
-                recordId,
-                enrolmentEvent,
-                integrationFrom
-            )
+            CREATED ->
+                redCapIntegrator.updateRedCapIntegrationForm(
+                    subject,
+                    recordId,
+                    enrolmentEvent,
+                    integrationFrom,
+                )
 
             // We send true here too since the integration was successful even though we did not
             // update the redcap form as it wasn't required. Later, we may update a field in
@@ -97,5 +97,6 @@ class Integrator(
 
     companion object {
         private val logger = LoggerFactory.getLogger(Integrator::class.java)
+        private val SUJBECT_ID_KEY = IntegrationData.SUBJECT_ID_LABEL
     }
 }

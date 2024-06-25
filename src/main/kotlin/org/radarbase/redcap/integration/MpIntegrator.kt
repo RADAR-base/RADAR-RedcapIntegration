@@ -43,7 +43,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         redcapUrl: URL,
         projectId: Int,
         recordId: Int,
-        attributes: MutableMap<String, String>,
+        attributes: Map<String, String>,
         redcapSubjectId: String?
     ): Subject {
         return try {
@@ -92,7 +92,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         recordId: Int,
         project: Project,
         humanReadableId: String,
-        attributes: MutableMap<String, String>,
+        attributes: Map<String, String>,
         redcapSubjectId: String?
     ): Subject {
         return try {
@@ -119,16 +119,16 @@ class MpIntegrator(private val mpClient: MpClient) {
 
     private fun updateSubject(
         subject: Subject,
-        attributes: MutableMap<String, String>,
+        attributes: Map<String, String>,
         humanReadableId: String
     ): Subject {
         Logger.info(
             "Subject, with Human readable identifier: {}, is already available, updating...",
             humanReadableId
         )
-        attributes[HUMAN_READABLE_IDENTIFIER_KEY] = humanReadableId
-        return if (subject.attributes != attributes) {
-            subject.addAttributes(attributes)
+        val updatedAttributes = attributes + (HUMAN_READABLE_IDENTIFIER_KEY to humanReadableId)
+        return if (subject.attributes != updatedAttributes) {
+            subject.addAttributes(updatedAttributes)
             mpClient.updateSubject(subject)
                 .apply { operationStatus = Subject.SubjectOperationStatus.UPDATED }
         } else {
