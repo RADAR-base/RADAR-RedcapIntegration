@@ -106,23 +106,24 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
 
     open fun fetchFormDataForId(
-        fields: List<String>,
+        field: String,
         recordId: Int,
         event: String?
-    ): MutableMap<String, String> {
+    ): String {
         val records = listOf(recordId.toString())
-        val parameters = getFormFetchParameters(fields, records, event)
+        val parameters = getFormFetchParameters(listOf(field), records, event)
         return try {
             val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
                     val result = response.body()!!.string()
-                    var data = JSONArray(result).asSequence().mapNotNull { it?.toString() }.firstOrNull() ?: ""
-                    mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
+                    JSONArray(result).asSequence().mapNotNull {
+                        mapper.readValue(it.toString(), object : TypeReference<HashMap<String, String>>() {})
+                    }.mapNotNull { it[field] }.firstOrNull() ?: ""                    
                 } else {
                     LOGGER.warn(getErrorMsg(response))
-                    mutableMapOf()
+                    ""
                 }
             }
         } catch (exc: IOException) {
@@ -132,7 +133,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             )
         } catch (exc: JSONException) {
             LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
-            mutableMapOf()
+            ""
         }
     }
 

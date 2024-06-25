@@ -46,7 +46,6 @@ class Integrator(
         val recordId = trigger.record
         val enrolmentEvent = redCapInfo.enrolmentEvent
         val integrationFrom = redCapInfo.integrationForm
-        val keys = redCapInfo.attributes?.map { a -> a.fieldName } ?: emptyList()
         var attributes = emptyMap<String, String>()
         var redcapSubjectId = ""
 
@@ -58,10 +57,9 @@ class Integrator(
             throw IllegalRequestException("Some of the required values were missing.")
         }
 
-        logger.info("Attribute Keys: {}", keys.toTypedArray())
         try {
-            attributes = redCapIntegrator.pullFieldsFromRedcap(keys, recordId)
-            redcapSubjectId = redCapIntegrator.pullFieldsFromRedcap(listOf(SUJBECT_ID_KEY), recordId, enrolmentEvent).getOrDefault(SUJBECT_ID_KEY, "")
+            attributes = redCapInfo.attributes?.associate { a -> (a.fieldName to redCapIntegrator.pullFieldFromRedcap(a.fieldName, recordId)) } ?: emptyMap()
+            redcapSubjectId = redCapIntegrator.pullFieldFromRedcap(SUJBECT_ID_KEY, recordId, enrolmentEvent)
         } catch (exc: RedcapOperationException) {
             logger.warn("Error getting fields from Redcap. Using null as result..", exc)
         }
