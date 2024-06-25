@@ -5,7 +5,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'application'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.21'  // Updated Kotlin version
+    id 'org.jetbrains.kotlin.jvm' version '1.5.21'
 }
 
 group = 'org.radarbase'
@@ -96,13 +96,13 @@ dependencies {
 }
 
 checkstyle {
-    toolVersion = '8.46'  // Updated Checkstyle version
+    toolVersion = '8.46'
     ignoreFailures = false
     sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
 }
 
 pmd {
-    toolVersion = '6.44.0'  // Updated PMD version
+    toolVersion = '6.44.0'
     ignoreFailures = false
     sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
     consoleOutput = true
@@ -125,7 +125,7 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.named('wrapper') {
-    gradleVersion = '7.0'  // Update Gradle wrapper version
+    gradleVersion = '7.4'
 }
 
 tasks.withType(Tar) {
