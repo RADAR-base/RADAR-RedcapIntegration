@@ -107,17 +107,18 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
     open fun fetchFormDataForId(
         fields: List<String>,
-        recordId: Int
+        recordId: Int,
+        event: String?
     ): MutableMap<String, String> {
         val records = listOf(recordId.toString())
-        val parameters = getFormFetchParameters(fields, records)
+        val parameters = getFormFetchParameters(fields, records, event)
         return try {
             val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
                     val result = response.body()!!.string()
-                    val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
+                    var data = JSONArray(result).asSequence().mapNotNull { it?.toString() }.firstOrNull() ?: ""
                     mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
                 } else {
                     LOGGER.warn(getErrorMsg(response))
@@ -147,7 +148,8 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
     private fun getFormFetchParameters(
         fields: List<String>,
-        records: List<String>
+        records: List<String>,
+        event: String?
     ): Map<String, String> {
         val parameters: MutableMap<String, String> = mutableMapOf()
         parameters["content"] = "record"
@@ -156,6 +158,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         parameters["rawOrLabel"] = "label"
         parameters.putAll(encodeListParams(fields, FIELDS_LABEL))
         parameters.putAll(encodeListParams(records, RECORDS_LABEL))
+        if (event != null) parameters.putAll(encodeListParams(listOf(event), EVENTS_LABEL))
         return parameters
     }
 
@@ -165,6 +168,9 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                 this["$label[$index]"] = value
             }
         }
+
+    operator fun <T> JSONArray.iterator(): Iterator<T> =
+    (0 until this.length()).asSequence().map { this.get(it) as T }.iterator()
 
     companion object {
         private val mapper = ObjectMapper().apply {
@@ -177,6 +183,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         private const val DATA_LABEL = "data"
         private const val FIELDS_LABEL = "fields"
         private const val RECORDS_LABEL = "records"
+        private const val EVENTS_LABEL = "events"
         private const val REDCAP_RESULT_INDEX = 0
     }
 
