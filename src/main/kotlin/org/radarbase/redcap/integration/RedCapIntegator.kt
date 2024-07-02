@@ -80,8 +80,8 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
     }
 
-    fun pullFieldFromRedcap(field: String, recordId: Int, event: String? = null) =
-        redCapClient.fetchFormDataForId(field, recordId, event)
+    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int, event: String? = null) =
+        redCapClient.fetchFormDataForId(fields, recordId, event)
 
     companion object {
         val parser = AttributeFieldParser()

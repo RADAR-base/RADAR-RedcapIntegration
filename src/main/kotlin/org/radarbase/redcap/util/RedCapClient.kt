@@ -106,21 +106,21 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
 
     open fun fetchFormDataForId(
-        field: String,
+        fields: List<String>,
         recordId: Int,
         event: String?
-    ): String {
+    ): Map<String, String> {
         val records = listOf(recordId.toString())
-        val parameters = getFormFetchParameters(listOf(field), records, event)
+        val parameters = getFormFetchParameters(fields, records, event)
         return try {
             val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
-                    val result = response.body()!!.string()
-                    JSONArray(result).asSequence().mapNotNull {
+                    val result = response.body()!!.string() 
+                    JSONArray(result).asSequence().flatMap {
                         mapper.readValue(it.toString(), object : TypeReference<HashMap<String, String>>() {})
-                    }.mapNotNull { it[field] }.firstOrNull() ?: ""                    
+                    }.groupBy { it.key }.mapValues { it.value.firstNotNullOf { it } }     
                 } else {
                     LOGGER.warn(getErrorMsg(response))
                     ""
