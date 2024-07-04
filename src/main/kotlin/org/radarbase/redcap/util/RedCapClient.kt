@@ -117,13 +117,21 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
-                    val result = response.body()!!.string() 
-                    JSONArray(result).asSequence().flatMap {
-                        mapper.readValue(it.toString(), object : TypeReference<HashMap<String, String>>() {})
-                    }.groupBy { it.key }.mapValues { it.value.firstNotNullOf { it } }     
+                    val result = response.body()?.string()
+                    if (result != null) {
+                        JSONArray(result).asSequence<JSONObject>().flatMap {
+                            mapper.readValue(
+                                it.toString(),
+                                object : TypeReference<Map<String, String>>() {}
+                            ).entries.asSequence()
+                        }.toMap()
+                    } else {
+                        LOGGER.warn("Response body was null.")
+                        emptyMap()
+                    }
                 } else {
                     LOGGER.warn(getErrorMsg(response))
-                    ""
+                    emptyMap()
                 }
             }
         } catch (exc: IOException) {
@@ -133,7 +141,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             )
         } catch (exc: JSONException) {
             LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
-            ""
+            emptyMap()
         }
     }
 
