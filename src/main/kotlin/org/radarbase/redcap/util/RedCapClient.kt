@@ -118,12 +118,13 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
                     val result = response.body()!!.string() 
-                    JSONArray(result).asSequence().flatMap {
-                        mapper.readValue(it.toString(), object : TypeReference<HashMap<String, String>>() {})
-                    }.groupBy { it.key }.mapValues { it.value.firstNotNullOf { it } }     
+                    mergeMaps(mapper.readValue(
+                        ObjectMapper().readTree(result).toString(),
+                        object : TypeReference<List<Map<String, String>>>() {}
+                    ))
                 } else {
                     LOGGER.warn(getErrorMsg(response))
-                    ""
+                    emptyMap()
                 }
             }
         } catch (exc: IOException) {
@@ -133,7 +134,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             )
         } catch (exc: JSONException) {
             LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
-            ""
+            emptyMap()
         }
     }
 
@@ -170,8 +171,17 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             }
         }
 
-    operator fun <T> JSONArray.iterator(): Iterator<T> =
-    (0 until this.length()).asSequence().map { this.get(it) as T }.iterator()
+    fun mergeMaps(list: List<Map<String, String>>): Map<String, String> {
+        val mergedMap = mutableMapOf<String, String>()
+        for (map in list) {
+            for ((key, value) in map) {
+                if (!mergedMap.containsKey(key) && value != null) {
+                    mergedMap[key] = value
+                }
+            }
+        }
+        return mergedMap
+    }
 
     companion object {
         private val mapper = ObjectMapper().apply {

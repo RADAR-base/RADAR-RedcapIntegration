@@ -59,7 +59,7 @@ class Integrator(
 
         try {
             attributes = redCapIntegrator.pullFieldsFromRedcap(redCapInfo.attributes?.map { a -> a.fieldName }!!, recordId)
-            redcapSubjectId = redCapIntegrator.pullFieldsFromRedcap(listOf(SUJBECT_ID_KEY), recordId, enrolmentEvent).get(SUJBECT_ID_KEY)!!
+            redcapSubjectId = redCapIntegrator.pullFieldsFromRedcap(listOf(SUBJECT_ID_KEY), recordId, enrolmentEvent).get(SUBJECT_ID_KEY)!!
         } catch (exc: RedcapOperationException) {
             logger.warn("Error getting fields from Redcap. Using null as result..", exc)
         }
@@ -95,6 +95,6 @@ class Integrator(
 
     companion object {
         private val logger = LoggerFactory.getLogger(Integrator::class.java)
-        private val SUJBECT_ID_KEY = IntegrationData.SUBJECT_ID_LABEL
+        private val SUBJECT_ID_KEY = IntegrationData.SUBJECT_ID_LABEL
     }
 }
