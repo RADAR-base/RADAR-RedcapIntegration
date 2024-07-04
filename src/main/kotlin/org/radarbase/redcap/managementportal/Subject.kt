@@ -41,7 +41,7 @@ data class Subject(
     @JsonProperty("login") val subjectId: String,
     @JsonProperty("externalId") val externalId: Int? = null,
     @JsonProperty("externalLink") val externalLink: URL? = null,
-    @JsonProperty("project") val project: Project,
+    @JsonProperty("project") var project: Project? = null,
     @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString()
 ) {

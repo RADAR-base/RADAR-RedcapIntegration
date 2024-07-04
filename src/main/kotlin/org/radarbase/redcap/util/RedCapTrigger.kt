@@ -8,6 +8,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import org.slf4j.LoggerFactory
 
 /*
  * Copyright 2017 King's College London
@@ -160,11 +161,12 @@ class RedCapTrigger(value: String) {
                         instrumentStatus(
                             value.substring(markerIndex + 1).toInt()
                         )
+                else -> {}
             }
         }
     }
 
-    private fun convertParameter(value: String, markerIndex: Int): TriggerParameter {
+    private fun convertParameter(value: String, markerIndex: Int): TriggerParameter? {
         if (markerIndex <= 0) {
             throw IllegalRequestException(
                 "No value found for the parameter. Please check that " +
@@ -185,7 +187,8 @@ class RedCapTrigger(value: String) {
             )) {
             return TriggerParameter.INSTRUMENT_STATUS
         }
-        throw IllegalRequestException(" No enum constant for $name")
+        LOGGER.warn("No enum constant for $name")
+        return null
     }
 
     /**
@@ -213,6 +216,7 @@ class RedCapTrigger(value: String) {
     }
 
     companion object {
+        private val LOGGER = LoggerFactory.getLogger(RedCapClient::class.java)
         private fun instrumentStatus(value: Int): InstrumentStatus {
             return when (value) {
                 0 -> InstrumentStatus.INCOMPLETE

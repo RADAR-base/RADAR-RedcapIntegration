@@ -175,7 +175,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         val mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId)
         val request = getBuilder(
             getSubjectUrl(
-                Properties.subjectEndPoint,
+                Properties.projectEndPoint,
                 mpInfo.projectName,
                 recordId
             )
@@ -188,6 +188,10 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                     Subject.subjects(
                         response
                     )
+                if (subjects.size == 0) {
+                    LOGGER.info("Subject is not present")
+                    return@performRequest null
+                }
                 check(subjects.size <= 1) {
                     ("More than 1 subjects exist with same "
                             + "externalId in the same Project")
@@ -250,7 +254,8 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         @Throws(URISyntaxException::class, MalformedURLException::class)
         private fun getSubjectUrl(url: URL, projectName: String, recordId: Int): URL {
             val oldUri = url.toURI()
-            val parameters = "projectName=$projectName&externalId=$recordId"
+            val path = (listOf(oldUri.path, projectName, "subjects")).joinToString("/") { it.trim('/') }
+            val parameters = "externalId=$recordId"
             var newQuery = oldUri.query
             if (newQuery == null) {
                 newQuery = parameters
@@ -258,9 +263,8 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 newQuery += parameters
             }
 
-            val path = if (oldUri.path.endsWith('/')) oldUri.path.dropLast(1) else oldUri.path
             val newUri = URI(
-                oldUri.scheme, oldUri.authority, path, newQuery, oldUri.fragment
+                oldUri.scheme, oldUri.authority, "/$path", newQuery, oldUri.fragment
             )
             LOGGER.info("URI = $newUri")
             return newUri.toURL()
