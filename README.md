@@ -1,7 +1,5 @@
 # RADAR-Base REDCap Integration
 
-[![Build Status](https://api.travis-ci.org/RADAR-base/RADAR-RedcapIntegration.svg?branch=master)](https://travis-ci.org/RADAR-base/RADAR-RedcapIntegration/)
-
 [REDCap](https://projectredcap.org/) is a secure web application for building and managing online
 surveys and databases. While REDCap can be used to collect virtually any type of data
 (including 21 CFR Part 11, FISMA, and HIPAA-compliant environments), it is specifically geared to
