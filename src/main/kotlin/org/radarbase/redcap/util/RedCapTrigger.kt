@@ -161,7 +161,7 @@ class RedCapTrigger(value: String) {
                         instrumentStatus(
                             value.substring(markerIndex + 1).toInt()
                         )
-                else -> {}
+                null -> {}
             }
         }
     }
@@ -216,7 +216,7 @@ class RedCapTrigger(value: String) {
     }
 
     companion object {
-        private val LOGGER = LoggerFactory.getLogger(RedCapClient::class.java)
+        private val LOGGER = LoggerFactory.getLogger(RedCapTrigger::class.java)
         private fun instrumentStatus(value: Int): InstrumentStatus {
             return when (value) {
                 0 -> InstrumentStatus.INCOMPLETE

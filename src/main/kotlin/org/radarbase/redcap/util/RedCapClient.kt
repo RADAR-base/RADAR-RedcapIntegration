@@ -175,7 +175,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         val mergedMap = mutableMapOf<String, String>()
         for (map in list) {
             for ((key, value) in map) {
-                if (!mergedMap.containsKey(key) && value != null) {
+                if (!mergedMap.containsKey(key) && value.isNotEmpty()) {
                     mergedMap[key] = value
                 }
             }
