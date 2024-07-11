@@ -107,7 +107,7 @@ data class Project(
          */
         @Throws(IOException::class)
         fun project(response: Response): Project {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(body, Project::class.java)
         }

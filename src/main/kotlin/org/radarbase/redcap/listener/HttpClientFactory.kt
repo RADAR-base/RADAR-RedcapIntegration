@@ -9,8 +9,8 @@ class HttpClientFactory :
     DisposableSupplier<OkHttpClient> {
 
     override fun dispose(instance: OkHttpClient) {
-        instance.connectionPool().evictAll()
-        val executorService = instance.dispatcher().executorService()
+        instance.connectionPool.evictAll()
+        val executorService = instance.dispatcher.executorService
         executorService.shutdown()
         try {
             executorService.awaitTermination(3, TimeUnit.MINUTES)

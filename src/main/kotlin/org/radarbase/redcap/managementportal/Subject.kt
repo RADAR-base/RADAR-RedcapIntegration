@@ -135,7 +135,7 @@ data class Subject(
          */
         @Throws(IOException::class)
         fun subjects(response: Response): List<Subject> {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(
                 body,
@@ -150,7 +150,7 @@ data class Subject(
          */
         @Throws(IOException::class)
         fun subject(response: Response): Subject {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(
                 body,

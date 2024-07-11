@@ -117,7 +117,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
-                    val result = response.body()!!.string() 
+                    val result = response.body!!.string() 
                     mergeMaps(mapper.readValue(
                         ObjectMapper().readTree(result).toString(),
                         object : TypeReference<List<Map<String, String>>>() {}
@@ -139,9 +139,9 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
     }
 
     private fun getErrorMsg(response: Response): String {
-        var msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
-                "Msg: ${response.message()}"
-        val body = response.body()
+        var msg = "Request to Redcap was unsuccessful. Code: ${response.code}, " +
+                "Msg: ${response.message}"
+        val body = response.body
         if(body != null) {
             msg += ", Reason: ${body.string()}"
         }
