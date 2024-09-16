@@ -31,7 +31,7 @@ data class RedCapInfo(
     @JsonProperty("enrolment_event") val enrolmentEvent: String? = null,
     @JsonProperty("integration_form") val integrationForm: String? = null,
     @JsonProperty("token") val token: String? = null,
-    @JsonProperty("attributes") val attributes: Set<Attribute>? = null
+    @JsonProperty("attributes") val attributes: Set<Attribute>? = emptySet()
 ) {
 
     init {

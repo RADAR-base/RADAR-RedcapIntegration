@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.MalformedURLException
 import java.time.Duration
-import javax.ws.rs.core.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 
 object IntegrationUtils {
     val LOGGER: Logger = LoggerFactory.getLogger(IntegrationUtils::class.java)
@@ -87,12 +87,12 @@ object IntegrationUtils {
                 "Authorization", "Bearer " +
                         oauthClient.getValidToken(Duration.ofSeconds(30)).accessToken
             ).put(
-                RequestBody.create(okhttp3.MediaType.parse(MediaType.APPLICATION_JSON), dto)
+                RequestBody.create("application/json".toMediaType(), dto)
             ).build()
 
         httpClient.newCall(request).execute().use { response ->
-            val code = response.code()
-            val body = response.body()
+            val code = response.code
+            val body = response.body
             if (code != 200 || body == null) {
                 throw IOException("The project attributes could not be updated.")
             }

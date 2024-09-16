@@ -53,7 +53,7 @@ class IntegratorTest {
     )
 
     private val redCapClient: RedCapClient = mock {
-        on { fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1) } doReturn testAttributes
+        on { fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1, "") } doReturn testAttributes
     }
     private val redCapIntegrator: RedCapIntegator =
         RedCapIntegator(redCapClient)
@@ -85,7 +85,8 @@ class IntegratorTest {
         whenever(
             redCapClient.fetchFormDataForId(
                 attributeKeys,
-                REDCAP_RECORD_ID_2
+                REDCAP_RECORD_ID_2,
+                ""
             )
         ).thenReturn(
             attr
@@ -118,7 +119,7 @@ class IntegratorTest {
     @Test
     @Throws(IOException::class, URISyntaxException::class)
     fun updateAttributesInMpTest() {
-        val attributes: MutableMap<String, String> =
+        val attributes: Map<String, String> =
             redCapIntegrator.pullFieldsFromRedcap(attributeKeys, REDCAP_RECORD_ID_1)
         assertEquals(attributes, testAttributes)
         val existingSubjectId: String =
@@ -143,11 +144,11 @@ class IntegratorTest {
     fun updateAttributesInMpWhenSubjectExistsTest() {
         testAttributes[REDCAP_ATTRIBUTE_1] =
             REDCAP_ATTRIBUTE_1_VAL_2
-        whenever(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1)).thenReturn(
+        whenever(redCapClient.fetchFormDataForId(attributeKeys, REDCAP_RECORD_ID_1, "")).thenReturn(
             testAttributes
         )
-        val attributes: MutableMap<String, String> =
-            redCapIntegrator.pullFieldsFromRedcap(attributeKeys, REDCAP_RECORD_ID_1)
+        val attributes: Map<String, String> =
+            redCapIntegrator.pullFieldsFromRedcap(attributeKeys, REDCAP_RECORD_ID_1, "")
 
         val existingSubjectId: String =
             mpClient.getSubject(redCapInfo.url, redCapInfo.projectId, REDCAP_RECORD_ID_1)!!

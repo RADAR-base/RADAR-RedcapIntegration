@@ -2,7 +2,6 @@ package org.radarbase.redcap.integration
 
 import org.radarbase.redcap.config.RedCapManager
 import org.radarbase.redcap.managementportal.Subject
-import org.radarbase.redcap.util.AttributeFieldParser
 import org.radarbase.redcap.util.RedCapClient
 import org.radarbase.redcap.util.RedCapInput
 import org.radarbase.redcap.util.RedCapTrigger
@@ -80,13 +79,7 @@ class RedCapIntegator(private val redCapClient: RedCapClient) {
         )
     }
 
-    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int) =
-        redCapClient.fetchFormDataForId(fields, recordId)
-            .filter { parser.canBeParsed(it.value) }
-            .mapValues { parser.parseField(it.value) }
-            .toMutableMap()
+    fun pullFieldsFromRedcap(fields: List<String>, recordId: Int, event: String? = null) =
+        redCapClient.fetchFormDataForId(fields, recordId, event)
 
-    companion object {
-        val parser = AttributeFieldParser()
-    }
 }

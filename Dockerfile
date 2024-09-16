@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:14 as builder
+FROM openjdk:17 as builder
 
 RUN mkdir /code
 WORKDIR /code
