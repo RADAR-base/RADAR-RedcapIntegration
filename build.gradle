@@ -68,7 +68,7 @@ ext {
     jerseyVersion = '2.31'
     jerseymediaVersion = '2.30.1'
     junitVersion = '4.12'
-    logbackVersion = '1.2.3'
+    logbackVersion = '1.2.13'
     okhttp3Version = '4.9.3'
     radarOauthClientVersion = '0.8.0'
     grizzlyVersion = '2.4.4'
