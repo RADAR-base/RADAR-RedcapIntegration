@@ -65,7 +65,7 @@ configurations {
 ext {
     apacheCommonsIoVersion = '2.5'
     apacheCommonsLangVersion = '3.6'
-    jerseyVersion = '2.30.1'
+    jerseyVersion = '2.31'
     jerseymediaVersion = '2.30.1'
     junitVersion = '4.12'
     logbackVersion = '1.2.3'
