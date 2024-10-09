@@ -72,7 +72,7 @@ ext {
     okhttp3Version = '4.9.3'
     radarOauthClientVersion = '0.8.0'
     grizzlyVersion = '2.4.4'
-    jacksonVersion = '2.11.2'
+    jacksonVersion = '2.16.1'
 }
 
 dependencies {
