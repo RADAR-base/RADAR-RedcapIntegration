@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'org.radarbase'
-version = '1.0.5-SNAPSHOT'
+version = '1.0.5'
 
 application {
     mainClass = 'org.radarbase.redcap.webapp.GrizzlyServer'
