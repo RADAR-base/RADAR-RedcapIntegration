@@ -2,6 +2,7 @@ package org.radarbase.redcap.managementportal
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -9,6 +10,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
+import org.radarbase.redcap.managementportal.Organization
 
 /*
  * Copyright 2017 King's College London
@@ -30,7 +32,7 @@ import java.net.URL
 data class Project(
     @JsonProperty("id") val id: Int,
     @JsonProperty("projectName") val projectName: String,
-    @JsonProperty("organization") val organization: String = "",
+    @JsonProperty("organization") @JsonDeserialize(using = OrganizationDeserializer::class) val organization: Organization,
     @JsonProperty("location") val location: String = "",
     @JsonProperty("attributes") val attributes: Map<String, String> = emptyMap()
 ) {
@@ -105,7 +107,7 @@ data class Project(
          */
         @Throws(IOException::class)
         fun project(response: Response): Project {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(body, Project::class.java)
         }

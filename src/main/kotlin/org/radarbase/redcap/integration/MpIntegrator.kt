@@ -43,7 +43,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         redcapUrl: URL,
         projectId: Int,
         recordId: Int,
-        attributes: MutableMap<String, String>,
+        attributes: Map<String, String>,
         redcapSubjectId: String?
     ): Subject {
         return try {
@@ -92,7 +92,7 @@ class MpIntegrator(private val mpClient: MpClient) {
         recordId: Int,
         project: Project,
         humanReadableId: String,
-        attributes: MutableMap<String, String>,
+        attributes: Map<String, String>,
         redcapSubjectId: String?
     ): Subject {
         return try {
@@ -101,8 +101,8 @@ class MpIntegrator(private val mpClient: MpClient) {
                 requireNotNull(redcapSubjectId) {
                     "Subject is not null in MP but no subject ID provided in redcap"
                 }
-                return if (subject.subjectId == redcapSubjectId) {
-                    updateSubject(subject, attributes, humanReadableId)
+                return if (subject.subjectId == redcapSubjectId) {                    
+                    updateSubject(subject, project, attributes, humanReadableId)
                 } else {
                     Logger.info(
                         "Subject already exists in MP and subject ids do not match!" +
@@ -119,16 +119,18 @@ class MpIntegrator(private val mpClient: MpClient) {
 
     private fun updateSubject(
         subject: Subject,
-        attributes: MutableMap<String, String>,
+        project: Project,
+        attributes: Map<String, String>,
         humanReadableId: String
     ): Subject {
         Logger.info(
             "Subject, with Human readable identifier: {}, is already available, updating...",
             humanReadableId
         )
-        attributes[HUMAN_READABLE_IDENTIFIER_KEY] = humanReadableId
-        return if (subject.attributes != attributes) {
-            subject.addAttributes(attributes)
+        if (subject.project == null) subject.project = project
+        val updatedAttributes = attributes + (HUMAN_READABLE_IDENTIFIER_KEY to humanReadableId)
+        return if (subject.attributes != updatedAttributes) {
+            subject.addAttributes(updatedAttributes)
             mpClient.updateSubject(subject)
                 .apply { operationStatus = Subject.SubjectOperationStatus.UPDATED }
         } else {

@@ -41,7 +41,7 @@ data class Subject(
     @JsonProperty("login") val subjectId: String,
     @JsonProperty("externalId") val externalId: Int? = null,
     @JsonProperty("externalLink") val externalLink: URL? = null,
-    @JsonProperty("project") val project: Project,
+    @JsonProperty("project") var project: Project? = null,
     @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString()
 ) {
@@ -135,7 +135,7 @@ data class Subject(
          */
         @Throws(IOException::class)
         fun subjects(response: Response): List<Subject> {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(
                 body,
@@ -150,7 +150,7 @@ data class Subject(
          */
         @Throws(IOException::class)
         fun subject(response: Response): Subject {
-            val body = response.body()!!.bytes()
+            val body = response.body!!.bytes()
             response.close()
             return mapper.readValue(
                 body,

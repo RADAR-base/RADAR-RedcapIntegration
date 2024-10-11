@@ -28,7 +28,7 @@ class EntryPointTest {
         Assert.assertNotNull(response)
         // This is because the the app fails to update redcap form as there is no actual redcap instance.
         // So the request times out with an exception
-        Assert.assertEquals(500, response.code().toLong())
+        Assert.assertEquals(500, response.code)
 
         // But we can verify if the corresponding subject creation in MP works fine.
         val subject: Subject? =

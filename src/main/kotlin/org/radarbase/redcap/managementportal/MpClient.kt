@@ -1,10 +1,12 @@
 package org.radarbase.redcap.managementportal
 
-import okhttp3.MediaType.parse
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.radarbase.redcap.config.Properties
 import org.radarbase.redcap.config.RedCapManager
 import org.radarbase.redcap.webapp.exception.IllegalRequestException
@@ -83,7 +85,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             onError = { response ->
                 throw SubjectOperationException(
                     errorMessage +
-                            " Response code: ${response.code()} Message: ${response.message()}"
+                            " Response code: ${response.code} Message: ${response.message}"
                 )
             },
             errorMessage = errorMessage
@@ -93,7 +95,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
     fun updateSubject(subject: Subject): Subject {
         val request =
             getBuilder(Properties.subjectEndPoint)
-                .put(RequestBody.create(parse(MediaType.APPLICATION_JSON), subject.jsonString))
+                .put(RequestBody.create("application/json; charset=utf-8".toMediaType(), subject.jsonString))
                 .build()
         val errorMessage = "Subject cannot be updated."
         return performRequest(
@@ -107,9 +109,9 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             },
             onError = { response ->
                 throw SubjectOperationException(
-                    errorMessage + "Response code: " + response.code() +
-                            " Message: " + response.message() +
-                            " Info: " + response.body()!!.string()
+                    errorMessage + "Response code: " + response.code +
+                            " Message: " + response.message +
+                            " Info: " + response.body!!.string()
                 )
             },
             errorMessage = errorMessage
@@ -140,7 +142,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         val request =
             getBuilder(Properties.subjectEndPoint).post(
                 RequestBody.create(
-                    parse(MediaType.APPLICATION_JSON), subject.jsonString
+                    "application/json; charset=utf-8".toMediaType(), subject.jsonString
                 )
             ).build()
 
@@ -157,9 +159,9 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             },
             onError = { response ->
                 throw SubjectOperationException(
-                    errorMessage + " Response code: " + response.code() +
-                            ", Message: " + response.message() +
-                            ", Info: " + response.body()!!.string()
+                    errorMessage + " Response code: " + response.code +
+                            ", Message: " + response.message +
+                            ", Info: " + response.body!!.string()
                 )
             },
             errorMessage = errorMessage
@@ -175,7 +177,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         val mpInfo = RedCapManager.getRelatedMpInfo(redcapUrl, projectId)
         val request = getBuilder(
             getSubjectUrl(
-                Properties.subjectEndPoint,
+                Properties.projectEndPoint,
                 mpInfo.projectName,
                 recordId
             )
@@ -188,6 +190,10 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                     Subject.subjects(
                         response
                     )
+                if (subjects.size == 0) {
+                    LOGGER.info("Subject is not present")
+                    return@performRequest null
+                }
                 check(subjects.size <= 1) {
                     ("More than 1 subjects exist with same "
                             + "externalId in the same Project")
@@ -249,21 +255,17 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
 
         @Throws(URISyntaxException::class, MalformedURLException::class)
         private fun getSubjectUrl(url: URL, projectName: String, recordId: Int): URL {
-            val oldUri = url.toURI()
-            val parameters = "projectName=$projectName&externalId=$recordId"
-            var newQuery = oldUri.query
-            if (newQuery == null) {
-                newQuery = parameters
-            } else {
-                newQuery += parameters
+            val httpUrl = url.toHttpUrlOrNull()
+            if (httpUrl == null) {
+                LOGGER.error("Invalid URL: $url")
+                throw IllegalArgumentException("Invalid URL: $url")
             }
-
-            val path = if (oldUri.path.endsWith('/')) oldUri.path.dropLast(1) else oldUri.path
-            val newUri = URI(
-                oldUri.scheme, oldUri.authority, path, newQuery, oldUri.fragment
-            )
-            LOGGER.info("URI = $newUri")
-            return newUri.toURL()
+            val subjectUrl = httpUrl.newBuilder()
+                .addPathSegment(projectName)
+                .addPathSegment("subjects")
+                .addQueryParameter("externalId", recordId.toString())
+                .build()
+            return subjectUrl.toUrl()
         }
     }
 }

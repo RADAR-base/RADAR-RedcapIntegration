@@ -107,21 +107,24 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
     open fun fetchFormDataForId(
         fields: List<String>,
-        recordId: Int
-    ): MutableMap<String, String> {
+        recordId: Int,
+        event: String?
+    ): Map<String, String> {
         val records = listOf(recordId.toString())
-        val parameters = getFormFetchParameters(fields, records)
+        val parameters = getFormFetchParameters(fields, records, event)
         return try {
             val request = createRequest(parameters, redCapInfo.token!!)
             httpClient.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
                     LOGGER.info("Successful fetch for record {}", recordId)
-                    val result = response.body()!!.string()
-                    val data = JSONArray(result)[REDCAP_RESULT_INDEX].toString()
-                    mapper.readValue(data, object : TypeReference<HashMap<String, String>>() {})
+                    val result = response.body!!.string() 
+                    mergeMaps(mapper.readValue(
+                        ObjectMapper().readTree(result).toString(),
+                        object : TypeReference<List<Map<String, String>>>() {}
+                    ))
                 } else {
                     LOGGER.warn(getErrorMsg(response))
-                    mutableMapOf()
+                    emptyMap()
                 }
             }
         } catch (exc: IOException) {
@@ -131,14 +134,14 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
             )
         } catch (exc: JSONException) {
             LOGGER.warn("The JSON response from Redcap could not be deserialized.", exc)
-            mutableMapOf()
+            emptyMap()
         }
     }
 
     private fun getErrorMsg(response: Response): String {
-        var msg = "Request to Redcap was unsuccessful. Code: ${response.code()}, " +
-                "Msg: ${response.message()}"
-        val body = response.body()
+        var msg = "Request to Redcap was unsuccessful. Code: ${response.code}, " +
+                "Msg: ${response.message}"
+        val body = response.body
         if(body != null) {
             msg += ", Reason: ${body.string()}"
         }
@@ -147,7 +150,8 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
 
     private fun getFormFetchParameters(
         fields: List<String>,
-        records: List<String>
+        records: List<String>,
+        event: String?
     ): Map<String, String> {
         val parameters: MutableMap<String, String> = mutableMapOf()
         parameters["content"] = "record"
@@ -156,6 +160,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         parameters["rawOrLabel"] = "label"
         parameters.putAll(encodeListParams(fields, FIELDS_LABEL))
         parameters.putAll(encodeListParams(records, RECORDS_LABEL))
+        if (event != null) parameters.putAll(encodeListParams(listOf(event), EVENTS_LABEL))
         return parameters
     }
 
@@ -165,6 +170,18 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
                 this["$label[$index]"] = value
             }
         }
+
+    fun mergeMaps(list: List<Map<String, String>>): Map<String, String> {
+        val mergedMap = mutableMapOf<String, String>()
+        for (map in list) {
+            for ((key, value) in map) {
+                if (!mergedMap.containsKey(key) && value.isNotEmpty()) {
+                    mergedMap[key] = value
+                }
+            }
+        }
+        return mergedMap
+    }
 
     companion object {
         private val mapper = ObjectMapper().apply {
@@ -177,6 +194,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
         private const val DATA_LABEL = "data"
         private const val FIELDS_LABEL = "fields"
         private const val RECORDS_LABEL = "records"
+        private const val EVENTS_LABEL = "events"
         private const val REDCAP_RESULT_INDEX = 0
     }
 
