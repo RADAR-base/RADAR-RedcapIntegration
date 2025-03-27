@@ -19,14 +19,6 @@ import java.util.*
  * limitations under the License.
  */
 
-/**
- * Constructor.
- * @param subjectId [String] representing Management Portal Subject identifier
- * @param externalId [Integer] representing the REDCap Record identifier
- * @param externalLink [URL] pointing the REDCap integration form / instrument
- * @param project [Project] associated with the subject
- * @param attributes [Map] of key,value pairs
- */
 data class Source(
     var id: Long? = null,
     var sourceTypeId: Long? = null,
