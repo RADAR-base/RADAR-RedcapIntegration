@@ -3,6 +3,7 @@ package org.radarbase.redcap.managementportal
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -32,7 +33,12 @@ import org.radarbase.redcap.managementportal.Organization
 data class Project(
     @JsonProperty("id") val id: Int,
     @JsonProperty("projectName") val projectName: String,
-    @JsonProperty("organization") @JsonDeserialize(using = OrganizationDeserializer::class) val organization: Organization,
+
+    @JsonProperty("organization") 
+    @JsonDeserialize(using = OrganizationDeserializer::class) 
+    @JsonSerialize(using = OrganizationSerializer::class)
+    val organization: Organization,
+
     @JsonProperty("location") val location: String = "",
     @JsonProperty("attributes") val attributes: Map<String, String> = emptyMap()
 ) {
