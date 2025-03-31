@@ -42,10 +42,10 @@ class OrganizationSerializer : JsonSerializer<Organization>() {
     override fun serialize(value: Organization, gen: JsonGenerator, serializers: SerializerProvider) {
         when (value) {
             is Organization.StringOrganization -> {
-                gen.writeString(value.value)  // Serialize as a string
+                gen.writeString(value.value)
             }
             is Organization.ObjectOrganization -> {
-                gen.writeObject(value.value)  // Assuming OrganizationObject is a class
+                gen.writeObject(value.value)
             }
         }
     }
