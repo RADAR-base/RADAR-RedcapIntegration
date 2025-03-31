@@ -31,20 +31,20 @@ import java.net.URL
 /**
  * Constructor.
  * @param subjectId [String] representing Management Portal Subject identifier
- * @param externalId [Integer] representing the REDCap Record identifier
- * @param externalLink [URL] pointing the REDCap integration form / instrument
+ * @param externalId [String] representing the REDCap Record identifier
+ * @param externalLink [String] pointing the REDCap integration form / instrument
  * @param project [Project] associated with the subject
  * @param attributes [Map] of key,value pairs
  */
 data class Subject(
     @JsonProperty("id") val mpId: Long?,
     @JsonProperty("login") val subjectId: String,
-    @JsonProperty("externalId") val externalId: Int? = null,
-    @JsonProperty("externalLink") val externalLink: URL? = null,
+    @JsonProperty("externalId") val externalId: String? = null,
+    @JsonProperty("externalLink") val externalLink: String? = null,
     @JsonProperty("project") var project: Project? = null,
     @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString(),
-    @JsonProperty("sources") val sources: Set<Source> = emptySet()
+    @JsonProperty("sources") val sources: List<Source> = emptyList()
 ) {
     enum class SubjectStatus {
         DEACTIVATED, ACTIVATED, DISCONTINUED, INVALID
@@ -63,13 +63,13 @@ data class Subject(
      * Constructor.
      * @param subjectId [String] representing Management Portal Subject identifier
      * @param externalId [Integer] representing the REDCap Record identifier
-     * @param externalLink [URL] pointing the REDCap integration form / instrument
+     * @param  [URL] pointing the REDCap integration form / instrument
      * @param project [Project] associated with the subject
      * @param humanReadableId [String] representing the value associated with
      * [.HUMAN_READABLE_IDENTIFIER_KEY]
      */
     constructor(
-        subjectId: String, externalId: Int, externalLink: URL, project: Project,
+        subjectId: String, externalId: String, externalLink: String, project: Project,
         humanReadableId: String
     ) : this(
         null, subjectId, externalId, externalLink, project,
@@ -78,8 +78,8 @@ data class Subject(
 
     constructor(
         subjectId: String,
-        externalId: Int,
-        externalLink: URL,
+        externalId: String,
+        externalLink: String,
         project: Project,
         humanReadableId: String,
         attributes: Map<String, String>

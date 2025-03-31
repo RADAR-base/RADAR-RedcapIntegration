@@ -97,7 +97,7 @@ object RedCapManager {
      * @throws NoSuchElementException In case the [URL] does not contain any characters
      */
     @Throws(MalformedURLException::class, NoSuchElementException::class)
-    fun getRecordUrl(redCapUrl: URL, projectId: Int, recordId: Int): URL {
+    fun getRecordUrl(redCapUrl: URL, projectId: Int, recordId: Int): String {
         val redCapInfo = getRedCapInfo(redCapUrl, projectId)
         var redCap = redCapInfo.url.toString()
 
@@ -107,6 +107,6 @@ object RedCapManager {
 
         redCap = "$redCap$PROJECT_ID$projectId$RECORD_ID$recordId" +
                 "$EVENT_ID${redCapInfo.enrolmentEvent}$PAGE_NAME${redCapInfo.integrationForm}"
-        return URL(redCap)
+        return URL(redCap).toString()
     }
 }

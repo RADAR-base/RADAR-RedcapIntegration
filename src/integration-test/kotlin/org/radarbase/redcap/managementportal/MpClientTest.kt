@@ -51,7 +51,7 @@ class MpClientTest {
             )
         Assert.assertNotNull(subject)
         Assert.assertEquals(
-            Integer.valueOf(IntegrationUtils.REDCAP_RECORD_ID_1),
+            IntegrationUtils.REDCAP_RECORD_ID_1.toString(),
             subject!!.externalId
         )
         Assert.assertEquals(

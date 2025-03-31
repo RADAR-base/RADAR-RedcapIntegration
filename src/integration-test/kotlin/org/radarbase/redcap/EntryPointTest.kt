@@ -34,7 +34,7 @@ class EntryPointTest {
         val subject: Subject? =
             mpClient.getSubject(URL(REDCAP_URL), REDCAP_PROJECT_ID, REDCAP_RECORD_ID_2)
         Assert.assertNotNull(subject)
-        Assert.assertEquals(Integer.valueOf(REDCAP_RECORD_ID_2), subject?.externalId)
+        Assert.assertEquals(REDCAP_RECORD_ID_2.toString(), subject?.externalId)
         Assert.assertEquals(
             "$WORK_PACKAGE-$MP_PROJECT_ID-$MP_PROJECT_LOCATION-$REDCAP_RECORD_ID_2",
             subject?.humanReadableIdentifier
