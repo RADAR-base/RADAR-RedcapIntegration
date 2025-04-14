@@ -1,5 +1,6 @@
 package org.radarbase.redcap.managementportal
 
+import com.fasterxml.jackson.databind.JsonNode
 import org.junit.Assert
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -17,6 +18,7 @@ class MpClientTest {
     private var project: Project? = null
     private val emptyAttributes: Map<String, String> = HashMap()
     private val attributes: Map<String, String> = mapOf("group" to "test")
+    private val emptySources: List<JsonNode> = listOf()
 
     @Before
     @Throws(IOException::class, TokenException::class)
@@ -42,7 +44,8 @@ class MpClientTest {
         }
         mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
-            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes,
+            emptySources
         )
         val subject =
             mpClient.getSubject(
@@ -69,7 +72,8 @@ class MpClientTest {
         // This should throw exception since subject already exists
         mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
-            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes,
+            emptySources
         )
     }
 

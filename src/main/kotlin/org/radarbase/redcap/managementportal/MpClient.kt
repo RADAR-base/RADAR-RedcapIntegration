@@ -137,7 +137,8 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             ),
             project = project,
             humanReadableId = humanReadableId,
-            attributes = attributes
+            attributes = attributes,
+            sources = listOf()
         )
         val request =
             getBuilder(Properties.subjectEndPoint).post(

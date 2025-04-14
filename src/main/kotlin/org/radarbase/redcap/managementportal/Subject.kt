@@ -44,7 +44,7 @@ data class Subject(
     @JsonProperty("project") var project: Project? = null,
     @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString(),
-    @JsonProperty("sources") val sources: List<JsonNode> = emptyList()
+    @JsonProperty("sources") val sources: List<JsonNode>
 ) {
     enum class SubjectStatus {
         DEACTIVATED, ACTIVATED, DISCONTINUED, INVALID
@@ -58,7 +58,6 @@ data class Subject(
     var operationStatus: SubjectOperationStatus =
         SubjectOperationStatus.NOOP
 
-
     /**
      * Constructor.
      * @param subjectId [String] representing Management Portal Subject identifier
@@ -69,11 +68,21 @@ data class Subject(
      * [.HUMAN_READABLE_IDENTIFIER_KEY]
      */
     constructor(
-        subjectId: String, externalId: String, externalLink: String, project: Project,
-        humanReadableId: String
+        subjectId: String,
+        externalId: String,
+        externalLink: String,
+        project: Project,
+        humanReadableId: String,
+        sources: List<JsonNode>
     ) : this(
-        null, subjectId, externalId, externalLink, project,
-        mutableMapOf<String, String>(Pair(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId))
+        null,
+        subjectId,
+        externalId,
+        externalLink,
+        project,
+        mutableMapOf(Pair(HUMAN_READABLE_IDENTIFIER_KEY, humanReadableId)),
+        SubjectStatus.ACTIVATED.toString(),
+        sources
     )
 
     constructor(
@@ -82,8 +91,9 @@ data class Subject(
         externalLink: String,
         project: Project,
         humanReadableId: String,
-        attributes: Map<String, String>
-    ) : this(subjectId, externalId, externalLink, project, humanReadableId) {
+        attributes: Map<String, String>,
+        sources: List<JsonNode>
+    ) : this(subjectId, externalId, externalLink, project, humanReadableId, sources) {
         addAttributes(attributes)
     }
 
