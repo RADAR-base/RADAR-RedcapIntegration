@@ -88,8 +88,8 @@ class MpClientTest {
         val newSubject = mpClient.updateSubject(subject!!)
 
         Assert.assertNotNull(newSubject)
-        Assert.assertEquals(subject,newSubject)
-        Assert.assertEquals(subject.attributes,newSubject.attributes)
-        Assert.assertEquals(subject.sources,newSubject.sources)
+        Assert.assertEquals(subject, newSubject)
+        Assert.assertEquals(subject.attributes, newSubject.attributes)
+        Assert.assertEquals(subject.sources, newSubject.sources)
     }
 }
