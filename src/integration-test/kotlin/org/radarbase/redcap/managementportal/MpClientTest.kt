@@ -15,8 +15,8 @@ import java.net.URL
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class MpClientTest {
     private var project: Project? = null
-    private val testAttributes: Map<String, String> =
-        HashMap()
+    private val emptyAttributes: Map<String, String> = HashMap()
+    private val attributes: Map<String, String> = mapOf("group" to "test")
 
     @Before
     @Throws(IOException::class, TokenException::class)
@@ -42,7 +42,7 @@ class MpClientTest {
         }
         mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
-            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes
         )
         val subject =
             mpClient.getSubject(
@@ -69,7 +69,27 @@ class MpClientTest {
         // This should throw exception since subject already exists
         mpClient.createSubject(
             URL(IntegrationUtils.REDCAP_URL), project!!, IntegrationUtils.REDCAP_RECORD_ID_1,
-            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, testAttributes
+            IntegrationUtils.WORK_PACKAGE + IntegrationUtils.REDCAP_RECORD_ID_1, emptyAttributes
         )
+    }
+
+    @Test
+    @Throws(IOException::class, URISyntaxException::class)
+    fun updateSubjectTest() {
+        if (project == null) {
+            projectTest()
+        }
+        val subject =
+            mpClient.getSubject(
+                URL(IntegrationUtils.REDCAP_URL), IntegrationUtils.REDCAP_PROJECT_ID,
+                IntegrationUtils.REDCAP_RECORD_ID_1
+            )
+        subject?.addAttributes(attributes)
+        val newSubject = mpClient.updateSubject(subject!!)
+
+        Assert.assertNotNull(newSubject)
+        Assert.assertEquals(subject,newSubject)
+        Assert.assertEquals(subject.attributes,newSubject.attributes)
+        Assert.assertEquals(subject.sources,newSubject.sources)
     }
 }
