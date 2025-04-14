@@ -44,7 +44,7 @@ data class Subject(
     @JsonProperty("project") var project: Project? = null,
     @JsonProperty("attributes") val attributes: MutableMap<String, String> = mutableMapOf(),
     @JsonProperty("status") val status: String = SubjectStatus.ACTIVATED.toString(),
-    @JsonProperty("sources") val sources: List<Source> = emptyList()
+    @JsonProperty("sources") val sources: List<JsonNode> = emptyList()
 ) {
     enum class SubjectStatus {
         DEACTIVATED, ACTIVATED, DISCONTINUED, INVALID
