@@ -129,7 +129,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
         val radarSubjectId = UUID.randomUUID().toString()
         val subject = Subject(
             subjectId = radarSubjectId,
-            externalId = recordId,
+            externalId = recordId.toString(),
             externalLink = RedCapManager.getRecordUrl(
                 redcapUrl,
                 project.redCapId!!,
@@ -137,7 +137,8 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
             ),
             project = project,
             humanReadableId = humanReadableId,
-            attributes = attributes
+            attributes = attributes,
+            sources = listOf()
         )
         val request =
             getBuilder(Properties.subjectEndPoint).post(
@@ -182,26 +183,23 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 recordId
             )
         ).get().build()
-
         return performRequest(
             request = request,
             onSuccess = { response ->
-                val subjects =
-                    Subject.subjects(
-                        response
-                    )
-                if (subjects.size == 0) {
-                    LOGGER.info("Subject is not present")
+                val subjects = Subject.subjects(response)
+                    .filter { it.externalId.toString() == recordId.toString() }
+                if (subjects.isEmpty()) {
+                    LOGGER.info("Subject with externalId $recordId is not present")
                     return@performRequest null
                 }
+    
                 check(subjects.size <= 1) {
-                    ("More than 1 subjects exist with same "
-                            + "externalId in the same Project")
+                    "More than one subject exists with the same externalId ($recordId) in the same project"
                 }
-                subjects[0]
+                subjects.first()
             },
             onError = {
-                LOGGER.info("Subject is not present")
+                LOGGER.info("Failed to retrieve subject with externalId $recordId")
                 null
             },
             errorMessage = "Subject could not be retrieved"
@@ -264,6 +262,7 @@ open class MpClient @Inject constructor(private val httpClient: OkHttpClient) {
                 .addPathSegment(projectName)
                 .addPathSegment("subjects")
                 .addQueryParameter("externalId", recordId.toString())
+                .addQueryParameter("size", Int.MAX_VALUE.toString())
                 .build()
             return subjectUrl.toUrl()
         }

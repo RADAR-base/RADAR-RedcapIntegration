@@ -105,7 +105,7 @@ class IntegratorTest {
 
         assertNotNull(subject)
         assertEquals(
-            Integer.valueOf(REDCAP_RECORD_ID_2),
+            REDCAP_RECORD_ID_2.toString(),
             subject?.externalId
         )
         assertEquals(
