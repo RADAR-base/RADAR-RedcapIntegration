@@ -17,7 +17,7 @@ application {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -201,6 +201,6 @@ tasks.register('copyConf', Copy) {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
