@@ -24,7 +24,7 @@ jobs:
             --configuration-matching='^runtimeClasspath$'
             --fail-on=upgradable
             --severity-threshold=high
-            --policy-path=.snykS
+            --policy-path=.snyk
             --org=radar-base
             --sarif-file-output=snyk.sarif
 
