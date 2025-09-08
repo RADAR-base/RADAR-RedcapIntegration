@@ -128,9 +128,9 @@ tasks.named('wrapper') {
     gradleVersion = '8.13'
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     compression = Compression.GZIP
-    extension = "tar"
+    archiveExtension.set("tar")
 }
 
 test {
