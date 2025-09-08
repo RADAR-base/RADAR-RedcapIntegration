@@ -5,7 +5,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'application'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.21'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
 }
 
 group = 'org.radarbase'
@@ -17,7 +17,7 @@ application {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -64,7 +64,7 @@ configurations {
 
 ext {
     apacheCommonsIoVersion = '2.5'
-    apacheCommonsLangVersion = '3.6'
+    apacheCommonsLangVersion = '3.18.0'
     jerseyVersion = '2.31'
     jerseymediaVersion = '2.30.1'
     junitVersion = '4.12'
@@ -74,6 +74,15 @@ ext {
     grizzlyVersion = '2.4.4'
     jacksonVersion = '2.16.1'
 }
+
+configurations.configureEach {
+    resolutionStrategy {
+        /* The entries in the block below are added here to force the version of
+        *  transitive dependencies and mitigate reported vulnerabilities */
+        force("org.apache.commons:commons-lang3:$apacheCommonsLangVersion")
+    }
+}
+
 
 dependencies {
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
@@ -125,12 +134,12 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.named('wrapper') {
-    gradleVersion = '7.4'
+    gradleVersion = '8.13'
 }
 
-tasks.withType(Tar) {
+tasks.withType(Tar).configureEach {
     compression = Compression.GZIP
-    extension = "tar"
+    archiveExtension.set("tar")
 }
 
 test {
@@ -199,8 +208,10 @@ tasks.register('copyConf', Copy) {
     }
 }
 
+
+
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
