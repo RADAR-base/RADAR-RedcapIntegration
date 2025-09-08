@@ -64,7 +64,7 @@ configurations {
 
 ext {
     apacheCommonsIoVersion = '2.5'
-    apacheCommonsLangVersion = '3.6'
+    apacheCommonsLangVersion = '3.18.0'
     jerseyVersion = '2.31'
     jerseymediaVersion = '2.30.1'
     junitVersion = '4.12'
@@ -74,6 +74,15 @@ ext {
     grizzlyVersion = '2.4.4'
     jacksonVersion = '2.16.1'
 }
+
+configurations.configureEach {
+    resolutionStrategy {
+        /* The entries in the block below are added here to force the version of
+        *  transitive dependencies and mitigate reported vulnerabilities */
+        force("org.apache.commons:commons-lang3:$apacheCommonsLangVersion")
+    }
+}
+
 
 dependencies {
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
@@ -198,6 +207,8 @@ tasks.register('copyConf', Copy) {
                      "  base_url: http://localhost:8090/")
     }
 }
+
+
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions {
