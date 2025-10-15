@@ -18,6 +18,10 @@ WORKDIR /code
 
 ENV GRADLE_OPTS -Dorg.gradle.daemon=false
 
+COPY ./gradle/wrapper /code/gradle/wrapper
+COPY ./gradlew /code/
+RUN ./gradlew --version
+
 COPY ./build.gradle ./settings.gradle /code/
 
 RUN ./gradlew downloadApplicationDependencies
