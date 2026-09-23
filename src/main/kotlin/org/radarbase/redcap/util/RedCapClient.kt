@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -186,7 +187,7 @@ open class RedCapClient(private val redCapInfo: RedCapInfo) {
     companion object {
         private val mapper = ObjectMapper().apply {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            registerModule(KotlinModule(nullIsSameAsDefault = true))
+            registerModule(KotlinModule.Builder().configure(KotlinFeature.NullIsSameAsDefault, true).build())
         }
 
         private val LOGGER = LoggerFactory.getLogger(RedCapClient::class.java)
