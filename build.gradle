@@ -63,7 +63,7 @@ configurations {
 }
 
 ext {
-    apacheCommonsIoVersion = '2.5'
+    apacheCommonsIoVersion = '2.14.0'
     apacheCommonsLangVersion = '3.18.0'
     jerseyVersion = '2.31'
     jerseymediaVersion = '2.30.1'
