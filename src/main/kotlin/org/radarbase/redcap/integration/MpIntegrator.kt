@@ -63,9 +63,9 @@ class MpIntegrator(private val mpClient: MpClient) {
             }
 
             val humanReadableId = createHumanReadableId(
-                workPackage.toUpperCase(),
+                workPackage.uppercase(),
                 project.id.toString(),
-                project.location.toUpperCase(),
+                project.location.uppercase(),
                 recordId.toString()
             )
 

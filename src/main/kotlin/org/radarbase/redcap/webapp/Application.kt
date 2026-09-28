@@ -34,7 +34,7 @@ internal class Application : ResourceConfig() {
         })
         register(CorsFilter::class.java)
         register(ContextResolver {
-            ObjectMapper().registerModule(KotlinModule())
+            ObjectMapper().registerModule(KotlinModule.Builder().build())
         })
     }
 }

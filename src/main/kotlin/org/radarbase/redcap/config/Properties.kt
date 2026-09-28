@@ -55,7 +55,7 @@ object Properties {
 
     private val mapper by lazy {
         ObjectMapper(YAMLFactory()).apply {
-            registerModule(KotlinModule())
+            registerModule(KotlinModule.Builder().build())
             propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
         }
     }
