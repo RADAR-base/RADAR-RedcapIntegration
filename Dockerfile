@@ -11,7 +11,7 @@
 # limitations under the License.
 
 
-FROM --platform=$BUILDPLATFORM gradle:8.13-jdk17 AS builder
+FROM --platform=$BUILDPLATFORM gradle:9.6.0-jdk17 AS builder
 
 RUN mkdir /code
 WORKDIR /code
